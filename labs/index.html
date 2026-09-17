@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Labs · ECON 282E</title>
+	<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+	<div class="container">
+		<nav class="topnav">
+			<a class="home" href="../index.html">← Course Home</a>
+			<span class="sep">·</span><a href="../syllabus.html">Syllabus</a>
+			<span class="sep">·</span><a href="../slides/index.html">Slides</a>
+			<span class="sep">·</span><a href="index.html">Labs</a>
+			<span class="sep">·</span><a href="../assignments.html">Assignments</a>
+		</nav>
+
+		<h1>Labs</h1>
+
+		<div class="notice">
+			<strong>The notebooks ship with no stored output, on purpose.</strong> You are meant to
+			produce the numbers, not read them. Every cell runs on a laptop CPU in well under a minute;
+			no GPU is needed in this course before Session&nbsp;7.
+		</div>
+
+		<h2>Getting set up</h2>
+		<pre><code>git clone https://github.com/vonzhg/Macro-2026Fall.git
+cd Macro-2026Fall
+conda create -n econ282e python=3.11 -y
+conda activate econ282e
+pip install -r labs/requirements.txt
+jupyter lab</code></pre>
+		<p>Or use any environment that satisfies <a href="requirements.txt">requirements.txt</a>.
+		GitHub renders <code>.ipynb</code> files in the browser if you only want to read one.</p>
+
+		<h2>Notebooks</h2>
+
+		<div class="res-row">
+			<span class="res-name">Lab 0 &mdash; Getting Started <span class="badge badge-ready">Available</span></span>
+			<a class="btn" href="L00_Getting_Started.ipynb" download>Download .ipynb</a>
+		</div>
+		<p style="margin-top:-6px; color:#555;">Posted before Session 3. Installs the tools, verifies
+		the environment, writes a first program, and solves the Solow model against its closed form.
+		Start here if you have never used Python.</p>
+
+		<div class="res-row">
+			<span class="res-name">Lab 3 &mdash; Python and Value Function Iteration <span class="badge badge-ready">Available</span></span>
+			<a class="btn" href="L03_Python_and_VFI.ipynb" download>Download .ipynb</a>
+		</div>
+		<p style="margin-top:-6px; color:#555;">Session 3 (Oct 8). Python and NumPy essentials; the
+		<code>GrowthModel</code> class; VFI and time iteration, both graded against the
+		Brock&ndash;Mirman closed form; convergence and accuracy diagnostics; a dependency-free HP
+		filter; a first look at autograd. <strong>Homework 1 Part A starts from this lab.</strong></p>
+
+		<div class="res-row">
+			<span class="res-name">Lab 4 &mdash; Numerical Methods <span class="badge badge-ready">Available</span></span>
+			<a class="btn" href="L04_Numerical_Methods.ipynb" download>Download .ipynb</a>
+		</div>
+		<p style="margin-top:-6px; color:#555;">Session 4 (Oct 15). A root-finder bake-off with
+		measured convergence orders (1, 1.618, 2); golden section; interpolation shape tests and
+		Smolyak sparse grids; quadrature; <strong>Tauchen against Rouwenhorst</strong> at
+		&rho;&nbsp;=&nbsp;0.9, 0.95, 0.99; Howard and EGM on the quarterly RBC model; and the deck
+		4.B5 worked example end to end.</p>
+
+		<h2>Labs 5&ndash;10 <span class="badge badge-soon">In preparation</span></h2>
+		<p>Perturbation and projection; Krusell&ndash;Smith; neural-network solvers; reinforcement
+		learning; text as data; an agentic research workflow. Posted as each session is built.</p>
+
+		<div class="notice info">
+			<strong>If a cell fails</strong>, check the package versions first
+			(<code>pip install -r requirements.txt</code>). Everything is offline-friendly except
+			<code>pandas-datareader</code>, which fetches FRED data in one optional section of Lab&nbsp;3.
+		</div>
+	</div>
+
+	<div class="site-footer">
+		ECON&nbsp;282E &middot; Foundations of Macroeconomics &middot; &copy; Zhigang Feng
+	</div>
+</body>
+</html>

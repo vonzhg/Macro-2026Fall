@@ -1,0 +1,157 @@
+%% ECON 282E -- Homework 1, Part A
+%% Reworked from PS1.lyx / PS1_IUBE.lyx (Quant Macro, HUST 2019), with the
+%% recorded defects fixed: Z and beta are now stated, the Z^b typo is gone, the
+%% accuracy measure is unit-free, and the step references are correct.
+%% Build:  python3 tools/build_docs.py homeworks-exams/HW1/hw1a.tex
+%% With answers:  python3 tools/build_docs.py --solutions homeworks-exams/HW1/hw1a.tex
+%% Answers live in solutions/ (gitignored); solution PDFs are gitignored too.
+%% Neither must ever be committed.
+
+\documentclass[11pt]{article}
+
+\newif\ifsolutions \solutionsfalse
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,enumitem,xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\newcommand{\solution}[1]{\ifsolutions\medskip
+  {\color{blue!45!black}\textbf{Solution.} #1}\medskip\fi}
+
+%% The answer key lives in solutions/ (gitignored, never published), so this
+%% source carries no answers. --solutions pulls it in; a plain build ignores it.
+\AtBeginDocument{\ifsolutions
+  \IfFileExists{solutions/hw1a_key.tex}{\input{solutions/hw1a_key.tex}}
+    {\GenericWarning{}{Answer key solutions/hw1a_key.tex not found}}\fi}
+
+\title{\vspace{-2em}\textbf{ECON 282E --- Homework 1, Part A}\\[2mm]
+       \large Dynamic Programming on the Computer}
+\author{Foundations of Macroeconomics \\ University of California, Riverside}
+\date{Out: Thursday, October 8, 2026 \quad\textbullet\quad Due: Thursday, October 22, 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{What to hand in.} One PDF with your answers and figures, the code that produced them,
+and an \texttt{AI\_LOG.md} recording how you used any AI assistance. Part B is released on
+October 15 and is due the same day as this part.
+
+\textbf{On the computational questions.} Every number you report must come from code you ran.
+State the grid, the tolerance and the dtype alongside each result --- the reporting standard
+from Session 3. Question 2(c) uses techniques taught on \textbf{October 15}; you can do 2(a)
+and 2(b) as soon as this sheet is out.
+
+\textbf{AI policy.} Assistance is allowed and expected. You remain responsible for every
+number. The validation is the part you cannot delegate.
+\normalsize\par
+\noindent\rule{\linewidth}{0.4pt}\par
+
+%=============================================================================
+\section*{Question 1. The model on paper (30 points)}
+
+A representative household solves
+\[
+  \max_{\{c_t,k_{t+1}\}_{t=0}^{\infty}} \; \sum_{t=0}^{\infty}\beta^{t}\ln c_t
+  \qquad\text{s.t.}\qquad
+  c_t+k_{t+1}=Z k_t^{\alpha}, \quad c_t\ge0,\; k_{t+1}\ge0,\; k_0>0 ,
+\]
+with $\alpha\in(0,1)$, $\beta\in(0,1)$, $Z>0$, and \textbf{full depreciation}, $\delta=1$.
+Throughout Part A use $\alpha=0.36$, $\beta=0.95$ and $Z=1$.
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+
+\item \textbf{(5 pts)} Write the sequence problem and the corresponding Bellman equation.
+State the state variable, the control, and the feasible correspondence $\Gamma(k)$.
+
+\solution{\keyAone}
+
+\item \textbf{(8 pts)} Verify Blackwell's sufficient conditions --- monotonicity and
+discounting --- for the operator $T$. What do they, together with the contraction mapping
+theorem, allow you to conclude about existence, uniqueness and convergence?
+
+\solution{\keyAtwo}
+
+\item \textbf{(10 pts)} Guess $v(k)=A+B\ln k$ and verify it. Solve for $A$ and $B$, and show
+that the optimal policy is $k'=g(k)=\alpha\beta Z k^{\alpha}$ and consumption is
+$c=(1-\alpha\beta)Zk^{\alpha}$. Report $A$ and $B$ numerically at the calibration above.
+
+\solution{\keyAthree}
+
+\item \textbf{(7 pts)} The contraction theorem gives two different bounds. Using
+$\lVert v_n-v^{*}\rVert\le\frac{\beta}{1-\beta}\lVert v_n-v_{n-1}\rVert$, answer:
+\begin{enumerate}[label=(\roman*)]
+  \item If you stop when successive iterates differ by $\varepsilon=10^{-6}$, how far from
+        $v^{*}$ might you still be, at $\beta=0.95$? At $\beta=0.99$?
+  \item Using $n\gtrsim\ln\varepsilon/\ln\beta$, how many sweeps does $\varepsilon=10^{-6}$
+        require at each of those two discount factors?
+\end{enumerate}
+Comment on what this implies for reporting a ``converged'' solution.
+
+\solution{\keyAfour}
+
+\end{enumerate}
+
+%=============================================================================
+\section*{Question 2. The model on the computer, parts (a)--(c) (70 points)}
+
+Solve the same model numerically. Use a capital grid on $[0.5k^{*},1.5k^{*}]$ where
+$k^{*}=(\alpha\beta Z)^{1/(1-\alpha)}$ is the deterministic steady state, and \textbf{float64}
+throughout.
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+
+\item \textbf{(25 pts) Grid value function iteration.} Implement VFI with the choice $k'$
+restricted to the grid (no interpolation, no continuous maximization). With $N=200$ and
+tolerance $10^{-6}$, report:
+\begin{enumerate}[label=(\roman*)]
+  \item the number of sweeps, and how it compares with your answer to 1(d)(ii);
+  \item $\max_k|v(k)-v^{*}(k)|$ and the maximum \emph{relative} policy error
+        $\max_k|g(k)/g^{*}(k)-1|$, against the closed form of 1(c);
+  \item a plot of the computed policy against $\alpha\beta Zk^{\alpha}$, zoomed into a window
+        of about 30 consecutive grid points.
+\end{enumerate}
+What does the zoomed plot show, and why does it not improve with more sweeps?
+
+\solution{\keyAfive}
+
+\item \textbf{(25 pts) Refinement, and the error budget.} Solve at $N\in\{50,100,200,400,800\}$
+and tabulate the value and policy errors against $h$. Fit the slopes of $\log(\text{error})$
+against $\log h$.
+\begin{enumerate}[label=(\roman*)]
+  \item What slopes do you get, and what do Santos \& Vigo-Aguiar (1998) predict?
+  \item Repeat with tolerance $10^{-11}$. One of the two slopes changes materially. Which,
+        and why? Relate your answer to 1(d)(i).
+\end{enumerate}
+
+\solution{\keyAsix}
+
+\item \textbf{(20 pts) Acceleration.} \emph{(Techniques from Session 4, October 15.)} Starting
+from your (a) solver, add each of the following and report a table of policy updates, wall
+time and the maximum relative policy error:
+\begin{enumerate}[label=(\roman*)]
+  \item Howard's policy improvement with $n_H\in\{10,20,50\}$;
+  \item exploiting monotonicity of $g$ to restrict the search;
+  \item both together.
+\end{enumerate}
+Two things to comment on: which of these changes the \emph{answer} and which only changes the
+route to it; and whether your wall-clock times move in the same direction as your operation
+counts. Explain any disagreement.
+
+\solution{\keyAseven}
+
+\end{enumerate}
+
+\vfill
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{Reminder.} Report the grid, the tolerance, the dtype and the hardware with every timing.
+An accuracy claim without a benchmark, and a speed claim without a timing, both count as
+unsupported.
+\normalsize
+
+\end{document}

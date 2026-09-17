@@ -1,0 +1,63 @@
+%% Course map: the recurring "you are here" slide for ECON 282E.
+%% Loaded by course_preamble.tex. Pattern follows AI-ECON-2026 lec01_map.tex, but the map
+%% shows the whole ten-session course rather than one lecture.
+%%
+%%   \CourseMap{s}{label}   s = 1..10 highlights session s and prints "you are here: label"
+%%                          (e.g. \CourseMap{1}{1.A2}); earlier sessions get a check mark.
+%%   \CourseMap{0}{}        full overview, nothing highlighted.
+%%
+%% Note: TikZ option lists are comma-split before TeX conditionals run, so every \ifnum
+%% below sits outside [...] option lists.
+
+\newcommand{\CourseMap}[2]{%
+\begin{center}
+\begin{tikzpicture}[
+    sess/.style={rectangle, rounded corners=2pt, draw=black!45, minimum width=1.34cm,
+        minimum height=1.12cm, text width=1.26cm, align=center, inner sep=1pt},
+    stage/.style={font=\tiny\bfseries, text=black!70},
+]
+  \foreach \i/\d/\t/\c in {%
+      1/Sep 24/Intro \\ Growth/StageTrunk,
+      2/Oct 1/HA $\cdot$ OLG \\ Policy/StageBranch,
+      3/Oct 8/Num.\ DP \\ Python/StageMachine,
+      4/Oct 15/Numerics \\ I/StageMachine,
+      5/Oct 22/Numerics \\ II/StageMachine,
+      6/Oct 29/The wall \\ \textbf{Midterm}/StageWall,
+      7/Nov 5/ML \\ Deep nets/StageTools,
+      8/Nov 12/RL \\ HA $+$ DL/StageTools,
+      9/Nov 19/Text \\ LLMs/StageData,
+      10/Dec 3/Agents \\ \textbf{Projects}/StageAgents} {
+    \node[sess, fill=\c] (n\i) at ({1.46*(\i-1)}, 0)
+      {{\scriptsize\bfseries S\i}\\[-1pt]{\tiny\color{black!60}\d}\\[1pt]{\tiny \t}};
+    \ifnum\i<#1
+      \node[font=\scriptsize, text=green!45!black] at ([xshift=-2.5mm,yshift=-2.2mm]n\i.north east) {$\checkmark$};
+    \fi
+    \ifnum\i=#1
+      \draw[RedTitle, very thick, rounded corners=2pt]
+        ([xshift=-0.6mm,yshift=-0.6mm]n\i.south west) rectangle ([xshift=0.6mm,yshift=0.6mm]n\i.north east);
+      % keep the label inside the picture at both ends of the row
+      \ifnum\i<3
+        \node[font=\scriptsize\bfseries, text=RedTitle, anchor=south west] at ([yshift=1.2mm]n\i.north west)
+          {$\blacktriangledown$\,you are here: #2};
+      \else\ifnum\i>8
+        \node[font=\scriptsize\bfseries, text=RedTitle, anchor=south east] at ([yshift=1.2mm]n\i.north east)
+          {you are here: #2\,$\blacktriangledown$};
+      \else
+        \node[font=\scriptsize\bfseries, text=RedTitle, anchor=south] at ([yshift=1.2mm]n\i.north)
+          {you are here: #2\,$\blacktriangledown$};
+      \fi\fi
+    \fi
+  }
+  % stage band under the sessions
+  \foreach \a/\b/\lab/\c in {1/1/trunk/StageTrunk, 2/2/branches/StageBranch,
+      3/5/the machine $\cdot$ classical methods/StageMachine, 6/6/the wall/StageWall,
+      7/8/new tools/StageTools, 9/9/new data/StageData, 10/10/colleagues/StageAgents} {
+    \fill[\c] ([yshift=-1.5mm]n\a.south west) rectangle ([yshift=-4.6mm]n\b.south east);
+    \path ([yshift=-1.5mm]n\a.south west) -- ([yshift=-4.6mm]n\b.south east)
+      node[midway, stage] {\lab};
+  }
+  \node[font=\footnotesize\itshape, text=black!70] at ([yshift=-9.5mm]$(n1.south)!0.5!(n10.south)$)
+    {Build it on paper $\;\to\;$ solve it on the machine $\;\to\;$ push it to the frontier with AI};
+\end{tikzpicture}
+\end{center}
+}

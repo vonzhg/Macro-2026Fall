@@ -1,0 +1,429 @@
+%% ECON 282E -- Session 3, Deck A3: Euler Equations, Time Iteration, What Is Missing
+%% Budget: 16 frames (~22 minutes). Provenance: slides/SOURCES.md.
+%% Every number and coordinate comes from tools/figures/s03_numbers.json, key
+%% "stochastic" and "fig_euler_errors" (tools/figures/s03_generate.py, compute node,
+%% 2026-09-17).  Same calibration as 3.A2, plus z in {0.95,1.05}, Pi symmetric
+%% with persistence 0.9.  Wall times are single-core Python/NumPy, float64.
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+\lstset{language=Python, basicstyle=\ttfamily\scriptsize, frame=none,
+        backgroundcolor=\color{gray!8}, aboveskip=2pt, belowskip=2pt}
+
+\decktitle{3}{A3}{Euler Equations, Time Iteration, and What Is Still Missing}{Thursday, October 8, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{3}{3.A3}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block A:} \textbf{3.A1} what it means to solve a model $\;\cdot\;$ \textbf{3.A2} value function iteration on a grid $\;\cdot\;$ \textbf{3.A3} Euler equations and time iteration $\;\cdot\;$ \textbf{3.A4} the worked example, end to end.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{One Model, Two Methods, One Judge}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Same model, same grid, same shock, same closed form to grade against, and both policies graded on the same object: $\max|c/c^{*}-1|$.
+\medskip
+\begin{center}\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & \textbf{VFI} & \textbf{Time iteration} \\
+\midrule
+Iterations & 272 & \textbf{17} \\
+Wall time & \textbf{0.03\,s} & 0.69\,s \\
+Max policy error & $5.4\times10^{-3}$ & $\mathbf{6.7\times10^{-6}}$ \\
+$\max\log_{10}\mathcal{E}$ & $-1.8$ & $\mathbf{-3.8}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}\small
+\textbf{Sixteen times fewer iterations and eight hundred times more accurate} --- and twenty times slower.
+\end{conceptbox}
+\medskip
+\begin{examplebox}\footnotesize
+Every one of those four numbers is explained by \emph{one} design change: iterate on the policy and solve an equation, instead of iterating on the value and searching for a maximum.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Why Leave the Value Function at All?}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+Three reasons, and the first two are visible in 3.A2's staircase:
+\medskip
+\begin{enumerate}\footnotesize
+  \item \textbf{The policy is the object you want.} VFI drives $v$ down to whatever tolerance you ask for, and then hands back a policy good to two digits. You paid for precision in the wrong function.
+  \item \textbf{The policy is flatter.} $v$ inherits the curvature of $u$; $g$ is close to linear in this model. A flatter function is cheaper to represent on a grid.
+  \item \textbf{No maximization.} Each point needs the solution of one scalar equation, not a search over $N$ candidates.
+\end{enumerate}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{cautionbox}[title=\textbf{What you give up}]\footnotesize
+The Euler equation requires \textbf{differentiability} and an \textbf{interior} optimum. VFI needs neither --- it will happily solve a problem with discrete choices, kinks, or a binding constraint, which is exactly where the Euler road ends.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+So this is not a replacement. It is a second instrument, with different failure modes --- which is what makes the comparison worth something.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Adapted from QM Lec.~7, ``From VFI to Euler Equation Methods''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Euler Equation Is Also a Functional Equation}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+From the first-order and envelope conditions of 1.B2,
+\[
+  u'(c_t)=\beta\,\mathbb{E}_t\big[u'(c_{t+1})\,R(k_{t+1},z_{t+1})\big],
+\]
+with the gross return $R(k',z')=\alpha z' k'^{\alpha-1}+1-\delta$.
+Write the policy as $k'=g(k,z)$ and substitute. Consumption today is $c=zk^{\alpha}+(1-\delta)k-g(k,z)$, and consumption tomorrow uses $g$ \emph{again}:
+\[
+  u'\big(zf(k)-g\big)=\beta\,\mathbb{E}\big[u'\big(z'f(g)-g(g,z')\big)R(g,z')\big].
+\]
+One equation, one unknown --- and the unknown is a function that appears composed with itself.
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{conceptbox}[title=\textbf{The same two problems}]\small
+\textbf{Represent} $g$ finitely: values on a grid plus linear interpolation, exactly as before.\\[1mm]
+\textbf{Kill the residual}: but now by \emph{root-finding}, not by maximizing.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+Decisions 1, 2, 3 and 5 of 3.A1 are unchanged. Only decisions 4 and 6 --- how you handle the choice, and what you iterate on --- have moved.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Derivation adapted from QM Lec.~7, ``Deriving Euler Equations'' and ``Policy Function Representation''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Time Iteration: The Operator}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+Given a guess $g_n$ for \emph{tomorrow's} policy, define $g_{n+1}=Kg_n$ pointwise: at each $(k,z)$, find the $k'$ that solves
+\[
+  u'\big(zf(k)-k'\big)=\beta\,\mathbb{E}\Big[u'\big(z'f(k')-g_n(k',z')\big)R(k',z')\Big].
+\]
+\begin{itemize}\footnotesize
+  \item The left side is \textbf{increasing} in $k'$: saving more costs more today.
+  \item The right side is \textbf{decreasing} in $k'$ under standard conditions.
+  \item So they cross \textbf{once}. The root exists and is unique --- before any numerical method is chosen.
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}[title=\textbf{Read the name literally}]\small
+$g_n$ is the policy used \emph{one period later}. Iterating $K$ is solving a finite-horizon problem of growing length --- ``time'' iteration.
+\end{conceptbox}
+\medskip
+\begin{examplebox}\footnotesize
+Which also tells you where to start: $g_0\equiv0$ (eat everything) is the last period of life, and the iterates then increase.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Operator and monotonicity argument adapted from QM Lec.~7, ``Time Iteration'', and AE Lec.~1, ``The Greenwood--Huffman Operator''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}[fragile]{Time Iteration: The Algorithm}
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\small
+\begin{enumerate}\footnotesize
+  \item Grid $\{k_i\}$, chain $(z_j,\Pi)$; guess $c_0$ (or $g_0$).
+  \item For every $(k_i,z_j)$: solve the scalar equation for $c$, evaluating $c_n$ off the grid by interpolation.
+  \item Stop when $\lVert c_{n+1}-c_n\rVert_\infty<\text{tol}$.
+\end{enumerate}
+\medskip
+\footnotesize
+On our grid that is $200\times2=400$ scalar root-finds per sweep, and \textbf{6{,}800} in total across 17 sweeps.
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{lstlisting}
+def resid(c, y, j):
+    kp  = y - c
+    rhs = 0.0
+    for m in range(nz):
+        cp = np.interp(kp, k, cn[:, m])
+        R  = alpha*z[m]*kp**(alpha-1)
+        rhs += Pi[j, m] * R / cp
+    return 1/c - beta*rhs
+
+c_new[i, j] = brentq(
+    resid, 1e-10, y - 1e-10, args=(y, j))
+\end{lstlisting}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Adapted from QM Lec.~7, ``Time Iteration: Algorithm''; the \texttt{brentq} call follows QM Lab 7.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Black Box in the Middle}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+\texttt{brentq} is handed a bracket $[a,b]$ on which the residual changes sign, and returns the root. Today we take that on trust, and we are entitled to: we \emph{proved}, when we wrote the operator down, that the residual is increasing on one side, decreasing on the other, and crosses zero exactly once, so a bracketing method cannot fail.
+\medskip
+
+That is the whole reason this course does theory before numerics. \textbf{The existence-and-uniqueness argument is what licenses the black box.}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{cautionbox}[title=\textbf{What is inside it}]\footnotesize
+Bisection is safe but slow; Newton is fast but needs a derivative and can fly off; the secant method splits the difference. Brent's method combines all three and keeps the bracket.\\[1mm]
+We build each of them, and their convergence rates, \textbf{next week}.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+Until then the rule is: a black box is acceptable exactly when you can state the condition under which it is guaranteed to work.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Root-finding options listed in QM Lec.~7, ``Time Iteration: Implementation Details''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Convergence Without a Contraction}
+\begin{columns}[T]
+\begin{column}{0.51\textwidth}
+\small
+VFI converged because $T$ is a contraction --- Blackwell gave us monotonicity \emph{and} discounting, and Banach did the rest. $K$ has no Bellman equation behind it, so that argument is unavailable.
+\medskip
+
+Two repairs exist, and they are genuinely different:
+\medskip
+\begin{itemize}\footnotesize
+  \item \textbf{Coleman (1990):} in the standard optimal-growth setting, $K$ \emph{is} a contraction in a suitable norm. Same guarantee, same geometric rate.
+  \item \textbf{Greenwood--Huffman (1995):} in economies with externalities or distortions --- where no planner's problem exists --- $K$ need not contract, but it is \textbf{monotone} and bounded, and that is enough.
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{conceptbox}[title=\textbf{Why the second one matters}]\small
+Taxes, externalities and market power break the welfare theorems. There is then \emph{no} value function to iterate on --- but the equilibrium Euler equation still holds, and $K$ still converges.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+This is the road that survives into the models of Session 2. It is why time iteration, not VFI, is the backbone of heterogeneous-agent and optimal-policy computation.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Coleman (1990); Greenwood \& Huffman (1995). Adapted from QM Lec.~7, ``Convergence: The Key Question''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Monotonicity Instead of Contraction}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+Start at $H^{0}(K,z)=0$ and define $H^{j+1}(K,z)=x$ as the solution of
+\[
+  \begin{aligned}
+  u'\big(F(K,K,z)-x\big)=\beta\,\mathbb{E}\Big[&u'\big(F(x,x,z')-H^{j}(x,z')\big)\\
+  &\cdot F_1(x,x,z')\Big],
+  \end{aligned}
+\]
+where the second argument of $F$ is the \emph{aggregate} capital the household takes as given. The argument runs in three steps:
+\medskip
+\begin{enumerate}\footnotesize
+  \item $H^{j+1}\ge H^{j}$ whenever $H^{j}\ge H^{j-1}$: the operator is \textbf{monotone}.
+  \item $H^{j}(K,z)\le F(K,K,z)$: the sequence is \textbf{bounded} by feasibility.
+  \item A monotone bounded sequence converges; equicontinuity makes the limit continuous.
+\end{enumerate}
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{conceptbox}[title=\textbf{Then check it is an equilibrium}]\small
+Convergence is not the end. You must still verify that the limit satisfies the \emph{equilibrium} Euler equation once the consistency condition $k=K$ is imposed.
+\end{conceptbox}
+\medskip
+\begin{examplebox}\footnotesize
+Practical consequence: start from $g_0\equiv0$ and \textbf{watch the iterates increase}. If they ever fall, the monotonicity hypothesis is violated somewhere and the guarantee is gone.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Adapted from AE Lec.~1, ``The Greenwood--Huffman Operator'', and QM Lec.~7, ``Monotonicity Approach''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Grading Both, on Points Neither One Solved}
+\begin{columns}[c]
+\begin{column}{0.52\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=7.3cm, height=5.3cm, xmin=0.05, xmax=0.60, ymin=-7.0, ymax=-1.2,
+    xlabel={\scriptsize capital $k$ (off the solution grid)},
+    ylabel={\scriptsize $\log_{10}\mathcal{E}$},
+    tick label style={font=\scriptsize},
+    axis x line*=bottom, axis y line*=left,
+    legend style={font=\tiny, draw=none, fill=none, at={(0.02,0.03)}, anchor=south west}]
+  \addplot[thin, RedTitle] coordinates {(0.0600,-2.3821) (0.0728,-2.0038) (0.0855,-1.8212) (0.0983,-2.5266) (0.1111,-2.4071) (0.1239,-1.9968) (0.1366,-2.7664) (0.1494,-2.3500) (0.1622,-3.9749) (0.1749,-2.0481) (0.1877,-2.1386) (0.2005,-2.7492) (0.2133,-2.2694) (0.2260,-2.6962) (0.2388,-2.6379) (0.2516,-2.1793) (0.2643,-2.2360) (0.2771,-2.5017) (0.2899,-2.1987) (0.3027,-2.1361) (0.3154,-2.1455) (0.3282,-2.1713) (0.3410,-2.1370) (0.3537,-2.2574) (0.3665,-2.6308) (0.3793,-2.3697) (0.3920,-2.2302) (0.4048,-2.7446) (0.4176,-2.3225) (0.4304,-2.1347) (0.4431,-2.2562) (0.4559,-2.2769) (0.4687,-2.1433) (0.4814,-2.4515) (0.4942,-3.0169) (0.5070,-3.0531) (0.5198,-2.4823) (0.5325,-3.1229) (0.5453,-2.6406) (0.5581,-2.2381) (0.5708,-3.0206) (0.5836,-2.3349)};
+  \addlegendentry{VFI on a grid}
+  \addplot[thin, orange!80!black] coordinates {(0.0600,-3.7897) (0.0728,-4.0574) (0.0855,-4.3767) (0.0983,-4.1452) (0.1111,-4.7458) (0.1239,-4.4905) (0.1366,-4.5290) (0.1494,-5.3648) (0.1622,-4.5562) (0.1749,-4.8839) (0.1877,-4.9961) (0.2005,-4.8168) (0.2133,-5.4676) (0.2260,-4.9847) (0.2388,-5.0367) (0.2516,-5.5955) (0.2643,-5.0593) (0.2771,-5.2309) (0.2899,-5.2998) (0.3027,-5.1864) (0.3154,-6.0838) (0.3282,-5.2862) (0.3410,-5.3739) (0.3537,-5.7368) (0.3665,-5.3389) (0.3793,-5.6728) (0.3920,-5.5317) (0.4048,-5.4507) (0.4176,-7.7078) (0.4304,-5.5040) (0.4431,-5.6375) (0.4559,-5.8518) (0.4687,-5.5525) (0.4814,-5.9997) (0.4942,-5.6768) (0.5070,-5.5367) (0.5198,-6.5292) (0.5325,-5.6759) (0.5453,-5.8627) (0.5581,-5.9493) (0.5708,-5.5698) (0.5836,-6.3141)};
+  \addlegendentry{time iteration}
+  \draw[black!45, dashed] (axis cs:0.05,-3) -- (axis cs:0.60,-3);
+  \node[font=\tiny, text=black!55, anchor=south east] at (axis cs:0.59,-2.95) {``acceptable'' $=10^{-3}$};
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.45\textwidth}
+\small
+The unit-free residual of 3.A1, at 997 capital levels chosen to fall \emph{between} the solution grid points.
+\medskip
+\begin{center}\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & VFI & TI \\
+\midrule
+mean $\log_{10}\mathcal{E}$ & $-2.40$ & $-4.92$ \\
+worst $\log_{10}\mathcal{E}$ & $-1.78$ & $-3.75$ \\
+\midrule
+worst residual & $1.7\!\times\!10^{-2}$ & $1.8\!\times\!10^{-4}$ \\
+\emph{true} policy error & $5.4\!\times\!10^{-3}$ & $6.7\!\times\!10^{-6}$ \\
+ratio & $3.1\times$ & $27\times$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{-1mm}
+{\footnotesize\textbf{Santos (2000), checked:} the residual exceeds the error it certifies, for both methods.}
+\medskip
+\begin{cautionbox}\footnotesize
+VFI's worst case is a \textbf{1.7\% consumption mistake}, a decade worse than 3.A1's ``acceptable'' line.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{VFI or Time Iteration --- and Why You Write Both}
+\renewcommand{\arraystretch}{1.18}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+ & \textbf{Value function iteration} & \textbf{Time iteration} \\
+\midrule
+Iterates on & the value $v$ & the policy $g$ \\
+Inner step & a maximization & a root-find \\
+Converges because & $T$ contracts (Blackwell) & $K$ contracts (Coleman) \emph{or} is monotone (Greenwood--Huffman) \\
+Handles & kinks, discrete choice, binding constraints & smooth interior problems, distorted economies \\
+Accuracy here & $\log_{10}\mathcal{E}=-1.8$ & $\log_{10}\mathcal{E}=-3.8$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\vspace{1mm}
+\begin{takeawaybox}\small
+Away from this benchmark there is \textbf{no closed form to grade against}. Two methods that rest on different theorems, agreeing to four digits, is then the strongest evidence available --- which is why cross-method agreement sits on 1.B2's verification checklist, and why the answer to ``which one?'' is usually ``both, once''.
+\end{takeawaybox}
+\vspace{1mm}
+\src{Comparison adapted from QM Lec.~7, ``VFI vs.\ Time Iteration'' and ``When to Use Each Method''; accuracy columns measured here.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Where Both Methods Break}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Everything today rested on \textbf{one continuous state and one small chain}. Four things break it, and you have already met three of them:
+\medskip
+\begin{itemize}\footnotesize
+  \item \textbf{A second continuous state.} The grid becomes $N^2$ and a VFI sweep $N^4$. 1.B2 counted where that ends: ten dimensions at a hundred points is $10^{20}$ grid points.
+  \item \textbf{A binding constraint.} $a'\ge-\underline{a}$ turns the Euler equation into a complementarity condition. The root-find of this deck simply has no root.
+  \item \textbf{A distribution as a state.} In 2.B1 the state included $\Gamma$ --- an infinite-dimensional object. There is no grid for it.
+  \item \textbf{Patience.} At a quarterly $\beta=0.99$, VFI needs $1{,}379$ sweeps and the error amplifier is $99$, not $19$.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{cautionbox}\small
+Not one of these is exotic. The first three are the standard models of Session 2 --- Aiyagari, Krusell--Smith, life-cycle --- and the fourth is the standard calendar.
+\end{cautionbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+So the honest summary of today is: \textbf{we can solve the trunk, and only the trunk}. The next two sessions are the tools that get us onto the branches.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Techniques You Need, and When We Build Them}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.3cm} >{\raggedright\arraybackslash}X c@{}}
+\toprule
+\textbf{Technique} & \textbf{Which of today's gaps it closes} & \\
+\midrule
+Root-finding & opens the \texttt{brentq} box: bisection, secant, Newton, Brent, and their rates & S4 \\
+Optimization & replaces the grid search that made the staircase & S4 \\
+Differentiation & Newton needs derivatives; finite differences, then automatic differentiation & S4 \\
+Approximation \& interpolation & better than straight lines, without losing shape & S4 \\
+Quadrature \& AR(1) discretization & where $\Pi$ actually comes from & S4 \\
+Acceleration & cuts the 272 sweeps and the $O(N^2)$ inner loop & S4 \\
+Perturbation & a local expansion that ignores the grid entirely & S5 \\
+Projection & a global basis instead of $N$ separate values & S5 \\
+Nested fixed points & Aiyagari solved end to end & S5 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\vspace{1mm}
+\begin{conceptbox}\small
+Nothing on this list is decoration. \textbf{Every row was put there by a specific failure you watched happen this morning.}
+\end{conceptbox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways}
+\begin{takeawaybox}
+\begin{itemize}\small
+  \item The Euler equation is a functional equation too. Iterating on the \textbf{policy} means solving one scalar equation per state instead of searching for a maximum.
+  \item The economics does the numerical work: the residual is increasing on one side and decreasing on the other, so the root exists, is unique, and a bracketing solver \textbf{cannot} fail. That argument is what licenses the black box.
+  \item Convergence has two proofs, and they are not interchangeable. \textbf{Coleman} gives a contraction in the planner's world; \textbf{Greenwood--Huffman} gives monotone convergence where no planner exists --- taxes, externalities, distortions.
+  \item Measured on the same grid, and graded on the same object: 17 sweeps against 272, consumption error $6.7\times10^{-6}$ against $5.4\times10^{-3}$, $\log_{10}\mathcal{E}$ of $-3.8$ against $-1.8$. Fewer iterations, better answers, more wall time --- each sweep does 400 root-finds.
+  \item Both methods stop at \textbf{one continuous state}. A second state, a binding constraint, or a distribution as a state, and today's toolkit is finished.
+\end{itemize}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: After the Break, the Machine Itself}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+Every claim this morning was a measurement, and every measurement came out of twenty to forty lines of Python. That is not incidental to the argument --- it \emph{is} the argument. A method you cannot implement is a method you cannot check.
+\medskip
+
+So Block B is the other half of the bridge from paper to machine: the environment, the language, and the one idea that turns an algorithm on a whiteboard into an array operation that runs in milliseconds.
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{conceptbox}[title=\textbf{After the break (Block B)}]\small
+\textbf{3.B1} Your toolkit: Python, environments, notebooks, and version control.\\[1mm]
+\textbf{3.B2} From loops to arrays --- we rebuild this morning's solver as a class, and make it 65 times faster without changing a single number.\\[1mm]
+\textbf{3.B3} PyTorch from the ground up, and how to work with an AI assistant without outsourcing your judgment.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

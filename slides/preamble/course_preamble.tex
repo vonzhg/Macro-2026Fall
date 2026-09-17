@@ -1,0 +1,167 @@
+%% ECON 282E -- Foundations of Macroeconomics (UC Riverside, Fall 2026)
+%% Shared Beamer preamble for every deck in slides/S01 ... slides/S10.
+%%
+%% Usage (a deck lives in slides/S0X/ and is compiled from that folder):
+%%   \input{../preamble/course_preamble.tex}
+%%   \decktitle{1}{A1}{Who I Am \& Why This Course}{September 24, 2026}
+%%   \begin{document}
+%%   \makedecktitle
+%%   ...
+%%
+%% Adapted from Courses/AI-ECON-2026/source/shared_preamble.tex (Metropolis theme,
+%% concept/caution/example/takeaway boxes, \sectiondivider). Changes for this course:
+%%   * course title block (\decktitle / \makedecktitle) instead of \makebeamertitle
+%%   * \zh{...} typesets Chinese (book titles) under pdflatex via CJKutf8
+%%   * researchbox for the "Research in the wild" frames
+%%   * section pages off; TikZ libraries and the course map loaded here
+%% Build with pdflatex only (two passes); tools/build_slides.py does this for you.
+
+\documentclass[10pt,english,aspectratio=169]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{CJKutf8}
+
+\usepackage{amsmath, amssymb, amsthm, graphicx}
+\usepackage{booktabs, multirow, tabularx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins, breakable}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{orange!80!black},
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+}
+
+\usetheme{metropolis}
+\usefonttheme{professionalfonts}
+\metroset{sectionpage=none}
+
+\definecolor{LightGray}{RGB}{230,230,230}
+\definecolor{RedTitle}{RGB}{0,0,200}
+\definecolor{VeryLightGray}{RGB}{245,245,245}
+\definecolor{DarkText}{RGB}{0,0,0}
+\definecolor{UCRBlue}{RGB}{0,45,106}
+\definecolor{UCRGold}{RGB}{241,171,0}
+
+% Stage colours of the course arc (used by the course map and elsewhere)
+\colorlet{StageTrunk}{blue!12}
+\colorlet{StageBranch}{cyan!14}
+\colorlet{StageMachine}{gray!18}
+\colorlet{StageWall}{red!14}
+\colorlet{StageTools}{orange!20}
+\colorlet{StageData}{green!16}
+\colorlet{StageAgents}{violet!14}
+
+\hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},colorlinks=true,
+  linkcolor=DarkText,urlcolor=RedTitle}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{title}{fg=RedTitle}
+\setbeamercolor{frametitle}{bg=VeryLightGray,fg=DarkText}
+\setbeamercolor{normal text}{fg=DarkText}
+\setbeamercolor{alerted text}{fg=RedTitle}
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+\addtobeamertemplate{frametitle}{}{\vspace{-0.5em}}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{%
+  \hspace{5mm}{\usebeamerfont{page number in head/foot}\color{black!45}%
+  ECON 282E \,$\cdot$\, \insertshortdeck}\hfill%
+  \usebeamercolor[fg]{page number in head/foot}%
+  \usebeamerfont{page number in head/foot}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip2pt%
+}
+
+% ---------------------------------------------------------------------------
+% Chinese text under pdflatex (book titles etc.)
+\newcommand{\zh}[1]{\begin{CJK*}{UTF8}{gbsn}#1\end{CJK*}}
+
+% ---------------------------------------------------------------------------
+% Deck title block
+%   \decktitle{session}{deck id}{title}{date}
+\newcommand{\insertshortdeck}{}
+\newcommand{\decksession}{}
+\newcommand{\deckid}{}
+\newcommand{\decktitletext}{}
+\newcommand{\deckdate}{}
+\newcommand{\decktitle}[4]{%
+  \renewcommand{\decksession}{#1}%
+  \renewcommand{\deckid}{#2}%
+  \renewcommand{\decktitletext}{#3}%
+  \renewcommand{\deckdate}{#4}%
+  \renewcommand{\insertshortdeck}{Session #1 \,$\cdot$\, Deck #1.#2}%
+  \title{#3}%
+  \author{Zhigang Feng}%
+  \date{#4}%
+}
+\newcommand{\makedecktitle}{%
+  \begin{frame}[plain,noframenumbering]
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[UCRBlue] (current page.north west) rectangle ([yshift=-0.55cm]current page.north east);
+      \fill[UCRGold] ([yshift=-0.55cm]current page.north west) rectangle ([yshift=-0.62cm]current page.north east);
+      \node[anchor=west, text=white, font=\small\bfseries] at ([xshift=5mm,yshift=-0.275cm]current page.north west)
+        {ECON 282E \,$\cdot$\, Foundations of Macroeconomics};
+      \node[anchor=east, text=white, font=\small] at ([xshift=-5mm,yshift=-0.275cm]current page.north east)
+        {UC Riverside \,$\cdot$\, Fall 2026};
+    \end{tikzpicture}
+    \vspace*{1.1cm}
+    {\usebeamerfont{title}\color{black!55}\large Session \decksession\ \,$\cdot$\, Deck \decksession.\deckid\par}
+    \vspace{0.25cm}
+    {\usebeamerfont{title}\color{RedTitle}\LARGE\bfseries \decktitletext\par}
+    \vspace{0.7cm}
+    {\large Zhigang Feng\par}
+    \vspace{0.15cm}
+    {\color{black!65}\deckdate\par}
+    \vfill
+    {\footnotesize\itshape\color{black!55}Build it on paper $\;\to\;$ solve it on the machine $\;\to\;$ push it to the frontier with AI\par}
+  \end{frame}}
+
+% ---------------------------------------------------------------------------
+% Section divider (plain frame, not counted)
+\newcommand{\sectiondivider}[2]{%
+\begin{frame}[plain,noframenumbering]
+\begin{center}
+\vfill
+{\Large\textbf{#1}\par}
+\vspace{0.35cm}
+{\normalsize #2\par}
+\vfill
+\end{center}
+\end{frame}
+}
+
+% ---------------------------------------------------------------------------
+% Boxes
+\newtcolorbox{conceptbox}[1][]{colback=blue!3, colframe=RedTitle!55, boxrule=0.35mm,
+  arc=1mm, left=2mm, right=2mm, top=1mm, bottom=1mm, #1}
+\newtcolorbox{cautionbox}[1][]{colback=red!3, colframe=red!50!black, boxrule=0.35mm,
+  arc=1mm, left=2mm, right=2mm, top=1mm, bottom=1mm, #1}
+\newtcolorbox{examplebox}[1][]{colback=green!3, colframe=green!45!black, boxrule=0.35mm,
+  arc=1mm, left=2mm, right=2mm, top=1mm, bottom=1mm, #1}
+\newtcolorbox{takeawaybox}[1][]{colback=VeryLightGray, colframe=RedTitle!55, boxrule=0.35mm,
+  arc=1mm, left=2mm, right=2mm, top=1mm, bottom=1mm, #1}
+\newtcolorbox{researchbox}[1][]{enhanced, colback=violet!4, colframe=violet!60!black,
+  boxrule=0.35mm, arc=1mm, left=2mm, right=2mm, top=1mm, bottom=1mm,
+  fonttitle=\bfseries\small, title={Research in the wild}, #1}
+
+\newcommand{\compacttables}{\renewcommand{\arraystretch}{1.15}}
+\newcommand{\src}[1]{{\tiny\color{black!55}#1}}
+
+% ---------------------------------------------------------------------------
+\input{../preamble/course_map.tex}

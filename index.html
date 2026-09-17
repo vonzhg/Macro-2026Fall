@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex, nofollow">
+	<title>ECON 282E · Foundations of Macroeconomics</title>
+	<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+	<div class="container">
+		<h1>ECON&nbsp;282E &mdash; Foundations of Macroeconomics</h1>
+
+		<div class="instructor-info">
+			<p><strong>Zhigang Feng</strong> &nbsp;·&nbsp; University of California, Riverside &nbsp;·&nbsp; Fall&nbsp;2026</p>
+			<p><strong>Meets:</strong> Thursdays 9:00&ndash;11:50, Sproul Hall 4128 &nbsp;·&nbsp; September&nbsp;24 &ndash; December&nbsp;3</p>
+			<p><strong>Webpage:</strong> <a href="https://sites.google.com/site/zfeng202/" target="_blank" rel="noopener">https://sites.google.com/site/zfeng202/</a></p>
+		</div>
+
+		<p>Modern macroeconomics asks questions about <strong>distributions</strong> and
+		<strong>policy</strong>: who bears income risk, how inequality interacts with the business
+		cycle, how aging and public debt burden different cohorts, what a government should tax when
+		it cannot commit, and how artificial intelligence will reshape work and wages. Answering
+		these questions requires models with heterogeneous agents, frictions, and strategic
+		governments &mdash; and those models can almost never be solved with pencil and paper.</p>
+
+		<p>The course builds the foundations in three steps. <strong>On paper</strong> (Sessions
+		1&ndash;2) we go from the neoclassical growth model to the workhorse models of current
+		research &mdash; Bewley&ndash;Huggett&ndash;Aiyagari, Krusell&ndash;Smith, overlapping
+		generations, and optimal fiscal policy with and without commitment. <strong>On the
+		machine</strong> (Sessions 3&ndash;6) we learn to solve them: numerical dynamic programming,
+		Python and PyTorch, root-finding, optimization, differentiation, approximation, quadrature,
+		discretizing stochastic processes, perturbation and projection &mdash; ending at the
+		computational wall that heterogeneous-agent economies run into. <strong>At the
+		frontier</strong> (Sessions 7&ndash;10) we study how machine learning, deep learning and
+		reinforcement learning break through that wall, how language models turn text into economic
+		data, and how AI agents are changing the way research is done.</p>
+
+		<p>Throughout, the course insists on one discipline: <strong>every computed answer must be
+		benchmarked and verified.</strong> As AI makes generating answers cheap, verification becomes
+		the scarce skill. Every number on a slide in this course was produced by code that is in this
+		repository, and every accuracy claim is reported with its cost.</p>
+
+		<p><strong>The companion course.</strong> Where this course ends, <strong><a
+		href="https://github.com/vonzhg/AI-ECON-2026" target="_blank" rel="noopener">AI for Economic
+		Research: Dynamic Models, Language, and Agents</a></strong> begins &mdash; ten lectures on
+		deep learning for dynamic models, reinforcement learning with heterogeneous agents, LLMs and
+		text as economic data, retrieval-augmented generation, and agentic AI research workflows.
+		Sessions 7&ndash;10 here are a compressed tour of that material; the companion site is where
+		it is developed in full, with its own labs.</p>
+
+		<!-- Quick links -->
+		<div class="quicklinks">
+			<a class="quicklink" href="syllabus.html">
+				<span class="ql-title">📋 Syllabus</span>
+				<span class="ql-sub">Schedule, grading, policies</span>
+			</a>
+			<a class="quicklink" href="slides/index.html">
+				<span class="ql-title">📑 Slides</span>
+				<span class="ql-sub">Session decks (&copy; Z. Feng)</span>
+			</a>
+			<a class="quicklink" href="labs/index.html">
+				<span class="ql-title">💻 Labs</span>
+				<span class="ql-sub">Notebooks &mdash; run them yourself</span>
+			</a>
+			<a class="quicklink" href="assignments.html">
+				<span class="ql-title">📝 Assignments</span>
+				<span class="ql-sub">Homework and the final project</span>
+			</a>
+		</div>
+
+		<!-- Start here -->
+		<h2>Start here</h2>
+		<div class="session-box">
+			<h3>Three steps per session</h3>
+			<ol style="list-style:decimal; padding-left:28px; margin:0;">
+				<li><strong>Read the session row in the <a href="syllabus.html">syllabus</a></strong> &mdash;
+					it says what each block covers and what is due.</li>
+				<li><strong>Work through the decks</strong> on the <a href="slides/index.html">slides</a>
+					page. Each block is three or four short decks rather than one long one.</li>
+				<li><strong>Run the lab.</strong> The <a href="labs/index.html">notebooks</a> are where the
+					material becomes yours. They ship with no stored output on purpose &mdash; you are meant
+					to produce the numbers.</li>
+			</ol>
+		</div>
+
+		<div class="notice">
+			<strong>No Python yet?</strong> Start with
+			<a href="labs/L00_Getting_Started.ipynb">Lab&nbsp;0</a>, posted before Session&nbsp;3. It
+			installs the tools and checks the install. Programming is taught from the ground up in
+			Session&nbsp;3 &mdash; prior experience helps but is not assumed.
+		</div>
+
+		<!-- Schedule -->
+		<h2>Schedule &mdash; Fall&nbsp;2026</h2>
+		<p>Two blocks per session: <strong>A</strong> 9:00&ndash;10:15, <strong>B</strong>
+		10:35&ndash;11:50. No class on November&nbsp;26.</p>
+		<table>
+			<thead>
+				<tr><th>Session</th><th>Block A</th><th>Block B</th><th>Due / out</th></tr>
+			</thead>
+			<tbody>
+				<tr><td><strong>1</strong><br>Sep 24</td><td>Introduction &mdash; the macro frontier, AI as tool and object</td><td>The optimal growth model</td><td></td></tr>
+				<tr><td><strong>2</strong><br>Oct 1</td><td>Incomplete markets &mdash; Bewley, Huggett, Aiyagari</td><td>Aggregate risk, finite lives, policy</td><td></td></tr>
+				<tr><td><strong>3</strong><br>Oct 8</td><td>Introduction to computation</td><td>Programming basics &mdash; Python, NumPy, PyTorch</td><td>HW&nbsp;1&nbsp;Part&nbsp;A out</td></tr>
+				<tr><td><strong>4</strong><br>Oct 15</td><td>Numerical methods I &mdash; roots, optima, derivatives</td><td>Approximation, quadrature, AR(1), a fast solver</td><td>HW&nbsp;1&nbsp;Part&nbsp;B out</td></tr>
+				<tr><td><strong>5</strong><br>Oct 22</td><td>Numerical methods II &mdash; perturbation</td><td>Projection; solving Aiyagari</td><td>HW&nbsp;1 due;<br>practice midterm out</td></tr>
+				<tr><td><strong>6</strong><br>Oct 29</td><td>The complexity wall</td><td><strong>Midterm examination</strong></td><td>HW&nbsp;2 out</td></tr>
+				<tr><td><strong>7</strong><br>Nov 5</td><td>Machine learning essentials</td><td>Deep learning for dynamic models</td><td>Project teams and topics</td></tr>
+				<tr><td><strong>8</strong><br>Nov 12</td><td>Reinforcement learning</td><td>Heterogeneous agents at the frontier</td><td>HW&nbsp;2 due</td></tr>
+				<tr><td><strong>9</strong><br>Nov 19</td><td>Language models and text as data</td><td>LLMs as research instruments</td><td>Proposal due Mon Nov&nbsp;16</td></tr>
+				<tr><td colspan="4"><em>November 26 &mdash; no class (Thanksgiving).</em></td></tr>
+				<tr><td><strong>10</strong><br>Dec 3</td><td>Agentic AI and the future of research</td><td>Final project presentations</td><td></td></tr>
+				<tr><td>Dec 10</td><td colspan="3"><strong>Final paper and replication package due</strong> (finals week).</td></tr>
+			</tbody>
+		</table>
+
+		<!-- Grading -->
+		<h2>Grading</h2>
+		<table>
+			<thead><tr><th>Component</th><th>Weight</th><th>When</th></tr></thead>
+			<tbody>
+				<tr><td>Homework 1 &mdash; dynamic programming and numerical methods</td><td>15%</td><td>out Oct 8 and Oct 15; due Oct 22</td></tr>
+				<tr><td>Homework 2 &mdash; heterogeneity and learning</td><td>15%</td><td>out Oct 29; due Nov 12</td></tr>
+				<tr><td>Midterm (closed book, in class)</td><td>20%</td><td>Oct 29, Block B</td></tr>
+				<tr><td>Final project (teams of 2&ndash;3)</td><td>40%</td><td>proposal 5 · talk and discussion 15 · paper and code 20</td></tr>
+				<tr><td>Participation</td><td>10%</td><td>throughout</td></tr>
+			</tbody>
+		</table>
+
+		<!-- Ecosystem -->
+		<div class="ecosystem-box">
+			<h3>Where this course sits</h3>
+			<p>This site is the <strong>foundations</strong> stage: the models, and the classical
+			methods that solve them. Its continuation is
+			<strong><a href="https://github.com/vonzhg/AI-ECON-2026" target="_blank" rel="noopener">AI
+			for Economic Research</a></strong>, which takes the same models to the AI frontier &mdash;
+			deep learning for dynamic models, reinforcement learning and heterogeneous agents, language
+			models and text as data, and agentic research workflows.</p>
+			<p style="text-align:center; font-size:1.05em; margin: 10px 0;">
+				<strong>Foundations of Macroeconomics</strong>
+				<span class="eco-arrow">&rarr;</span>
+				<a href="https://github.com/vonzhg/AI-ECON-2026" target="_blank" rel="noopener">AI for Economic Research</a>
+			</p>
+			<p style="margin-bottom:0;">Sessions 7&ndash;10 here are the bridge between the two.</p>
+		</div>
+
+		<div class="notice info">
+			<strong>Unlisted, not secret.</strong> Every page carries <code>noindex, nofollow</code> and
+			<code>robots.txt</code> disallows crawlers, so this site does not appear in search results
+			&mdash; but the repository is public, so anyone with the link can read it. Treat the slide
+			PDFs accordingly.
+		</div>
+	</div>
+
+	<div class="site-footer">
+		ECON&nbsp;282E &middot; Foundations of Macroeconomics &middot; University of California, Riverside &middot; &copy; Zhigang Feng<br>
+		Slides are watermarked and shared for personal study &mdash; please do not redistribute them without permission.
+	</div>
+</body>
+</html>

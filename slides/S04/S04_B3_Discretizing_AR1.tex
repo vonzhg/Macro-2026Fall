@@ -1,0 +1,310 @@
+%% ECON 282E -- Session 4, Deck B3: Discretizing an AR(1)
+%% Discharges S03_A2's promise: "the two standard constructions disagree badly
+%% when rho > 0.95 ... We build both next week."
+%% Tauchen is ported from QM Lec.4 F69-F75 (with the drift inconsistency fixed --
+%% the source gives the transition formula twice, once with mu(1-rho) and once
+%% without, and renames the state z -> y -> z).  ROUWENHORST IS NEW: it appears
+%% nowhere in the corpus, named twice and never constructed.
+%% Numbers from tools/figures/s04_numbers.json, key "markov".
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+\lstset{language=Python, basicstyle=\ttfamily\scriptsize, frame=none,
+        backgroundcolor=\color{gray!8}, aboveskip=2pt, belowskip=2pt}
+
+\decktitle{4}{B3}{Discretizing an AR(1): Where $\Pi$ Comes From}{Thursday, October 15, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{4}{4.B3}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block B:} \textbf{4.B1} approximation and interpolation $\;\cdot\;$ \textbf{4.B2} quadrature $\;\cdot\;$ \textbf{4.B3} discretizing an AR(1) $\;\cdot\;$ \textbf{4.B4} fast and accurate $\;\cdot\;$ \textbf{4.B5} the worked example, end to end.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{A Chain That Reports a Unit Root}
+\begin{columns}[T]
+\begin{column}{0.51\textwidth}
+\small
+Take the standard quarterly productivity process,
+\[
+  \ln z'=\rho\ln z+\sigma\varepsilon', \qquad \rho=0.99,\;\sigma=0.007,
+\]
+and build a five-state chain the usual way. Then ask the chain what persistence it actually has.
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X c c@{}}
+\toprule
+$\rho=0.99$, $n=5$ & \textbf{implied $\rho$} & \textbf{sd error} \\
+\midrule
+Tauchen & \textbf{1.0000} & $36\%$ \\
+Rouwenhorst & 0.990000 & $6\times10^{-13}\%$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+The Tauchen chain is a \textbf{unit root}, and its unconditional standard deviation is a third too small. Every business-cycle moment computed from it is wrong.
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{cautionbox}[title=\textbf{Session 3 owed you this}]\small
+3.A2 said the two standard constructions ``disagree badly when $\rho>0.95$, which is exactly the range macro uses''. This is the measurement.
+\end{cautionbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+And $\rho=0.99$ is not an exotic calibration. It is the \textbf{standard quarterly} one --- the same $\rho$ used in this session's RBC model and in Homework 1.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What We Are Actually Asking For}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+A continuous AR(1) has a continuum of states. The Bellman equation needs a finite sum, so we replace it by a chain: a grid $\{z_1,\dots,z_n\}$ and a matrix $\Pi$ with
+\[
+  \Pi_{jm}=\Pr\big(z'=z_m \mid z=z_j\big).
+\]
+\medskip
+This is \emph{not} the quadrature problem of 4.B2. There the distribution was fixed; here it \textbf{depends on today's state}, and the object we need is a whole conditional law for each $j$.
+\medskip
+\textbf{What a good chain should match:} the persistence $\rho$, the unconditional variance $\sigma^{2}/(1-\rho^{2})$, and ideally the shape of the conditional distribution.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{Why $\rho$ near one is hard}]\small
+The unconditional standard deviation is
+\[
+  \sigma_z=\frac{\sigma}{\sqrt{1-\rho^{2}}},
+\]
+which \textbf{explodes} as $\rho\to1$: at $\rho=0.99$ it is seven times $\sigma$. A fixed number of states has to cover a much wider range, with each step correspondingly coarser.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Setup adapted from QM Lec.~4, ``AR(1) Discretization: Why?'' and ``AR(1) Process: Properties''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Tauchen (1986): Put a Grid Down and Integrate the Normal}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+\begin{enumerate}\footnotesize
+  \item Set $\sigma_z=\sigma/\sqrt{1-\rho^{2}}$ and cover $[-m\sigma_z,\,m\sigma_z]$ with $n$ \textbf{equally spaced} points, $m=3$ by convention.
+  \item Conditional on $z_j$, next period is $N(\rho z_j,\ \sigma^{2})$.
+  \item Assign to each interior $z_m$ the probability that the normal lands in its cell:
+\end{enumerate}
+\[
+  \Pi_{jm}=\Phi\!\Big(\tfrac{z_m+\frac{\Delta}{2}-\rho z_j}{\sigma}\Big)
+          -\Phi\!\Big(\tfrac{z_m-\frac{\Delta}{2}-\rho z_j}{\sigma}\Big),
+\]
+with the two end states absorbing the remaining tails.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{cautionbox}[title=\textbf{Two things to fix on sight}]\footnotesize
+The formula is often printed twice in the same set of notes, once with a drift term $\mu(1-\rho)$ and once without, with the state renamed halfway through. \textbf{Set $\mu=0$ and keep one symbol.}\\[1mm]
+And the coverage multiple is usually called $\lambda$ --- which this course reserves for the invariant distribution. We write $m$.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+The method is intuitive and it is what almost everyone writes first. Its weakness is structural: the grid is chosen \emph{before} the persistence is taken into account.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Tauchen (1986). Algorithm from QM Lec.~4, ``Tauchen Method'' frames, with the drift inconsistency resolved.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Rouwenhorst (1995): Build the Chain, Not the Integral}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+A completely different idea: never integrate anything. Start from the two-state chain
+\[
+  \Pi_2=\begin{pmatrix}p & 1-p\\ 1-p & p\end{pmatrix},
+  \qquad p=\frac{1+\rho}{2},
+\]
+and grow it recursively. Given $\Pi_{n-1}$,
+\[
+  \Pi_n=p\begin{pmatrix}\Pi_{n-1}&0\\0&0\end{pmatrix}
+       +(1-p)\begin{pmatrix}0&\Pi_{n-1}\\0&0\end{pmatrix}
+\]
+\[
+  +(1-p)\begin{pmatrix}0&0\\ \Pi_{n-1}&0\end{pmatrix}
+       +p\begin{pmatrix}0&0\\0&\Pi_{n-1}\end{pmatrix},
+\]
+then halve the interior rows so they sum to one. The grid is equally spaced on $[-\psi,\psi]$ with $\psi=\sigma_z\sqrt{n-1}$.
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{takeawaybox}[title=\textbf{Why it is exact}]\small
+The construction is a \textbf{binomial} one: the chain is a sum of $n-1$ independent two-state processes. Its persistence is $2p-1=\rho$ and its variance is $\psi^{2}/(n-1)=\sigma_z^{2}$ --- \emph{by construction}, for every $n$ and every $\rho$.
+\end{takeawaybox}
+\medskip
+\begin{cautionbox}\footnotesize
+The price is that the conditional distribution is binomial, not normal. For a linear-quadratic world that is irrelevant; for a strongly non-linear one it can matter.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Rouwenhorst (1995). \textbf{Written for this course} --- the method is named twice in the source decks and never constructed.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Comparison Session 3 Promised}
+\begin{columns}[c]
+\begin{column}{0.53\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=7.9cm, height=5.5cm, xmin=3, xmax=17, ymin=-0.3, ymax=4.6,
+    xlabel={\scriptsize number of states $n$},
+    ylabel={\scriptsize error in implied $\rho$ (\%)},
+    tick label style={font=\scriptsize}, xtick={5,9,15},
+    axis x line*=bottom, axis y line*=left,
+    legend style={font=\tiny, draw=none, fill=none, at={(0.98,0.97)}, anchor=north east}]
+  \addplot[very thick, RedTitle, mark=*, mark size=1.3pt] coordinates {(5,3.5028) (9,0.1757) (15,0.1470)};
+  \addlegendentry{Tauchen, $\rho=0.90$}
+  \addplot[very thick, orange!80!black, mark=square*, mark size=1.2pt] coordinates {(5,3.9866) (9,0.1347) (15,0.1169)};
+  \addlegendentry{Tauchen, $\rho=0.95$}
+  \addplot[very thick, violet!70!black, mark=triangle*, mark size=1.4pt] coordinates {(5,1.0101) (9,0.8718) (15,0.1767)};
+  \addlegendentry{Tauchen, $\rho=0.99$}
+  \addplot[very thick, black!55, dashed] coordinates {(5,0) (9,0) (15,0)};
+  \addlegendentry{Rouwenhorst (all $\rho$)}
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.44\textwidth}
+\small
+Error in the chain's implied persistence, as a percentage of the target $\rho$.
+\medskip
+\begin{center}\scriptsize
+\begin{tabularx}{\linewidth}{@{}c c r r@{}}
+\toprule
+$\rho$ & $n$ & \textbf{Tauchen} & \textbf{Rouwen.} \\
+\midrule
+0.90 & 5 & 3.50\% & $2\!\times\!10^{-14}$ \\
+0.95 & 5 & 3.99\% & $0$ \\
+0.99 & 5 & 1.01\% & $0$ \\
+0.99 & 15 & 0.18\% & $7\!\times\!10^{-14}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\vspace{1mm}
+\begin{cautionbox}\footnotesize
+Rouwenhorst is exact to machine precision at \textbf{every} $n$ and \textbf{every} $\rho$. The two lines are not close; one of them is zero.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{And the Variance Is Worse Than the Persistence}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Persistence is the forgiving statistic. The unconditional standard deviation --- which is what sets the \emph{size} of every business-cycle moment --- is where Tauchen really suffers.
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}c c r r@{}}
+\toprule
+\multicolumn{2}{@{}l}{sd error} & \textbf{Tauchen} & \textbf{Rouwenhorst} \\
+\midrule
+$\rho=0.90$ & $n=5$ & 26.9\% & $\approx0$ \\
+$\rho=0.95$ & $n=5$ & 31.4\% & $\approx0$ \\
+$\rho=0.99$ & $n=5$ & 36.2\% & $\approx0$ \\
+$\rho=0.99$ & $n=9$ & 28.5\% & $\approx0$ \\
+$\rho=0.99$ & $n=15$ & \textbf{20.1\%} & $\approx0$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{cautionbox}[title=\textbf{Read the last row}]\small
+Even with \textbf{fifteen} states, at the standard quarterly persistence, the Tauchen chain's unconditional standard deviation is \textbf{a fifth too small}.
+\end{cautionbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+A model calibrated with that chain will understate the volatility of output --- and the natural response, raising $\sigma$ until the moments match, hides a discretization error inside a structural parameter.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Target $\sigma_z=\sigma/\sqrt{1-\rho^{2}}$; chain moments computed from the invariant distribution of each $\Pi$.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What To Actually Do}
+\begin{columns}[T]
+\begin{column}{0.51\textwidth}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Method} & \textbf{Use it when} \\
+\midrule
+Rouwenhorst & \textbf{the default}, and essential for $\rho>0.9$ \\
+Tauchen & low persistence, or when the conditional distribution must look normal \\
+Tauchen--Hussey & quadrature-based; accurate for moderate $\rho$, degrades badly near one \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\footnotesize
+Kopecky \& Suen (2010) make the case formally: Rouwenhorst matches the conditional and unconditional first and second moments and the persistence \emph{exactly}, for any $n$.
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{takeawaybox}[title=\textbf{The habit to build}]\small
+Whatever you use, \textbf{report what the chain actually delivers}: its implied $\rho$ and $\sigma_z$ next to the targets. It is three lines of code and it is the only way anyone can tell whether your moments came from the economics or the grid.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+Homework 1 Part B asks for exactly that table at $n=5,9,15$ --- and then asks you to solve the model with both and see whether it moved the answer.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Kopecky \& Suen, ``Finite State Markov-Chain Approximations to Highly Persistent Processes'', \emph{RED} (2010).}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways}
+\begin{takeawaybox}
+\begin{itemize}\small
+  \item $\Pi$ is not data and it is not a modelling choice you can leave implicit. It is an \textbf{approximation with an error}, and the error is measurable.
+  \item \textbf{Tauchen} puts down an equally spaced grid and integrates the conditional normal over each cell. Intuitive, and the grid is chosen before persistence is taken into account.
+  \item \textbf{Rouwenhorst} builds the chain recursively from a two-state block and matches $\rho$ and $\sigma_z$ \textbf{exactly, by construction}, for every $n$.
+  \item Measured at the standard quarterly calibration $\rho=0.99$: the five-state Tauchen chain implies $\rho=1.0000$ --- \textbf{a unit root} --- and a standard deviation 36\% too small. At $n=15$ it is still 20\% too small.
+  \item \textbf{Use Rouwenhorst}, and report the chain's implied $\rho$ and $\sigma_z$ beside the targets every time.
+\end{itemize}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: Everything Is Now in Place}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Session 3 ended with six crude choices and a list of what would repair each. We have now built all of them: a root-finder, a maximizer on an interval, derivatives, an interpolation scheme that keeps its shape, a quadrature rule, and a transition matrix that is not invented.
+\medskip
+
+What we have not done is put them back together. The crude solver of 3.A4 took 1{,}352 sweeps and 2.4 billion comparisons at this session's calibration, and its worst Euler error was $10^{-1.5}$. The question for the last deck is simple: \textbf{how much of that was avoidable, and which repair bought the most?}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{Next (4.B4)}]\small
+Howard's policy improvement, monotonicity, concavity --- and the endogenous grid method, done the way Carroll actually formulated it, which removes the root-finding entirely.\\[1mm]
+Then one table: every technique, its speed-up and its accuracy, measured on the same model.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,63 @@
+# LaTeX build artifacts
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+# compiled decks live in slides/pdf/ (watermarked); the unwatermarked copies next to the .tex are not published
+slides/S[0-9][0-9]/*.pdf
+
+# private: never published
+supporting-intro/
+plans/
+plan-*.txt
+course-build-plan-*.md
+
+# assessments that must stay private
+homeworks-exams/Midterm/
+homeworks-exams/_archive/
+**/*solution*
+**/reference_code/
+
+# build/run logs from tools/run_code.slurm
+tools/logs/
+
+# Python / notebooks
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+
+# ---------------------------------------------------------------------------
+# PUBLIC REPO — added 2026-09-17 when the site was first pushed.
+# ---------------------------------------------------------------------------
+
+# ⚠ PUBLISH BLOCKERS: three decks show unpublished research (Feng, Han, Sargent
+# & Zhu 2026; Feng, Han & Zhu, under review) and two of them carry the notice
+# "Confidential — work in progress. Please do not circulate without permission."
+# Remove these lines ONLY after the instructor clears the material.
+slides/pdf/S01_A1_Who_I_Am.pdf
+slides/pdf/S02_A2_Aiyagari.pdf
+slides/pdf/S02_B3_Ramsey_Time_Consistency.pdf
+# ...and their LaTeX sources and figures, which carry the same numbers.
+slides/S01/
+slides/S02/
+
+# Instructor-facing working notes: absolute paths into private folders,
+# unpublished numbers, and provenance for material that is not cleared.
+CLAUDE.md
+slides/SOURCES.md
+
+# Old 2019 HUST problem sets, kept locally until archived
+homeworks-exams/PS*.lyx
+
+# LaTeX intermediates that the top-of-file rules miss
+homeworks-exams/**/*.aux
+homeworks-exams/**/*.log
+homeworks-exams/**/*.out

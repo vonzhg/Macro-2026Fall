@@ -1,0 +1,244 @@
+%% ECON 282E -- Foundations of Macroeconomics -- Syllabus, Fall 2026
+%% Build: python3 tools/build_docs.py syllabus/syllabus.tex   (pdflatex, two passes)
+%% Items marked with \tba{...} are placeholders to be filled in before distribution.
+
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{booktabs, tabularx, array, longtable}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{CJKutf8}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{UCRBlue}{RGB}{0,45,106}
+\definecolor{UCRGold}{RGB}{241,171,0}
+\newcommand{\tba}[1]{\textcolor{red!70!black}{[#1]}}
+\newcommand{\zh}[1]{\begin{CJK*}{UTF8}{gbsn}#1\end{CJK*}}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\titleformat{\section}{\large\bfseries\color{UCRBlue}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+\titlespacing*{\section}{0pt}{1.4ex plus 0.4ex}{0.6ex}
+\titlespacing*{\subsection}{0pt}{1.0ex plus 0.3ex}{0.3ex}
+\setlist{itemsep=1pt, topsep=3pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55ex}
+
+\begin{document}
+
+%-----------------------------------------------------------------------------
+\begin{center}
+{\color{UCRBlue}\rule{\linewidth}{2pt}}\\[0.4em]
+{\LARGE\bfseries ECON 282E: Foundations of Macroeconomics}\\[0.35em]
+{\large Heterogeneous Agents, Computation, and Artificial Intelligence}\\[0.35em]
+{\normalsize Ph.D.\ Elective \,$\cdot$\, University of California, Riverside \,$\cdot$\, Fall Quarter 2026}\\[0.2em]
+{\color{UCRGold}\rule{\linewidth}{1pt}}
+\end{center}
+
+\begin{tabularx}{\linewidth}{@{}p{3.2cm}L@{}}
+\textbf{Meetings} & Thursdays, 9:00--11:50 a.m., Sproul Hall 4128. Each meeting has two 75-minute blocks separated by a 20-minute break. \\
+\textbf{Instructor} & Zhigang Feng \\
+\textbf{Email} & \tba{UCR email} \\
+\textbf{Office hours} & \tba{day, time, room}, and by appointment \\
+\textbf{Course website} & \tba{URL} --- slides, labs, homework, and announcements \\
+\end{tabularx}
+
+%-----------------------------------------------------------------------------
+\section{Course Description}
+
+Modern macroeconomics asks questions about \emph{distributions} and \emph{policy}: who bears income risk, how inequality interacts with the business cycle, how aging and public debt burden different cohorts, what a government should tax when it cannot commit, and how artificial intelligence will reshape work and wages. Answering these questions requires models with heterogeneous agents, frictions, and strategic governments --- and those models can almost never be solved with pencil and paper.
+
+This course builds the foundations in three steps. \textbf{On paper}, we start from the neoclassical growth model and extend it to the workhorse models of modern research: the Bewley--Huggett--Aiyagari incomplete-markets model, the Krusell--Smith model with aggregate risk, overlapping-generations models, and optimal fiscal policy with and without commitment. For each model we ask how it is built, what equilibrium means, what can be characterized, and which questions it can answer. \textbf{On the machine}, we learn to solve these models: numerical dynamic programming, programming in Python and PyTorch, function approximation, optimization, root-finding, quadrature, discretization of stochastic processes, perturbation, and projection methods --- culminating in the computation of heterogeneous-agent economies and the ``computational wall'' they run into. \textbf{At the frontier}, we study how machine learning, deep learning, and reinforcement learning break through that wall; how language models turn text into economic data; and how AI agents are changing the way research is done.
+
+Throughout, the course insists on one discipline: \emph{every computed answer must be benchmarked and verified}. As AI makes generating answers cheap, verification becomes the scarce skill.
+
+%-----------------------------------------------------------------------------
+\section{Learning Objectives}
+
+By the end of the quarter you should be able to:
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Theory.} Define, characterize, and interpret equilibrium in the growth model, the Bewley--Huggett--Aiyagari model, the Krusell--Smith model, overlapping-generations models, and Ramsey and Markov-perfect optimal-policy problems.
+  \item \textbf{Algorithms.} Design solution algorithms --- value function iteration, time iteration, the endogenous grid method, perturbation, projection, nested fixed-point methods for heterogeneous-agent models --- and explain their accuracy, speed, and failure modes.
+  \item \textbf{Implementation.} Implement these algorithms in Python and PyTorch, including neural-network and reinforcement-learning solutions of dynamic models, using AI coding assistants responsibly.
+  \item \textbf{Validation and research use.} Verify numerical solutions against benchmarks; use language models as measurement instruments with proper validation; and design an AI-assisted research workflow that you remain in control of.
+\end{enumerate}
+
+%-----------------------------------------------------------------------------
+\section{Prerequisites}
+
+The first-year Ph.D.\ macroeconomics sequence (or equivalent), including dynamic optimization. Programming experience is helpful but not required: Python is taught from the ground up in Session~3, and a setup lab is posted before then. Students from other fields are welcome with the instructor's consent.
+
+%-----------------------------------------------------------------------------
+\section{Course Materials}
+
+\begin{itemize}
+  \item \textbf{Slides.} Short decks (about 20 minutes each; three per block) are posted on the course website before each session. The decks are self-contained.
+  \item \textbf{Labs.} Jupyter notebooks in Python and PyTorch accompany the lectures and run on a laptop; Google Colab (or the UCR High-Performance Computing Center) can be used for GPU work.
+  \item \textbf{Readings.} There is no required textbook. Recommended references:
+  \begin{itemize}
+    \item L.~Ljungqvist and T.~J.~Sargent, \emph{Recursive Macroeconomic Theory}, 4th ed., MIT Press, 2018.
+    \item N.~Stokey, R.~Lucas, and E.~Prescott, \emph{Recursive Methods in Economic Dynamics}, Harvard University Press, 1989.
+    \item K.~Judd, \emph{Numerical Methods in Economics}, MIT Press, 1998.
+    \item B.~Heer and A.~Maussner, \emph{Dynamic General Equilibrium Modeling}, 2nd ed., Springer, 2009.
+    \item Z.~Feng, \zh{《机器学习与数量宏观经济学：以PyTorch为工具》} (\emph{Machine Learning for Quantitative Macroeconomics: Using PyTorch}), Peking University Press, 2025.
+    \item I.~Goodfellow, Y.~Bengio, and A.~Courville, \emph{Deep Learning}, MIT Press, 2016.
+    \item R.~Sutton and A.~Barto, \emph{Reinforcement Learning: An Introduction}, 2nd ed., MIT Press, 2018.
+  \end{itemize}
+  Session-specific readings are listed in Section~\ref{sec:readings}.
+\end{itemize}
+
+%-----------------------------------------------------------------------------
+\clearpage
+\section{Schedule}
+
+Each session has two blocks (A: 9:00--10:15; B: 10:35--11:50). The schedule may be adjusted as the course progresses; changes will be announced in class and on the website.
+
+{\small
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{5.75cm}>{\raggedright\arraybackslash}p{5.75cm}>{\raggedright\arraybackslash}p{2.25cm}@{}}
+\toprule
+\textbf{Session} & \textbf{Block A} & \textbf{Block B} & \textbf{Due / out} \\
+\midrule
+\endhead
+\textbf{1}\newline Sep 24 &
+\textbf{Introduction.} Who I am and why this course; the macro research frontier; AI as a tool and as an object of macro research; how the course works. &
+\textbf{The optimal growth model.} From Solow to the planner; Euler equations and steady states; recursive formulation and dynamic programming; the growth model as a platform. & \\
+\textbf{2}\newline Oct 1 &
+\textbf{Incomplete markets.} Bewley and Huggett; Aiyagari; stationary recursive competitive equilibrium; the stationary distribution; extensions (health, entrepreneurship, portfolios). &
+\textbf{Aggregate risk, finite lives, policy.} Krusell--Smith; overlapping generations; Ramsey taxation, time consistency, and Markov-perfect policy. & \\
+\textbf{3}\newline Oct 8 &
+\textbf{Introduction to computation.} What it means to solve a model; value function iteration on a grid; Euler-equation methods and time iteration. &
+\textbf{Programming basics.} Python, NumPy, and PyTorch from the ground up; functions, classes, vectorization, automatic differentiation; coding with AI assistants. & HW\,1 Part A out \\
+\textbf{4}\newline Oct 15 &
+\textbf{Numerical methods I.} Root-finding and fixed points; optimization; numerical and automatic differentiation. &
+\textbf{Numerical methods I (cont.).} Function approximation and interpolation; quadrature; discretizing AR(1) processes (Tauchen, Rouwenhorst); a fast and accurate stochastic growth model. & HW\,1 Part B out \\
+\textbf{5}\newline Oct 22 &
+\textbf{Numerical methods II: perturbation.} First- and second-order perturbation; Blanchard--Kahn conditions and linear rational-expectations systems; pruning. &
+\textbf{Numerical methods II: projection.} Chebyshev polynomials, Smolyak grids, finite elements; collocation vs.\ Galerkin; choosing the right tool; solving the Aiyagari model. & HW\,1 due;\newline practice midterm out \\
+\textbf{6}\newline Oct 29 &
+\textbf{The complexity wall.} Solving Krusell--Smith and OLG economies; transition dynamics; optimal policy with heterogeneous agents; why grids and moments break down. &
+\textbf{Midterm examination} (in class, 75 minutes, closed book). & HW\,2 out \\
+\textbf{7}\newline Nov 5 &
+\textbf{Machine learning essentials.} Learning as function approximation; neural networks; training, backpropagation, and generalization. &
+\textbf{Deep learning for dynamic models.} Euler-residual minimization; deep value function iteration and actor--critic; structured networks and validation. & Project teams and topics \\
+\textbf{8}\newline Nov 12 &
+\textbf{Reinforcement learning.} RL as dynamic programming without the model; Monte Carlo, temporal-difference learning, Q-learning; policy gradients and actor--critic. &
+\textbf{Heterogeneous agents at the frontier.} The distribution as a network input; deep equilibrium nets and DeepHAM; optimal taxation without commitment with heterogeneous agents. & HW\,2 due \\
+\textbf{9}\newline Nov 19 &
+\textbf{Language models and text as data.} From models to data; text as measurement; from words to vectors; attention and the Transformer. &
+\textbf{LLMs as research instruments.} Limits and validation; measuring the economic footprint of AI; retrieval-augmented generation. & Proposal due Mon Nov 16; HW\,2 bonus due \\
+\multicolumn{4}{@{}l}{\emph{November 26: no class (Thanksgiving).}} \\
+\textbf{10}\newline Dec 3 &
+\textbf{Agentic AI and the future of research.} How AI agents work; building a research workflow; verification, governance, and what remains human. &
+\textbf{Final project presentations} (mini-conference with discussants). & \\
+\midrule
+Dec 10 & \multicolumn{3}{@{}l}{\textbf{Final paper and replication package due} (finals week).} \\
+\bottomrule
+\end{longtable}
+}
+
+%-----------------------------------------------------------------------------
+\section{Assessment}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}Lrl@{}}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Dates} \\
+\midrule
+Homework 1: dynamic programming and numerical methods & 15\% & out Oct 8 and Oct 15; due Oct 22 \\
+Homework 2: heterogeneity and learning & 15\% & out Oct 29; due Nov 12 \\
+Midterm examination (closed book, in class) & 20\% & Oct 29, Block B \\
+Final project (teams of 2--3) & 40\% & see below \\
+\quad Proposal (two pages) & \quad 5\% & due Monday, Nov 16 \\
+\quad Presentation and discussion & \quad 15\% & Dec 3, Block B \\
+\quad Paper ($\le$ 10 pages) and replication package & \quad 20\% & due Dec 10 \\
+Participation & 10\% & every session \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Homework}
+Two homework assignments combine short theory questions with computational work in Python. \textbf{Homework~1} covers the growth model, value function iteration and its accelerations, the endogenous grid method, discretization of AR(1) processes, and accuracy analysis. \textbf{Homework~2} covers the stationary equilibrium of the Aiyagari model, projection methods, and neural-network solutions of dynamic models (with an optional reinforcement-learning bonus). Submit a PDF write-up, your code, and an \texttt{AI\_LOG.md} (see Section~\ref{sec:ai}). You may discuss homework with classmates, but each student writes and submits their own solutions and code and lists the people they worked with. Late homework loses 10\% per day and is not accepted after solutions are posted.
+
+\subsection{Midterm examination}
+The midterm is held in class on October 29 (Block B, 75 minutes). It is closed book, with no notes and no devices, and covers Sessions~1--5: equilibrium definitions and properties, dynamic-programming theory and algorithms, numerical methods worked by hand, and perturbation. A practice midterm with solutions is posted on October 22. Make-up exams are given only for documented emergencies arranged in advance whenever possible.
+
+\subsection{Final project}
+In teams of two or three, you will \emph{replicate a benchmark result and then extend it}. Projects follow one of four tracks:
+\begin{enumerate}[label=\textbf{\Alph*.}]
+  \item Replicate and extend a quantitative model (e.g.\ Aiyagari, Krusell--Smith, or a life-cycle OLG model) and run a policy experiment.
+  \item Solve a classically hard dynamic model with deep learning or reinforcement learning, validated against a benchmark.
+  \item The economics of AI: a task-based model of AI and the labor market, or a measure of AI exposure linked to economic outcomes.
+  \item Text or language-model measurement that feeds a macroeconomic model or its calibration.
+\end{enumerate}
+Milestones: teams and topics by November 5; a two-page proposal by November 16 (question, benchmark to replicate, data or model, division of labor); presentations at the December 3 mini-conference, where each team also serves as discussant for another team; and a paper of at most ten pages with a replication package (code that reproduces every number and figure with one command) by December 10. Projects are evaluated on the economic question, correctness of the replication, rigor of validation, reproducibility, quality of AI collaboration, and communication. Detailed guidelines and a rubric will be posted by Session~3.
+
+\subsection{Participation}
+Participation includes exit tickets at the end of each session, engagement in discussion, and your role as a discussant at the final-project conference.
+
+%-----------------------------------------------------------------------------
+\section{Use of AI Tools}\label{sec:ai}
+
+This course teaches you to use AI as a research tool, so AI assistants are \textbf{encouraged} for homework and the final project, subject to three rules:
+\begin{enumerate}
+  \item \textbf{Disclose.} Keep an \texttt{AI\_LOG.md} with each submission: the tools you used, the prompts that mattered, where the AI was wrong, and what you verified yourself.
+  \item \textbf{Own it.} You must be able to explain and defend every line of code and every result you submit. ``The AI wrote it'' is never an explanation.
+  \item \textbf{Verify.} Every numerical result needs a benchmark or an accuracy check.
+\end{enumerate}
+AI tools, notes, and devices are \textbf{not permitted} during the midterm examination.
+
+%-----------------------------------------------------------------------------
+\section{Course Policies}
+
+\textbf{Academic integrity.} All work must follow the University of California, Riverside policy on academic integrity. Unauthorized collaboration, undisclosed use of AI tools, or submitting work you cannot explain is a violation of that policy and of the rules above.
+
+\textbf{Accessibility.} Students who need accommodations should contact the Student Disability Resource Center and let the instructor know as early as possible so arrangements can be made.
+
+\textbf{Well-being.} If personal circumstances affect your work in the course, please reach out early. UCR's Counseling and Psychological Services and other campus resources are available to support you.
+
+\textbf{Communication.} Announcements and materials are posted on the course website. Please allow up to two business days for replies to email.
+
+%-----------------------------------------------------------------------------
+\section{Readings by Session}\label{sec:readings}
+
+{\small
+\begin{description}[style=nextline, leftmargin=0pt, labelwidth=0pt, itemsep=3pt]
+\item[Session 1 --- Introduction; the growth model]
+Ljungqvist and Sargent (2018), chs.~3--4; Stokey, Lucas, and Prescott (1989), chs.~2--4; Acemoglu, ``The Simple Macroeconomics of AI,'' \emph{Economic Policy} (2025); Korinek, ``Generative AI for Economic Research: Use Cases and Implications for Economists,'' \emph{Journal of Economic Literature} (2023).
+
+\item[Session 2 --- Heterogeneous agents, OLG, optimal policy]
+Huggett, ``The Risk-Free Rate in Heterogeneous-Agent Incomplete-Insurance Economies,'' \emph{JEDC} (1993); Aiyagari, ``Uninsured Idiosyncratic Risk and Aggregate Saving,'' \emph{QJE} (1994); Krusell and Smith, ``Income and Wealth Heterogeneity in the Macroeconomy,'' \emph{JPE} (1998); Heathcote, Storesletten, and Violante, ``Quantitative Macroeconomics with Heterogeneous Households,'' \emph{Annual Review of Economics} (2009); Diamond, ``National Debt in a Neoclassical Growth Model,'' \emph{AER} (1965); Chamley, \emph{Econometrica} (1986); Judd, \emph{Journal of Public Economics} (1985); Kydland and Prescott, ``Rules Rather than Discretion,'' \emph{JPE} (1977); Klein, Krusell, and R\'ios-Rull, ``Time-Consistent Public Policy,'' \emph{REStud} (2008); Feng, ``Time-Consistent Optimal Fiscal Policy over the Business Cycle,'' \emph{Quantitative Economics} (2015).
+
+\item[Session 3 --- Computation and programming]
+Judd (1998), ch.~12; Aruoba, Fern\'andez-Villaverde, and Rubio-Ram\'irez, ``Comparing Solution Methods for Dynamic Equilibrium Economies,'' \emph{JEDC} (2006); QuantEcon lectures (Sargent and Stachurski), online.
+
+\item[Session 4 --- Numerical methods I]
+Judd (1998), chs.~4--7; Tauchen, ``Finite State Markov-Chain Approximations to Univariate and Vector Autoregressions,'' \emph{Economics Letters} (1986); Kopecky and Suen, ``Finite State Markov-Chain Approximations to Highly Persistent Processes,'' \emph{RED} (2010); Carroll, ``The Method of Endogenous Gridpoints for Solving Dynamic Stochastic Optimization Problems,'' \emph{Economics Letters} (2006).
+
+\item[Session 5 --- Numerical methods II]
+Blanchard and Kahn, \emph{Econometrica} (1980); Klein, \emph{JEDC} (2000); Schmitt-Groh\'e and Uribe, \emph{JEDC} (2004); Andreasen, Fern\'andez-Villaverde, and Rubio-Ram\'irez, ``The Pruned State-Space System for Non-Linear DSGE Models,'' \emph{REStud} (2018); Fern\'andez-Villaverde, Rubio-Ram\'irez, and Schorfheide, ``Solution and Estimation Methods for DSGE Models,'' \emph{Handbook of Macroeconomics}, vol.~2 (2016); Young, \emph{JEDC} (2010).
+
+\item[Session 6 --- The complexity wall]
+Den Haan, ``Assessing the Accuracy of the Aggregate Law of Motion in Models with Heterogeneous Agents,'' \emph{JEDC} (2010); Reiter, \emph{JEDC} (2009); Auclert, Bard\'oczy, Rognlie, and Straub, ``Using the Sequence-Space Jacobian to Solve and Estimate Heterogeneous-Agent Models,'' \emph{Econometrica} (2021); Conesa, Kitao, and Krueger, ``Taxing Capital? Not a Bad Idea After All!,'' \emph{AER} (2009).
+
+\item[Session 7 --- Machine learning and deep learning for dynamic models]
+Goodfellow, Bengio, and Courville (2016), chs.~6--8; Maliar, Maliar, and Winant, ``Deep Learning for Solving Dynamic Economic Models,'' \emph{Journal of Monetary Economics} (2021); Fern\'andez-Villaverde, Hurtado, and Nu\~no, ``Financial Frictions and the Wealth Distribution,'' \emph{Econometrica} (2023).
+
+\item[Session 8 --- Reinforcement learning and heterogeneous agents]
+Sutton and Barto (2018), chs.~3--6 and 13; Azinovic, Gaegauf, and Scheidegger, ``Deep Equilibrium Nets,'' \emph{International Economic Review} (2022); Han, Yang, and E, ``DeepHAM: A Global Solution Method for Heterogeneous Agent Models with Aggregate Shocks,'' arXiv:2112.14377.
+
+\item[Session 9 --- Language models and measuring AI]
+Gentzkow, Kelly, and Taddy, ``Text as Data,'' \emph{Journal of Economic Literature} (2019); Baker, Bloom, and Davis, ``Measuring Economic Policy Uncertainty,'' \emph{QJE} (2016); Vaswani et al., ``Attention Is All You Need,'' \emph{NeurIPS} (2017); Eloundou, Manning, Mollick, and Rock, ``GPTs Are GPTs,'' \emph{Science} (2024); Acemoglu and Restrepo, ``The Race between Man and Machine,'' \emph{AER} (2018).
+
+\item[Session 10 --- Agentic AI]
+Korinek (2023), revisited; Handa et al., ``Which Economic Tasks Are Performed with AI? Evidence from Millions of Claude Conversations,'' arXiv:2503.04761 (2025).
+\end{description}
+}
+
+\end{document}

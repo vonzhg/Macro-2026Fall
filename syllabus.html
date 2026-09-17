@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Syllabus · ECON 282E</title>
+	<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+	<div class="container">
+		<nav class="topnav">
+			<a class="home" href="index.html">← Course Home</a>
+			<span class="sep">·</span><a href="syllabus.html">Syllabus</a>
+			<span class="sep">·</span><a href="slides/index.html">Slides</a>
+			<span class="sep">·</span><a href="labs/index.html">Labs</a>
+			<span class="sep">·</span><a href="assignments.html">Assignments</a>
+		</nav>
+
+		<h1>Syllabus</h1>
+
+		<div class="res-row">
+			<span class="res-name">ECON 282E &mdash; full syllabus (6 pp.)</span>
+			<a class="btn" href="syllabus/syllabus.pdf" download>Download PDF</a>
+		</div>
+
+		<p>The PDF is authoritative. What follows is the same content in brief, for quick reference.</p>
+
+		<h2>Logistics</h2>
+		<table>
+			<tbody>
+				<tr><th>Instructor</th><td>Zhigang Feng</td></tr>
+				<tr><th>Meets</th><td>Thursdays 9:00&ndash;11:50, Sproul Hall 4128</td></tr>
+				<tr><th>Blocks</th><td>A 9:00&ndash;10:15 &nbsp;·&nbsp; break &nbsp;·&nbsp; B 10:35&ndash;11:50</td></tr>
+				<tr><th>Term</th><td>Ten sessions, September 24 &ndash; December 3. No class November 26.</td></tr>
+			</tbody>
+		</table>
+
+		<h2>Prerequisites</h2>
+		<p>The first-year Ph.D. macroeconomics sequence (or equivalent), including dynamic optimization.
+		Programming experience helps but is <strong>not</strong> required: Python is taught from the
+		ground up in Session&nbsp;3, and <a href="labs/L00_Getting_Started.ipynb">a setup lab</a> is
+		posted before then. Students from other fields are welcome with the instructor's consent.</p>
+
+		<h2>Learning objectives</h2>
+		<ol>
+			<li>Build and characterize the workhorse models of modern macroeconomics &mdash; growth,
+				incomplete markets, aggregate risk, overlapping generations, optimal policy.</li>
+			<li>Solve them numerically, and know which method suits which problem.</li>
+			<li><strong>Verify</strong> a computed answer: benchmark it, bound its error, and report the
+				accuracy with its cost.</li>
+			<li>Use machine learning and AI where the classical methods run out, and know where they do
+				not help.</li>
+			<li>Carry out a small replication-and-extension project end to end, with code that runs.</li>
+		</ol>
+
+		<h2>Schedule</h2>
+		<table>
+			<thead><tr><th>Session</th><th>Block A</th><th>Block B</th><th>Due / out</th></tr></thead>
+			<tbody>
+				<tr><td><strong>1</strong><br>Sep 24</td><td><strong>Introduction.</strong> Who I am and why this course; the macro research frontier; AI as a tool and as an object of macro research.</td><td><strong>The optimal growth model.</strong> From Solow to the planner; Euler equations and steady states; recursive formulation and dynamic programming.</td><td></td></tr>
+				<tr><td><strong>2</strong><br>Oct 1</td><td><strong>Incomplete markets.</strong> Bewley and Huggett; Aiyagari; stationary recursive competitive equilibrium; the stationary distribution.</td><td><strong>Aggregate risk, finite lives, policy.</strong> Krusell&ndash;Smith; overlapping generations; Ramsey taxation, time consistency, Markov-perfect policy.</td><td></td></tr>
+				<tr><td><strong>3</strong><br>Oct 8</td><td><strong>Introduction to computation.</strong> What it means to solve a model; value function iteration on a grid; Euler-equation methods and time iteration.</td><td><strong>Programming basics.</strong> Python, NumPy and PyTorch from the ground up; vectorization; automatic differentiation; coding with AI assistants.</td><td>HW&nbsp;1 Part&nbsp;A out</td></tr>
+				<tr><td><strong>4</strong><br>Oct 15</td><td><strong>Numerical methods I.</strong> Root-finding and fixed points; optimization in one and many dimensions; numerical and automatic differentiation.</td><td><strong>Numerical methods I (cont.).</strong> Approximation and interpolation; quadrature; discretizing AR(1) processes; a fast and accurate stochastic growth model.</td><td>HW&nbsp;1 Part&nbsp;B out</td></tr>
+				<tr><td><strong>5</strong><br>Oct 22</td><td><strong>Numerical methods II: perturbation.</strong> First- and second-order perturbation; Blanchard&ndash;Kahn; linear RE systems; pruning.</td><td><strong>Numerical methods II: projection.</strong> Chebyshev polynomials, Smolyak grids, finite elements; collocation vs. Galerkin; solving Aiyagari.</td><td>HW&nbsp;1 due;<br>practice midterm out</td></tr>
+				<tr><td><strong>6</strong><br>Oct 29</td><td><strong>The complexity wall.</strong> Solving Krusell&ndash;Smith and OLG economies; transition dynamics; optimal policy with heterogeneous agents.</td><td><strong>Midterm examination</strong> (in class, 75 minutes, closed book).</td><td>HW&nbsp;2 out</td></tr>
+				<tr><td><strong>7</strong><br>Nov 5</td><td><strong>Machine learning essentials.</strong> Learning as function approximation; neural networks; training, backpropagation, generalization.</td><td><strong>Deep learning for dynamic models.</strong> Euler-residual minimization; deep VFI and actor&ndash;critic; structured networks and validation.</td><td>Project teams and topics</td></tr>
+				<tr><td><strong>8</strong><br>Nov 12</td><td><strong>Reinforcement learning.</strong> RL as dynamic programming without the model; Monte Carlo, TD, Q-learning; policy gradients.</td><td><strong>Heterogeneous agents at the frontier.</strong> The distribution as a network input; deep equilibrium nets and DeepHAM; optimal taxation without commitment.</td><td>HW&nbsp;2 due</td></tr>
+				<tr><td><strong>9</strong><br>Nov 19</td><td><strong>Language models and text as data.</strong> From models to data; text as measurement; words to vectors; attention and the Transformer.</td><td><strong>LLMs as research instruments.</strong> Limits and validation; measuring the economic footprint of AI; retrieval-augmented generation.</td><td>Proposal due Mon Nov&nbsp;16;<br>HW&nbsp;2 bonus due</td></tr>
+				<tr><td colspan="4"><em>November 26 &mdash; no class (Thanksgiving).</em></td></tr>
+				<tr><td><strong>10</strong><br>Dec 3</td><td><strong>Agentic AI and the future of research.</strong> How AI agents work; building a research workflow; verification, governance, and what remains human.</td><td><strong>Final project presentations</strong> (mini-conference with discussants).</td><td></td></tr>
+				<tr><td>Dec 10</td><td colspan="3"><strong>Final paper and replication package due</strong> (finals week).</td></tr>
+			</tbody>
+		</table>
+
+		<h2>Assessment</h2>
+		<table>
+			<thead><tr><th>Component</th><th>Weight</th><th>Timing</th></tr></thead>
+			<tbody>
+				<tr><td>Homework 1 &mdash; dynamic programming and numerical methods</td><td>15%</td><td>out Oct 8 and Oct 15; due Oct 22</td></tr>
+				<tr><td>Homework 2 &mdash; heterogeneity and learning</td><td>15%</td><td>out Oct 29; due Nov 12</td></tr>
+				<tr><td>Midterm examination (closed book, in class)</td><td>20%</td><td>Oct 29, Block B</td></tr>
+				<tr><td>Final project (teams of 2&ndash;3)</td><td>40%</td><td></td></tr>
+				<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Proposal (two pages)</td><td>5%</td><td>due Monday, Nov 16</td></tr>
+				<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Presentation and discussion</td><td>15%</td><td>Dec 3, Block B</td></tr>
+				<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Paper (≤ 10 pp.) and replication package</td><td>20%</td><td>due Dec 10</td></tr>
+				<tr><td>Participation</td><td>10%</td><td>throughout</td></tr>
+			</tbody>
+		</table>
+
+		<h2>Use of AI tools</h2>
+		<div class="notice info">
+			<strong>AI assistance is allowed and expected.</strong> You remain responsible for every
+			number you report. Submit an <code>AI_LOG.md</code> with each assignment recording how you
+			used it. The validation is the part you cannot delegate &mdash; and it is what the course
+			is actually about.
+		</div>
+
+		<h2>The reporting standard</h2>
+		<p>Every computational result in this course is reported with: the <strong>method</strong>; the
+		<strong>grid</strong> (points, spacing, bounds); the <strong>chain</strong> and its
+		<em>implied</em> persistence and standard deviation; the <strong>tolerance</strong>; the
+		<strong>dtype</strong>; the <strong>maximum and mean Euler residuals on points not used to
+		solve</strong>; and the <strong>wall time with the hardware</strong>. A number without these is
+		not yet a result.</p>
+	</div>
+
+	<div class="site-footer">
+		ECON&nbsp;282E &middot; Foundations of Macroeconomics &middot; &copy; Zhigang Feng
+	</div>
+</body>
+</html>

@@ -1,0 +1,271 @@
+%% ECON 282E -- Session 4, Deck B2: Quadrature
+%% ENTIRELY NEW: quadrature appears nowhere in the sister-course corpus -- no
+%% Newton-Cotes, no Gauss rules, no Monte Carlo integration.  Written for this
+%% course.  Numbers from tools/figures/s04_numbers.json, key "quadrature":
+%% E[exp(z)] with z ~ N(0,1), exact value e^{1/2} = 1.6487212707001282.
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+\lstset{language=Python, basicstyle=\ttfamily\scriptsize, frame=none,
+        backgroundcolor=\color{gray!8}, aboveskip=2pt, belowskip=2pt}
+
+\decktitle{4}{B2}{Quadrature: Turning an Expectation into a Sum}{Thursday, October 15, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{4}{4.B2}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block B:} \textbf{4.B1} approximation and interpolation $\;\cdot\;$ \textbf{4.B2} quadrature $\;\cdot\;$ \textbf{4.B3} discretizing an AR(1) $\;\cdot\;$ \textbf{4.B4} fast and accurate $\;\cdot\;$ \textbf{4.B5} the worked example, end to end.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Seventeen Points, or a Million}
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\small
+Compute $\mathbb{E}[e^{z}]$ for $z\sim N(0,1)$. The answer is $e^{1/2}=1.64872127$.
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X r r@{}}
+\toprule
+\textbf{rule} & \textbf{points} & \textbf{error} \\
+\midrule
+Gauss--Hermite & 17 & \textbf{0} \\
+Gauss--Hermite & 9 & $7\times10^{-11}$ \\
+trapezoid & 17 & $9\times10^{-9}$ \\
+Simpson & 17 & $8\times10^{-3}$ \\
+Monte Carlo & 1 million & $2\times10^{-3}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+Seventeen well-chosen points beat a million random ones by \textbf{thirteen orders of magnitude}.
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{conceptbox}[title=\textbf{Why you should care}]\small
+Every Bellman sweep evaluates
+\[
+  \mathbb{E}\big[\hat v(k',z')\mid z\big]
+\]
+at every state. It is the inner sum in every solve we have run.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+And notice the row that is \emph{worse} than the one above it. Simpson is a higher-order rule than the trapezoid rule --- and here it loses by six decades. That is the lesson of this deck.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Object, and the Two Choices}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Every rule has the same shape --- evaluate at nodes, add up with weights:
+\[
+  \int f(z)\,w(z)\,dz \;\approx\; \sum_{m=1}^{n} \omega_m\, f(z_m).
+\]
+So there are exactly two choices: \textbf{where the nodes go} and \textbf{what the weights are}. Everything else is a consequence.
+\medskip
+
+The rules divide by how they make those choices:
+\begin{itemize}\footnotesize
+  \item \textbf{Fix the nodes} (equally spaced) and solve for weights: Newton--Cotes.
+  \item \textbf{Choose both}: Gaussian rules, which buys twice the accuracy for the same $n$.
+  \item \textbf{Draw the nodes at random}: Monte Carlo.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{$w$ is the weight, and it matters}]\small
+For an expectation, $w$ is the \textbf{density}. A rule that knows about $w$ can place nodes where the probability is, instead of spreading them evenly over a region that is mostly empty.
+\end{conceptbox}
+\medskip
+\begin{examplebox}\footnotesize
+That single observation explains the whole table on the previous slide.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Newton--Cotes: Equally Spaced, and the Surprise}
+\begin{columns}[T]
+\begin{column}{0.51\textwidth}
+\small
+Fit a polynomial through equally spaced nodes and integrate it exactly.
+\begin{itemize}\footnotesize
+  \item \textbf{Trapezoid} (degree 1): error $O(h^{2})$.
+  \item \textbf{Simpson} (degree 2): error $O(h^{4})$.
+\end{itemize}
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}c r r@{}}
+\toprule
+$n$ & \textbf{trapezoid} & \textbf{Simpson} \\
+\midrule
+5 & $2.4\times10^{-2}$ & $5.5\times10^{-1}$ \\
+9 & $2.4\times10^{-2}$ & $2.4\times10^{-2}$ \\
+17 & $\mathbf{8.8\times10^{-9}}$ & $7.9\times10^{-3}$ \\
+33 & $\mathbf{4.0\times10^{-12}}$ & $2.9\times10^{-9}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{cautionbox}[title=\textbf{The higher-order rule loses}]\small
+Simpson is $O(h^{4})$ and trapezoid is $O(h^{2})$, yet the trapezoid rule is a thousand times better at $n=17$.
+\end{cautionbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+\textbf{Why:} for a smooth integrand whose derivatives vanish at both ends --- which a normal density does, very fast --- the Euler--Maclaurin error terms all cancel, and the trapezoid rule becomes \emph{spectrally} accurate. The $O(h^{2})$ bound is true and enormously pessimistic.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Measured on $\mathbb{E}[e^{z}]$, $z\sim N(0,1)$, truncated at $\pm8$ standard deviations.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Gaussian Rules: Choose the Nodes Too}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+With $n$ nodes and $n$ weights you have $2n$ free numbers, so you can ask the rule to be \textbf{exact for every polynomial of degree up to $2n-1$} --- twice what Newton--Cotes achieves with the same count.
+\medskip
+
+The nodes that do it are the roots of the orthogonal polynomials for the weight $w$:
+\begin{itemize}\footnotesize
+  \item $w=1$ on $[-1,1]$: Legendre $\Rightarrow$ \textbf{Gauss--Legendre}.
+  \item $w=e^{-z^{2}}$ on $\mathbb{R}$: Hermite $\Rightarrow$ \textbf{Gauss--Hermite}, which is the normal density.
+  \item $w=e^{-z}$ on $[0,\infty)$: Laguerre.
+\end{itemize}
+\medskip
+For $z\sim N(\mu,\sigma^{2})$, substitute $z=\mu+\sqrt2\,\sigma x$ and the Hermite nodes and weights apply directly.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}c r r@{}}
+\toprule
+$n$ & \textbf{Gauss--Leg.} & \textbf{Gauss--Herm.} \\
+\midrule
+3 & $1.2$ & $1.1\times10^{-2}$ \\
+5 & $1.8\times10^{-1}$ & $4.2\times10^{-5}$ \\
+9 & $1.3\times10^{-1}$ & $7.2\times10^{-11}$ \\
+17 & $2.8\times10^{-4}$ & $\mathbf{0}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\vspace{1mm}
+\begin{takeawaybox}\footnotesize
+Both are Gaussian rules. The difference is entirely that \textbf{Hermite knows the weight is a normal density} and Legendre does not --- it is spending its nodes on a truncated interval that is mostly empty.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Monte Carlo: Slow, and Indifferent to Dimension}
+\begin{columns}[T]
+\begin{column}{0.51\textwidth}
+\small
+Draw $z_1,\dots,z_n$ from the distribution and average:
+\[
+  \mathbb{E}[f(z)]\approx\frac1n\sum_{m} f(z_m),
+  \qquad \text{s.e.}=\frac{\sigma_f}{\sqrt n}.
+\]
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}c r r@{}}
+\toprule
+$n$ & \textbf{error} & \textbf{s.e.} \\
+\midrule
+100 & $4.0\times10^{-2}$ & $1.7\times10^{-1}$ \\
+10{,}000 & $8.9\times10^{-3}$ & $2.0\times10^{-2}$ \\
+1{,}000{,}000 & $2.4\times10^{-3}$ & $2.2\times10^{-3}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\footnotesize
+A hundredfold increase in draws buys one decimal digit. That is the $n^{-1/2}$ rate, and no amount of cleverness changes the exponent.
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{conceptbox}[title=\textbf{And yet it wins, eventually}]\small
+$n^{-1/2}$ \textbf{does not depend on the dimension}. A tensor Gauss rule needs $n^{d}$ nodes; Monte Carlo needs the same $n$ whether $d$ is 1 or 100.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+So the crossover is a property of $d$, not of taste: below about five dimensions use a Gaussian rule, far above it you have no choice --- which is the regime Sessions 7 and 8 live in.\\[1mm]
+\textbf{Quasi-Monte Carlo} (Sobol, Halton) replaces randomness with a low-discrepancy sequence and recovers close to $n^{-1}$ in moderate dimensions.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Choosing a Rule}
+\renewcommand{\arraystretch}{1.12}
+\begin{center}\scriptsize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.0cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3.4cm}@{}}
+\toprule
+\textbf{Rule} & \textbf{Exact for} & \textbf{Use it when} \\
+\midrule
+Trapezoid & degree 1, but spectral on a smooth decaying integrand & a fast-decaying integrand on a wide interval \\
+Simpson & degree 3 & rarely --- not the safe default people assume \\
+Gauss--Legendre & degree $2n-1$ on $[a,b]$ & a genuinely bounded domain \\
+Gauss--Hermite & degree $2n-1$ against a normal weight & \textbf{normal shocks --- the macro default} \\
+Monomial rules & low degree, few nodes & moderate dimension \\
+Monte Carlo / QMC & nothing exactly & high dimension, or sampling only \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\vspace{1mm}
+\begin{conceptbox}\small
+\textbf{The rule should know the weight.} Gauss--Hermite was exact at seventeen nodes and Gauss--Legendre was not, on the same integral, with the same node count --- and the only difference was that one of them was built for a normal density.
+\end{conceptbox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways}
+\begin{takeawaybox}
+\begin{itemize}\small
+  \item Every quadrature rule is \textbf{nodes and weights}. The only questions are where the nodes go and whether the rule knows the density.
+  \item A Gaussian rule with $n$ nodes is exact for polynomials up to degree $\mathbf{2n-1}$ --- twice what equally spaced nodes deliver for the same cost.
+  \item \textbf{Gauss--Hermite was exact at 17 nodes.} Gauss--Legendre, with the same 17, was off by $3\times10^{-4}$; a million Monte Carlo draws were off by $2\times10^{-3}$.
+  \item Higher order is not the same as more accurate: \textbf{Simpson lost to the trapezoid rule by a thousand times} at $n=17$, because on a smooth decaying integrand the trapezoid rule is secretly spectral.
+  \item Monte Carlo converges at $n^{-1/2}$ \textbf{regardless of dimension}. That is terrible in one dimension and the only option in fifty.
+\end{itemize}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: Nodes and Weights, or a Markov Chain?}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Gauss--Hermite gives an excellent approximation to $\mathbb{E}[f(z')]$ when $z'$ is drawn afresh each period. But in every model we have solved, $z$ is \textbf{persistent}:
+\[
+  \ln z'=\rho\ln z+\sigma\varepsilon' ,
+\]
+so the distribution of $z'$ depends on today's $z$. What we have been using is not a quadrature rule at all --- it is a \textbf{finite Markov chain}, a grid plus a transition matrix $\Pi$.
+\medskip
+
+We have written $\Pi$ down by hand in Session 3 and again this morning. Where does it actually come from?
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{Next (4.B3)}]\small
+Two standard constructions, Tauchen and Rouwenhorst --- and a measurement of how badly they disagree when $\rho$ is close to one, which is the range macroeconomics actually uses.\\[1mm]
+Session 3 promised you this comparison. It is more one-sided than you might expect.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,11 @@
+# ECON 282E -- Foundations of Macroeconomics (UCR, Fall 2026)
+# CPU-only; no GPU is required for any lab.
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+matplotlib>=3.7
+torch>=2.0
+jupyter
+tqdm
+statsmodels
+pandas-datareader   # FRED access (3.B4); needs an internet connection

@@ -1,0 +1,150 @@
+%% ECON 282E -- Homework 1, Part B
+%% Reworked from PS2.lyx / PS2_IUBE.lyx (Quant Macro, HUST 2019).
+%% Build:  python3 tools/build_docs.py homeworks-exams/HW1/hw1b.tex
+%% With answers:  python3 tools/build_docs.py --solutions homeworks-exams/HW1/hw1b.tex
+%% Answers live in solutions/ (gitignored); solution PDFs are gitignored too.
+%% Neither must ever be committed.
+
+\documentclass[11pt]{article}
+
+\newif\ifsolutions \solutionsfalse
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,enumitem,xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\newcommand{\solution}[1]{\ifsolutions\medskip
+  {\color{blue!45!black}\textbf{Solution.} #1}\medskip\fi}
+
+%% The answer key lives in solutions/ (gitignored, never published), so this
+%% source carries no answers. --solutions pulls it in; a plain build ignores it.
+\AtBeginDocument{\ifsolutions
+  \IfFileExists{solutions/hw1b_key.tex}{\input{solutions/hw1b_key.tex}}
+    {\GenericWarning{}{Answer key solutions/hw1b_key.tex not found}}\fi}
+
+\title{\vspace{-2em}\textbf{ECON 282E --- Homework 1, Part B}\\[2mm]
+       \large Continuous Choice, Stochastic Shocks, and Accuracy}
+\author{Foundations of Macroeconomics \\ University of California, Riverside}
+\date{Out: Thursday, October 15, 2026 \quad\textbullet\quad Due: Thursday, October 22, 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{What to hand in.} One PDF, your code, and \texttt{AI\_LOG.md} --- together with Part A,
+in a single submission. Question 3(d) feeds the anonymous accuracy leaderboard.
+
+\textbf{Continuity with Part A.} Questions 2(d) and 2(e) extend the same deterministic model
+and the same solver. Question 3 changes the calibration to a standard quarterly one and adds a
+shock.
+\normalsize\par
+\noindent\rule{\linewidth}{0.4pt}\par
+
+%=============================================================================
+\section*{Question 2, continued. Getting off the grid (40 points)}
+
+Same model and calibration as Part A: $u=\ln c$, $c+k'=Zk^{\alpha}$, $\delta=1$,
+$\alpha=0.36$, $\beta=0.95$, $Z=1$.
+
+\begin{enumerate}[label=(\alph*), leftmargin=*, start=4]
+
+\item \textbf{(20 pts) Continuous choice.} Replace the grid search with a maximization over the
+\emph{interval}, using golden section (or Brent) and evaluating the interpolated value function
+off the grid. Keep $N=200$.
+\begin{enumerate}[label=(\roman*)]
+  \item Report the maximum relative policy error and the maximum unit-free Euler residual,
+        evaluated at 500 capital levels that are \emph{not} grid points, against your Part A
+        2(a) results.
+  \item Report the number of objective evaluations and the wall time. How do they compare?
+  \item Which interpolation scheme did you use for $\hat v$, and why does the choice matter for
+        whether golden section is licensed at all?
+\end{enumerate}
+
+\solution{\keyBone}
+
+\item \textbf{(20 pts) A second road.} Solve the same model again by \emph{either} time
+iteration on the Euler equation \emph{or} the endogenous grid method. Then produce one table
+comparing all four solvers --- Part A 2(a), Part A 2(c), and 2(d) and 2(e) here --- on
+iterations, wall time, maximum relative policy error and maximum off-grid Euler residual.
+Which solver would you use in practice, and for what reason?
+
+\solution{\keyBtwo}
+
+\end{enumerate}
+
+%=============================================================================
+\section*{Question 3. A stochastic, quarterly model (60 points)}
+
+Now the standard quarterly calibration:
+\[
+  \alpha=0.33,\qquad \beta=0.99,\qquad \delta=0.025,\qquad
+  \ln z'=\rho\ln z+\sigma\varepsilon',\quad \rho=0.95,\ \sigma=0.007 ,
+\]
+with $c+k'=zk^{\alpha}+(1-\delta)k$ and $u=\ln c$. There is \textbf{no closed-form policy} for
+this model --- only a closed-form steady state,
+$k^{*}=\big(\alpha\beta/(1-\beta(1-\delta))\big)^{1/(1-\alpha)}$.
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+
+\item \textbf{(15 pts) Where $\Pi$ comes from.} Implement \emph{both} Tauchen (1986) and
+Rouwenhorst (1995). For $n\in\{5,9,15\}$, report each chain's implied persistence and
+unconditional standard deviation against the targets $\rho$ and $\sigma/\sqrt{1-\rho^{2}}$.
+Then repeat the table at $\rho=0.99$. Which method would you use, and why?
+
+\solution{\keyBthree}
+
+\item \textbf{(15 pts) Solve it.} Using the Rouwenhorst chain with $n=7$, solve the model with
+your best solver from Question 2. Report the grid, tolerance, sweeps and wall time, and verify
+that your policy crosses the 45-degree line near the analytical $k^{*}$ in the middle
+productivity state. How close is the crossing? If it is further off than one grid spacing,
+diagnose why --- the answer is not that your solver is broken.
+
+\solution{\keyBfour}
+
+\item \textbf{(15 pts) Simulate and match moments.} Simulate 2,000 quarters (discard the first
+500), HP-filter $\ln Y$, $\ln C$ and $\ln I$ with $\lambda=1600$, and report
+$\sigma(Y)$, $\sigma(C)/\sigma(Y)$, $\sigma(I)/\sigma(Y)$, $\mathrm{corr}(C,Y)$,
+$\mathrm{corr}(I,Y)$ and the first-order autocorrelation of $Y$. Compare with the US
+post-war targets $\sigma(Y)\approx1.5$--$2.0\%$, $\sigma(C)/\sigma(Y)\approx0.5$--$0.8$,
+$\sigma(I)/\sigma(Y)\approx3$--$4$, both correlations $\approx0.8$--$0.9$.
+\emph{An HP filter is provided in Lab 3, Part 7; you may use it or your own.}
+Then re-run with the \emph{Tauchen} chain and report how much the moments move.
+
+\solution{\keyBfive}
+
+\item \textbf{(15 pts) Accuracy, and the leaderboard.} Compute unit-free Euler residuals
+$\mathcal{E}=|1-\tilde c/c|$ at 1,000 capital levels drawn uniformly, \emph{off} the solution
+grid, across all productivity states. Report $\log_{10}$ of the mean and the maximum, and plot
+the residual against $k$. Where are the errors largest, and why?
+
+Submit your maximum $\log_{10}\mathcal{E}$, together with your grid size, tolerance and wall
+time, for the anonymous class leaderboard.
+
+\solution{\keyBsix}
+
+\end{enumerate}
+
+%=============================================================================
+\section*{Bonus (up to 10 points). Endogenous labour}
+
+Add a labour choice with $u(c,n)=\ln c-\psi\frac{n^{1+1/\nu}}{1+1/\nu}$ and
+$y=zk^{\alpha}n^{1-\alpha}$. Calibrate $\psi$ so that average hours in the simulation are
+$\bar n=0.3$. Report how $\sigma(Y)$ and $\sigma(I)/\sigma(Y)$ change relative to Question 3,
+and say which of the target moments the model now gets closer to.
+
+\solution{\keyBseven}
+
+\vfill
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{Reporting standard.} With every result: the method, the grid (points, spacing, bounds),
+the chain and its \emph{implied} $\rho$ and $\sigma_z$, the tolerance, the dtype, maximum and
+mean Euler residuals on points not used to solve, and the wall time with the hardware. A number
+without these is not yet a result.
+\normalsize
+
+\end{document}

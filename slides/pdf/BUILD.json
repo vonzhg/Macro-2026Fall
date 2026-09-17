@@ -1,0 +1,205 @@
+{
+  "S01_A1_Who_I_Am.pdf": {
+    "source": "slides/S01/S01_A1_Who_I_Am.tex",
+    "inputs_md5": "1c3e5a86360e2d8c7f45f3b494fd323d",
+    "pages": 15,
+    "frames": 15,
+    "watermarked": true
+  },
+  "S01_A2_Macro_Frontier.pdf": {
+    "source": "slides/S01/S01_A2_Macro_Frontier.tex",
+    "inputs_md5": "75386d268b5fc8c4f6e910bcea7242a5",
+    "pages": 15,
+    "frames": 15,
+    "watermarked": true
+  },
+  "S01_A3_AI_Tool_and_Object.pdf": {
+    "source": "slides/S01/S01_A3_AI_Tool_and_Object.tex",
+    "inputs_md5": "a4027a41cca57ad3fb7985850346b9bf",
+    "pages": 15,
+    "frames": 15,
+    "watermarked": true
+  },
+  "S01_B1_Planner_to_Equilibrium.pdf": {
+    "source": "slides/S01/S01_B1_Planner_to_Equilibrium.tex",
+    "inputs_md5": "5a96f2db31c44b705b68daa3e951ba5a",
+    "pages": 14,
+    "frames": 14,
+    "watermarked": true
+  },
+  "S01_B2_Dynamic_Programming.pdf": {
+    "source": "slides/S01/S01_B2_Dynamic_Programming.tex",
+    "inputs_md5": "47a714b63fd01862e6d133826adf36d9",
+    "pages": 14,
+    "frames": 14,
+    "watermarked": true
+  },
+  "S01_B3_DP_to_RL_and_HA.pdf": {
+    "source": "slides/S01/S01_B3_DP_to_RL_and_HA.tex",
+    "inputs_md5": "208d755bb9a9335c39582992646b5d0b",
+    "pages": 15,
+    "frames": 15,
+    "watermarked": true
+  },
+  "S02_A1_Bewley_Huggett.pdf": {
+    "source": "slides/S02/S02_A1_Bewley_Huggett.tex",
+    "inputs_md5": "bce944e500787f3bf9197c32a7f5696c",
+    "pages": 16,
+    "frames": 16,
+    "watermarked": true
+  },
+  "S02_A2_Aiyagari.pdf": {
+    "source": "slides/S02/S02_A2_Aiyagari.tex",
+    "inputs_md5": "93440881fc57eacb96d53516b3813b39",
+    "pages": 16,
+    "frames": 16,
+    "watermarked": true
+  },
+  "S02_A3_Stationary_Distribution.pdf": {
+    "source": "slides/S02/S02_A3_Stationary_Distribution.tex",
+    "inputs_md5": "70fbc6a9511d6bf5c1722044690565ba",
+    "pages": 14,
+    "frames": 14,
+    "watermarked": true
+  },
+  "S02_B1_Krusell_Smith.pdf": {
+    "source": "slides/S02/S02_B1_Krusell_Smith.tex",
+    "inputs_md5": "2e0c2183223fa8754af5a9b39694a1a8",
+    "pages": 13,
+    "frames": 13,
+    "watermarked": true
+  },
+  "S02_B2_OLG.pdf": {
+    "source": "slides/S02/S02_B2_OLG.tex",
+    "inputs_md5": "70fd7705c3c218969be9333402217aa8",
+    "pages": 16,
+    "frames": 16,
+    "watermarked": true
+  },
+  "S02_B3_Ramsey_Time_Consistency.pdf": {
+    "source": "slides/S02/S02_B3_Ramsey_Time_Consistency.tex",
+    "inputs_md5": "36dc2ec51b95ae05708cc3d27cfc3965",
+    "pages": 15,
+    "frames": 15,
+    "watermarked": true
+  },
+  "S03_A1_Solving_A_Model.pdf": {
+    "source": "slides/S03/S03_A1_Solving_A_Model.tex",
+    "inputs_md5": "69a66ed8b9ce3ea2ea65d16b03343df8",
+    "pages": 18,
+    "frames": 18,
+    "watermarked": false
+  },
+  "S03_A2_VFI_On_A_Grid.pdf": {
+    "source": "slides/S03/S03_A2_VFI_On_A_Grid.tex",
+    "inputs_md5": "780113c72056ff2bc0713e7bf27bd7d6",
+    "pages": 16,
+    "frames": 16,
+    "watermarked": true
+  },
+  "S03_A3_Euler_And_Time_Iteration.pdf": {
+    "source": "slides/S03/S03_A3_Euler_And_Time_Iteration.tex",
+    "inputs_md5": "2a8c6d9abafce7d6380c0f13e96f6177",
+    "pages": 16,
+    "frames": 16,
+    "watermarked": true
+  },
+  "S03_A4_Worked_Example_RBC.pdf": {
+    "source": "slides/S03/S03_A4_Worked_Example_RBC.tex",
+    "inputs_md5": "0985890ce163b32ed56e9143d0eccd49",
+    "pages": 15,
+    "frames": 15,
+    "watermarked": true
+  },
+  "S03_B1_Your_Toolkit.pdf": {
+    "source": "slides/S03/S03_B1_Your_Toolkit.tex",
+    "inputs_md5": "2fbb5381c3e7617d171a5b03b30d9c74",
+    "pages": 16,
+    "frames": 16,
+    "watermarked": true
+  },
+  "S03_B2_Loops_To_Arrays.pdf": {
+    "source": "slides/S03/S03_B2_Loops_To_Arrays.tex",
+    "inputs_md5": "2623670cf3b8396b6f0b7f6407c2a0f4",
+    "pages": 16,
+    "frames": 16,
+    "watermarked": true
+  },
+  "S03_B3_PyTorch_And_AI.pdf": {
+    "source": "slides/S03/S03_B3_PyTorch_And_AI.tex",
+    "inputs_md5": "c7530b15dec414a5733c2574ac73d513",
+    "pages": 16,
+    "frames": 16,
+    "watermarked": true
+  },
+  "S03_B4_Data_Workflow.pdf": {
+    "source": "slides/S03/S03_B4_Data_Workflow.tex",
+    "inputs_md5": "21a22f44843025016ca40a16348856e0",
+    "pages": 12,
+    "frames": 12,
+    "watermarked": true
+  },
+  "S04_A1_Root_Finding.pdf": {
+    "source": "slides/S04/S04_A1_Root_Finding.tex",
+    "inputs_md5": "55609ba33fa81c1b2ce3578fbd8bea07",
+    "pages": 13,
+    "frames": 13,
+    "watermarked": true
+  },
+  "S04_A2_Optimization_Interval.pdf": {
+    "source": "slides/S04/S04_A2_Optimization_Interval.tex",
+    "inputs_md5": "bb138b79de1584f2edb21d6dcfa1cbf3",
+    "pages": 11,
+    "frames": 11,
+    "watermarked": true
+  },
+  "S04_A3_Optimization_Many_Dimensions.pdf": {
+    "source": "slides/S04/S04_A3_Optimization_Many_Dimensions.tex",
+    "inputs_md5": "630d8261d8335db20eb5ffdcf94ef095",
+    "pages": 17,
+    "frames": 17,
+    "watermarked": true
+  },
+  "S04_A4_Differentiation.pdf": {
+    "source": "slides/S04/S04_A4_Differentiation.tex",
+    "inputs_md5": "9f7cbd70194ed0dccab399c9cb528845",
+    "pages": 11,
+    "frames": 11,
+    "watermarked": true
+  },
+  "S04_B1_Approximation.pdf": {
+    "source": "slides/S04/S04_B1_Approximation.tex",
+    "inputs_md5": "817d6cde9b0184a3e22dce77dd2eff84",
+    "pages": 18,
+    "frames": 18,
+    "watermarked": true
+  },
+  "S04_B2_Quadrature.pdf": {
+    "source": "slides/S04/S04_B2_Quadrature.tex",
+    "inputs_md5": "f5c8cb72fbeed6ba9512157f6766ce78",
+    "pages": 10,
+    "frames": 10,
+    "watermarked": true
+  },
+  "S04_B3_Discretizing_AR1.pdf": {
+    "source": "slides/S04/S04_B3_Discretizing_AR1.tex",
+    "inputs_md5": "e45f5a9983f16dc391957c159c6a274e",
+    "pages": 11,
+    "frames": 11,
+    "watermarked": true
+  },
+  "S04_B4_Fast_And_Accurate.pdf": {
+    "source": "slides/S04/S04_B4_Fast_And_Accurate.tex",
+    "inputs_md5": "c62dd85d2bf631a3ae3f35e53960e284",
+    "pages": 17,
+    "frames": 17,
+    "watermarked": true
+  },
+  "S04_B5_Worked_Example_Stochastic.pdf": {
+    "source": "slides/S04/S04_B5_Worked_Example_Stochastic.tex",
+    "inputs_md5": "67b0e764ede20cc37a26b596ee2e4c76",
+    "pages": 13,
+    "frames": 13,
+    "watermarked": true
+  }
+}

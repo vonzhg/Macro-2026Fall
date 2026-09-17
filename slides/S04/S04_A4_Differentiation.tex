@@ -1,0 +1,297 @@
+%% ECON 282E -- Session 4, Deck A4: Differentiation
+%% QM Lec.4 F55-F58 supply forward/central differences and the error analysis but
+%% carry no figure and no numbers; the step-size curve, the complex step (absent
+%% from every source in the corpus) and the Jacobian comparison are new.
+%% Numbers from tools/figures/s04_numbers.json, keys "differentiation", "jacobian";
+%% the forward-difference curve is the one 3.B3 already showed, now explained.
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+\lstset{language=Python, basicstyle=\ttfamily\scriptsize, frame=none,
+        backgroundcolor=\color{gray!8}, aboveskip=2pt, belowskip=2pt}
+
+\decktitle{4}{A4}{Differentiation: Finite Differences to Autodiff}{Thursday, October 15, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{4}{4.A4}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block A:} \textbf{4.A1} root-finding $\;\cdot\;$ \textbf{4.A2} optimization on an interval $\;\cdot\;$ \textbf{4.A3} optimization in many dimensions $\;\cdot\;$ \textbf{4.A4} differentiation.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Three Curves, One Derivative}
+\begin{columns}[c]
+\begin{column}{0.54\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=8.0cm, height=5.4cm, xmin=-16.5, xmax=-0.5, ymin=-17.5, ymax=1.0,
+    xlabel={\scriptsize $\log_{10} h$}, ylabel={\scriptsize $\log_{10}$ relative error},
+    tick label style={font=\scriptsize},
+    axis x line*=bottom, axis y line*=left,
+    legend style={font=\tiny, draw=none, fill=none, at={(0.02,0.30)}, anchor=west}]
+  \addplot[very thick, RedTitle, mark=*, mark size=0.9pt] coordinates {(-1,-1.788) (-2,-2.777) (-3,-3.776) (-4,-4.776) (-5,-5.776) (-6,-6.777) (-7,-7.686) (-8,-7.686) (-9,-7.686) (-10,-5.979) (-11,-4.649) (-12,-4.073) (-13,-2.360) (-14,-1.438) (-15,-1.151) (-16,0.000)};
+  \addlegendentry{forward}
+  \addplot[very thick, orange!80!black, mark=square*, mark size=0.8pt] coordinates {(-1,-3.331) (-2,-5.331) (-3,-7.331) (-4,-9.333) (-5,-11.010) (-6,-9.557) (-7,-9.090) (-8,-7.686) (-9,-7.686) (-10,-5.979) (-11,-4.649) (-12,-4.073) (-13,-2.360) (-14,-1.438) (-15,-1.151) (-16,0.000)};
+  \addlegendentry{central}
+  \addplot[very thick, black!55, mark=triangle*, mark size=1.0pt] coordinates {(-1,-3.332) (-2,-5.331) (-3,-7.331) (-4,-9.331) (-5,-11.331) (-6,-13.330) (-7,-15.353) (-8,-18.000) (-9,-18.000) (-10,-18.000) (-11,-18.000) (-12,-18.000) (-13,-15.654) (-14,-18.000) (-15,-15.955) (-16,-15.955)};
+  \addlegendentry{complex step}
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.43\textwidth}
+\small
+The derivative of $k^{\alpha}$ at $k=2$, computed three ways as the step shrinks.
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X r@{}}
+\toprule
+ & \textbf{best $\log_{10}$ error} \\
+\midrule
+forward difference & $-7.7$ \\
+central difference & $-11.0$ \\
+complex step & \textbf{exact} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\begin{examplebox}\footnotesize
+3.B3 showed you the first curve and called it a floor. This deck is where the floor gets an explanation --- and where it turns out not to be a law of nature.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Why the Curve Has a Minimum}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+The forward difference carries two errors that move in opposite directions.
+\medskip
+
+\textbf{Truncation.} Taylor gives
+\[
+  \frac{f(x+h)-f(x)}{h}=f'(x)+\tfrac{h}{2}f''(x)+O(h^{2}),
+\]
+an error of order $h$ --- it \emph{falls} with $h$.
+\medskip
+
+\textbf{Round-off.} The numerator is a difference of two nearly equal numbers, each known to a relative $\varepsilon_{\text{mach}}$, so the quotient carries about $\varepsilon_{\text{mach}}|f|/h$ --- it \emph{rises} as $h$ falls.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{Balance them}]\small
+Minimising $\tfrac h2|f''|+\varepsilon|f|/h$ gives
+\[
+  h^{*}\sim\sqrt{\varepsilon_{\text{mach}}}\approx1.5\times10^{-8},
+\]
+and an error of order $\sqrt{\varepsilon_{\text{mach}}}$ --- \textbf{half your digits, gone}.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+Measured: the best forward step was $10^{-7}$ and the best error $10^{-7.7}$. The theory predicts the location of the minimum, not just its existence.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Error decomposition adapted from QM \emph{Numerical Methods}, ``Numerical Differentiation: Error Analysis''; the cancellation mechanism is 3.A1's.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Central Differences: Better, and Twice the Price}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Expand in both directions and the even-order terms cancel:
+\[
+  \frac{f(x+h)-f(x-h)}{2h}=f'(x)+\tfrac{h^{2}}{6}f'''(x)+O(h^{4}).
+\]
+Truncation is now $O(h^{2})$, so balancing against the same round-off gives
+\[
+  h^{*}\sim\varepsilon_{\text{mach}}^{1/3}\approx6\times10^{-6},
+\]
+with an error of order $\varepsilon_{\text{mach}}^{2/3}$ --- about $10^{-11}$.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X c c@{}}
+\toprule
+ & \textbf{best $h$} & \textbf{best error} \\
+\midrule
+forward & $10^{-7}$ & $10^{-7.7}$ \\
+central & $10^{-5}$ & $\mathbf{10^{-11.0}}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\vspace{1mm}
+\begin{takeawaybox}\footnotesize
+\textbf{Three and a half extra decades} for one extra function evaluation per derivative.
+\end{takeawaybox}
+\medskip
+\begin{cautionbox}\footnotesize
+In a Jacobian that doubling matters: $2N$ evaluations instead of $N+1$. It is usually still worth it.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}[fragile]{The Complex Step: Subtract Nothing, Lose Nothing}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+For a real-analytic $f$, expand along the \emph{imaginary} axis:
+\[
+  f(x+ih)=f(x)+ihf'(x)-\tfrac{h^{2}}{2}f''(x)+\dots
+\]
+Take the imaginary part and divide by $h$:
+\[
+  f'(x)=\frac{\operatorname{Im} f(x+ih)}{h}+O(h^{2}).
+\]
+\textbf{There is no subtraction}, so there is no cancellation --- and $h$ can be made absurdly small.
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{lstlisting}
+h = 1e-200
+d = ((2.0 + 1j*h)**0.36).imag / h
+# relative error: 0.0
+\end{lstlisting}
+\vspace{-1mm}
+\begin{takeawaybox}\footnotesize
+At $h=10^{-200}$ the answer is correct to \textbf{every bit}. The price: $f$ must accept a complex argument, so every \texttt{abs}, \texttt{max} and comparison inside it has to be complex-safe.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Squire \& Trapp (1998). Absent from every source deck in this course's corpus.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Automatic Differentiation: Neither Symbolic Nor Numerical}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+AD applies the chain rule to the program, one elementary operation at a time. No step size, no truncation, no cancellation --- the result is exact to machine precision.
+\medskip
+\begin{itemize}\footnotesize
+  \item \textbf{Forward mode} propagates a derivative alongside each value. Cost $\propto$ number of \emph{inputs}.
+  \item \textbf{Reverse mode} records the operations, then walks the tape backwards. Cost $\propto$ number of \emph{outputs}.
+\end{itemize}
+\medskip
+A gradient has one output and many inputs, so reverse mode gives the whole thing for about the cost of \textbf{one} function evaluation. That is why it is what trains neural networks.
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{conceptbox}[title=\textbf{Which mode for a Jacobian?}]\small
+$N$ inputs and $N$ outputs: forward mode costs $N$ sweeps, reverse mode costs $N$ sweeps. Neither wins, and structure --- sparsity --- is what actually helps.
+\end{conceptbox}
+\medskip
+\begin{cautionbox}\footnotesize
+AD differentiates \textbf{the program you wrote}, not the function you meant. Branches, clipping and \texttt{max} all have derivatives, and at a kink the one you get is whichever branch executed.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Mentioned once in passing in QM Lec.~4 as ``may not be available''; the mechanics are 3.B3's autograd tape.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Pay-Off: One Jacobian, Four Ways}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+The system from 4.A1, $x^{2}+y^{2}=4$ and $e^{x}+y=1$, whose Jacobian we can also write by hand.
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X r r@{}}
+\toprule
+ & \textbf{max error} & \textbf{evals} \\
+\midrule
+finite difference & $3.7\times10^{-8}$ & 3 \\
+complex step & \textbf{0} & 2 \\
+autograd & \textbf{0} & --- \\
+by hand & 0 & --- \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\footnotesize
+The finite-difference Jacobian is accurate to \textbf{eight digits}. The other two are accurate to sixteen.
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{takeawaybox}[title=\textbf{Does it matter?}]\small
+For Newton, often not: an approximate Jacobian costs iterations, not correctness, and Broyden works with a deliberately wrong one.\\[1mm]
+It matters when the derivative \emph{is} the answer --- Euler residuals, elasticities, standard errors, the gradient of a loss.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+And it matters for the same reason 4.A3 did: eight digits of Jacobian caps how far Newton can converge.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Choosing}
+\renewcommand{\arraystretch}{1.2}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3.3cm}@{}}
+\toprule
+\textbf{Method} & \textbf{Accuracy} & \textbf{Use it when} \\
+\midrule
+Forward difference & $\sqrt{\varepsilon}$, about 8 digits & $f$ is a black box and cheap \\
+Central difference & $\varepsilon^{2/3}$, about 11 digits & the default for a black box \\
+Complex step & exact & you control the source and it is analytic \\
+Automatic differentiation & exact & you control the source; gradients of many inputs \\
+Symbolic / by hand & exact & the expression is small, and you will check it \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\vspace{1mm}
+\begin{conceptbox}\small
+\textbf{The step size is not a free parameter to be tuned.} It has a right answer, $\sqrt{\varepsilon_{\text{mach}}}$ or $\varepsilon_{\text{mach}}^{1/3}$, and choosing it by trial and error is how people end up on the wrong side of the U-curve.
+\end{conceptbox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways}
+\begin{takeawaybox}
+\begin{itemize}\small
+  \item The finite-difference U-curve is \textbf{truncation falling plus round-off rising}. Its minimum sits at $h\sim\sqrt{\varepsilon_{\text{mach}}}$ for forward and $\varepsilon_{\text{mach}}^{1/3}$ for central differences --- and the measurement lands where the theory says.
+  \item A forward difference costs you \textbf{half your digits}, permanently. Central differences recover three and a half decades for one extra evaluation.
+  \item The complex step removes the subtraction, and with it the floor: correct to every bit at $h=10^{-200}$. The price is that $f$ must be complex-safe.
+  \item \textbf{Automatic differentiation is exact}, and in reverse mode a full gradient costs about one function evaluation --- which is why it, not finite differences, is what makes Session 7 possible.
+  \item AD differentiates the \textbf{program}, not the function. At a kink you get whichever branch ran.
+\end{itemize}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: After the Break, Representing Functions}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Block A has been about \textbf{operating} on a function you already have: finding where it is zero, where it is largest, how steep it is. Every one of those methods asked to evaluate $f$ at a point of its choosing --- and in a dynamic program, $\hat v$ is only known at $N$ grid points.
+\medskip
+
+So the questions change. How do you represent a function you only know at finitely many places? Which representation keeps the properties the algorithms of Block A depend on? And where does the transition matrix $\Pi$ --- which we have simply written down twice now --- actually come from?
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{After the break (Block B)}]\small
+\textbf{4.B1} Approximation and interpolation.\\[1mm]
+\textbf{4.B2} Quadrature: turning $\mathbb{E}$ into a finite sum.\\[1mm]
+\textbf{4.B3} Discretizing an AR(1): Tauchen and Rouwenhorst, and which one you should actually use.\\[1mm]
+\textbf{4.B4} The pay-off, measured.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}
