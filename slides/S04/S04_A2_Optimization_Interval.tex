@@ -74,8 +74,8 @@ In the Bellman problem the objective is
 so it is concave as long as $u$ is concave \emph{and the interpolant $\hat v$ is}. Concave $\Rightarrow$ unimodal $\Rightarrow$ the bracket can be shrunk safely.
 \end{column}
 \begin{column}{0.44\textwidth}
-\begin{cautionbox}[title=\textbf{A correction worth making}]\small
-The usual table says linear interpolation does \emph{not} preserve concavity. \textbf{It does} --- we checked: the worst second difference of a linearly interpolated concave function is $4\times10^{-16}$, i.e.\ zero.
+\begin{cautionbox}[title=\textbf{And it does}]\small
+Linear interpolation \textbf{preserves concavity}: the chord of a concave function lies below it, so the interpolant is concave too. Measured, the worst second difference of a linearly interpolated concave function is $4\times10^{-16}$ --- zero.
 \end{cautionbox}
 \medskip
 \begin{takeawaybox}\footnotesize

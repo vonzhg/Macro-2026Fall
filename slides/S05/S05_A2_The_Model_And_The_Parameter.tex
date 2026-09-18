@@ -1,0 +1,347 @@
+%% ECON 282E -- Session 5, Deck A2: The Model, and the Parameter That Scales Risk
+%% Source: Quant_Macro Lec.9 frames 9-15, plus the two "Taylor's theorem" frames
+%% that the successor deck dropped (Lec5-7_Dynamic_models.tex:1608, 1624).
+%% Exposition follows Fernandez-Villaverde & Guerron-Quintana, Solution Methods V.
+%% Numbers from tools/figures/s05_numbers.json, key "brock_mirman".
+%% NOTATION: the perturbation parameter is chi.  The literature writes lambda;
+%% this course reserves lambda for the invariant distribution (CLAUDE.md).
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+\lstset{language=Python, basicstyle=\ttfamily\scriptsize, frame=none,
+        backgroundcolor=\color{gray!8}, aboveskip=2pt, belowskip=2pt}
+
+\decktitle{5}{A2}{The Model, and the Parameter That Scales Risk}{Thursday, October 22, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{5}{5.A2}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block A:} 5.A1 what perturbation computes $\;\cdot\;$ \textbf{5.A2} the model and the parameter $\;\cdot\;$ 5.A3 first order $\;\cdot\;$ 5.A4 linear RE systems $\;\cdot\;$ 5.A5 higher order, risk, pruning $\;\cdot\;$ 5.A6 the worked example.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Model We Will Expand}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+\vspace{-2mm}
+\begin{align*}
+\max\;&\mathbb{E}_{0}\sum_{t=0}^{\infty}\beta^{t}\ln c_{t}\\
+\text{s.t.}\;\; & c_{t}+k_{t+1}=e^{z_{t}}k_{t}^{\alpha}\\
+ & z_{t}=\rho z_{t-1}+\sigma\varepsilon_{t},\quad \varepsilon_t\sim N(0,1)
+\end{align*}
+Equilibrium conditions:
+\begin{align*}
+\frac{1}{c_{t}} &=\beta\,\mathbb{E}_{t}\!\left[\frac{1}{c_{t+1}}\,\alpha e^{z_{t+1}}k_{t+1}^{\alpha-1}\right]\\
+c_{t}+k_{t+1} &= e^{z_{t}}k_{t}^{\alpha}
+\end{align*}
+\textbf{States} $(k_t,z_t)$. \textbf{Controls} $(c_t,k_{t+1})$. The object we want is the pair of \textbf{policy functions} $c(k,z)$ and $k'(k,z)$.
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}[title=\textbf{Why this model}]\small
+Log utility with \textbf{full depreciation} is the Brock--Mirman benchmark of 1.B1 --- the one model in this course whose policy is known in closed form. Every method gets tested here first.
+\end{conceptbox}
+\medskip
+\begin{examplebox}\footnotesize
+$\delta=1$ is not realistic. It is diagnostic. 5.A6 moves to the quarterly calibration with $\delta=0.025$, where no closed form exists.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Stochastic neoclassical growth model''. Calibration $\alpha=0.36$, $\beta=0.95$, as in S3.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The One Thing We Know Exactly}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+Guess and verify gives the exact policy:
+\begin{align*}
+c_{t} &= (1-\alpha\beta)\,e^{z_{t}}k_{t}^{\alpha}\\
+k_{t+1} &= \alpha\beta\,e^{z_{t}}k_{t}^{\alpha}
+\end{align*}
+and therefore the deterministic steady state
+\begin{align*}
+k^{*} &= (\alpha\beta)^{\frac{1}{1-\alpha}} = 0.1870\\
+c^{*} &= (\alpha\beta)^{\frac{\alpha}{1-\alpha}}-(\alpha\beta)^{\frac{1}{1-\alpha}}\\
+z^{*} &= 0 .
+\end{align*}
+The steady state is the point we expand around; the closed-form policy is the answer we will grade against.
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{takeawaybox}\footnotesize
+\textbf{Two different objects.} Almost every model has a computable steady state. Almost none has a closed-form \emph{policy}. Perturbation needs only the first --- which is why it generalizes.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+1.B1: ``If a method cannot recover $k'=\alpha\beta z k^{\alpha}$, do not trust it on anything harder.'' VFI was tested here in S3. Perturbation is tested here in three slides.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Solution and steady state''. Ledger \texttt{brock\_mirman}: $k^{*}=0.187032$.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Goal, Written as Functional Equations}
+\small
+Substituting the unknown policies into the equilibrium conditions gives a system in which the unknowns are \emph{functions}:
+\begin{align*}
+\frac{1}{c(k_{t},z_{t})} &=\beta\,\mathbb{E}_{t}\!\left[\frac{\alpha\,e^{\rho z_{t}+\sigma\varepsilon_{t+1}}\,k(k_{t},z_{t})^{\alpha-1}}
+{c\big(k(k_{t},z_{t}),\,\rho z_{t}+\sigma\varepsilon_{t+1}\big)}\right]\\[1mm]
+c(k_{t},z_{t})+k(k_{t},z_{t}) &= e^{z_{t}}k_{t}^{\alpha}
+\end{align*}
+\medskip
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{conceptbox}[title=\textbf{Read the composition}]\footnotesize
+$c$ appears \emph{evaluated at next period's state}, which is itself the unknown $k(\cdot)$. That nesting is why this is a functional equation and not an algebraic one.
+\end{conceptbox}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{examplebox}\footnotesize
+Once $c(\cdot)$ and $k(\cdot)$ are known, everything follows: simulate, compute moments, produce impulse responses, do welfare.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``The goal''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{A Parameter That Scales the Risk}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+There is a problem with expanding in $(k,z)$ alone: we want to know what \textbf{uncertainty itself} does, and uncertainty is not a state.
+\medskip
+
+The device is to introduce an artificial parameter $\chi$ multiplying the shock:
+\[
+  z_{t}=\rho z_{t-1}+\chi\,\sigma\varepsilon_{t}
+\]
+\begin{itemize}\small
+  \item $\chi=1$: the model we care about.
+  \item $\chi=0$: the \textbf{deterministic} economy, where we know how to compute everything.
+\end{itemize}
+\medskip
+The policies become $c(k_t,z_t;\chi)$ and $k(k_t,z_t;\chi)$, and $\chi$ is treated as a third argument to differentiate with respect to.
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{cautionbox}[title=\textbf{Notation}]\footnotesize
+The literature, including Fern\'andez-Villaverde \& Guerr\'on-Quintana, writes $\lambda$ for this parameter. This course reserves $\lambda$ for the \textbf{invariant distribution} (2.A3), so we write $\chi$. Nothing else changes.
+\end{cautionbox}
+\medskip
+\begin{conceptbox}[title=\textbf{The move}]\footnotesize
+Risk has been turned into a \emph{parameter we can differentiate}. That is the entire trick, and everything in 5.A5 is a consequence of it.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``A perturbation solution''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Why Expand Around $\chi=0$?}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+Because $\chi=0$ is the one point where the answer is available: no uncertainty, a deterministic steady state, and policies we can compute directly.
+\medskip
+
+Expanding around it measures \textbf{how a small amount of risk changes behaviour relative to the deterministic economy} --- which is exactly the economic question.
+\medskip
+
+The by-products are immediate:
+\begin{itemize}\small
+  \item first order gives a \textbf{linear state-space system}, so impulse responses are one matrix multiplication;
+  \item second-order moments follow in closed form, with no simulation.
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{cautionbox}[title=\textbf{And the price}]\small
+Accuracy deteriorates with large shocks, strong nonlinearity, and distance from the steady state. We do not have to take that on trust --- 5.A6 measures exactly where it happens.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+Note what is being assumed: that the solution is \emph{smooth in $\chi$ at $\chi=0$}. Models with occasionally binding constraints are not.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Why Perturb Around $\lambda=0$?''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What Exactly Gets Differentiated}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+We build a local approximation around $(k^{*},0;0)$. Taking the equilibrium conditions
+\begin{align*}
+\frac{1}{c(k_{t},z_{t};\chi)} &=\beta\mathbb{E}_{t}\!\left[\cdots\right]\\
+c(k_{t},z_{t};\chi)+k(k_{t},z_{t};\chi) &= e^{z_{t}}k_{t}^{\alpha}
+\end{align*}
+we differentiate with respect to $k_t$, $z_t$ and $\chi$, and evaluate at $(k^{*},0;0)$.
+\medskip
+
+\textbf{The unknowns become coefficients.} $c_k$, $c_z$, $c_\chi$, $k_k$, $k_z$, $k_\chi$ are numbers, not functions --- the partial derivatives of the true policies at one point.
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{conceptbox}[title=\textbf{Taylor's theorem, twice over}]\small
+Once to justify writing the policy as a series at all, and once to say what the truncation error is. Both need the smoothness the IFT gave us in 5.A1.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+``Solve the model'' has become ``compute a few derivatives at a point we already know''.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Taylor's theorem'' --- including the two frames of that title carried in the predecessor deck and dropped from the current one.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Expansion, Written Out}
+\small
+To second order, around $(k^{*},0;0)$, writing $\hat{k}_t=k_t-k^{*}$:
+\begin{align*}
+c_t \;=\;& c^{*} + c_k\hat{k}_t + c_z z_t + c_\chi \chi \\
+ &+ \tfrac12\Big(c_{kk}\hat{k}_t^{2} + 2c_{kz}\hat{k}_t z_t + c_{zz}z_t^{2}
+   + 2c_{k\chi}\hat{k}_t\chi + 2c_{z\chi}z_t\chi + c_{\chi\chi}\chi^{2}\Big)+\cdots\\[1mm]
+k_{t+1} \;=\;& k^{*} + k_k\hat{k}_t + k_z z_t + k_\chi \chi \\
+ &+ \tfrac12\Big(k_{kk}\hat{k}_t^{2} + 2k_{kz}\hat{k}_t z_t + k_{zz}z_t^{2}
+   + 2k_{k\chi}\hat{k}_t\chi + 2k_{z\chi}z_t\chi + k_{\chi\chi}\chi^{2}\Big)+\cdots
+\end{align*}
+\medskip
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{conceptbox}[title=\textbf{First order}]\footnotesize
+Keep the linear terms only: six unknowns, $\{c_k,c_z,c_\chi,k_k,k_z,k_\chi\}$. 5.A3 shows that two of them are zero.
+\end{conceptbox}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{examplebox}\footnotesize
+$c_{\chi\chi}$ is the term that will carry \textbf{precautionary behaviour}. It is a second-order object, which is already the answer to ``why go beyond first order''.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Taylor Expansion of Policy Functions''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Measured: On This Model, the Linear Solution Is Not an Approximation}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+Take logs of the exact policy:
+\[
+  \ln k_{t+1}=\ln(\alpha\beta)+z_t+\alpha\ln k_t ,
+\]
+and since $\ln k^{*}=\ln(\alpha\beta)/(1-\alpha)$,
+\[
+  \widehat{\ln k}_{t+1}=\alpha\,\widehat{\ln k}_{t}+z_t .
+\]
+\textbf{The true policy is exactly linear in logs.} So a first-order perturbation in logs should return $\alpha$ and $1$ --- not approximately.
+\medskip
+
+Solved numerically, it does:
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X r@{}}
+\toprule
+\textbf{Measured} & \\
+\midrule
+$k$ on $\hat{k}$, $\;k$ on $z$ & $0.36$,\; $1.00$ \\
+$c$ on $\hat{k}$, $\;c$ on $z$ & $0.36$,\; $1.00$ \\
+deviation from exact & $1.1\times10^{-16}$ \\
+policy error, \emph{in levels} & $4.4\times10^{-16}$ \\
+every second-order term & $<10^{-9}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\begin{takeawaybox}\footnotesize
+Machine precision, over $k\in[0.25k^{*},2.5k^{*}]$ --- a tenfold range, not a neighbourhood.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{brock\_mirman}. Coefficients by generalized Schur; the second-order terms come from an independent residual-matching solve and vanish to the precision of its finite differences.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What That Benchmark Can and Cannot Tell You}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+\textbf{What it certifies.} The algebra, the code, the steady state, the sign conventions, the transposes. If perturbation cannot return $0.36$ and $1.00$ here, the implementation is wrong and nothing else matters.
+\medskip
+
+\textbf{What it cannot certify.} Anything about accuracy. The error is zero \emph{because the model is log-linear}, not because perturbation is good. A benchmark that a method solves exactly measures nothing about the method.
+\medskip
+
+This is the same trap as 3.A2's beautifully converged value function with a bad policy: the diagnostic that looks most reassuring is the one carrying least information.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{cautionbox}[title=\textbf{Why $\delta=1$ does this}]\small
+Full depreciation plus log utility makes the saving \emph{rate} constant at $\alpha\beta$. Nothing is left for curvature to act on, so certainty equivalence is exact and every higher-order term is zero.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+Hence 5.A6 runs the quarterly model with $\delta=0.025$, where the second-order terms are not zero and the error is not zero either.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{brock\_mirman}, field \texttt{note}.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways}
+\begin{takeawaybox}
+\begin{itemize}\small
+  \item The model is the \textbf{Brock--Mirman benchmark} of 1.B1: log utility, $\delta=1$, closed-form policy, steady state $k^{*}=0.1870$.
+  \item Perturbation needs only the \textbf{steady state}, not the closed form --- which is exactly why it survives into models that have no closed form.
+  \item Risk becomes differentiable by introducing $\chi$ with $z'=\rho z+\chi\sigma\varepsilon'$: $\chi=0$ is the deterministic economy, $\chi=1$ the one we want.
+  \item ``Solve the model'' has become ``find $\{c_k,c_z,c_\chi,k_k,k_z,k_\chi\}$, then the second-order terms, then\dots''.
+  \item Measured: on this model the first-order solution reproduces the exact policy to \textbf{$10^{-16}$ over a tenfold range of capital}, and every second-order term is zero.
+  \item Which is a \textbf{correctness} test, not an accuracy test. A benchmark solved exactly tells you nothing about how the method behaves where it is actually needed.
+\end{itemize}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: Where the Equations Come From}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+We now have unknowns --- six of them at first order --- and no equations for them yet. The next deck writes the equilibrium conditions as a single object $F(k,z;\chi)=0$, observes that it is an \textbf{identity}, and differentiates it.
+\medskip
+
+Two results fall out that are worth waiting for: two of the six unknowns turn out to be \textbf{exactly zero}, and the remaining system is exactly square.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{Next (5.A3)}]\small
+$F\equiv 0 \Rightarrow F_k=F_z=F_\chi=0$; six unknowns, four equations, and why that is not a mistake. Certainty equivalence, and what it costs.
+\end{conceptbox}
+\medskip
+\begin{examplebox}\footnotesize
+Keep the closed form in view. Everything 5.A3 derives can be checked against $\alpha$ and $1$.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

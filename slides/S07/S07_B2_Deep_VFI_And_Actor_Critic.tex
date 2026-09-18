@@ -1,0 +1,493 @@
+%% ECON 282E -- Session 7, Deck B2: Deep VFI and Actor-Critic
+%% Sources: AI-ECON Lec04_T2_VFI_DL_ActorCritic.tex, carried WHOLE (20 frames);
+%% AI-ECON Lec06_T2a_Why_ML_Euler.tex fr 3-10; Quant_Macro Lec.6
+%% "DNN Based Value Function Iteration" and "The Role & Advantage of
+%% Reinforcement Learning".
+%% Numbers from tools/figures/s07_numbers.json (key "five_methods") and
+%% s04_numbers.json (key "optimizer_memory"), both cited, not recomputed.
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+\decktitle{7}{B2}{Deep VFI and Actor--Critic}{Thursday, November 5, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{7}{7.B2}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block B:} 7.B1 the model as a loss function $\;\cdot\;$ \textbf{7.B2} deep VFI and actor--critic $\;\cdot\;$ 7.B3 structure and validation.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Other Road}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+7.B1 required first-order conditions --- a real restriction, and it bites exactly where macroeconomics gets interesting:
+\smallskip
+\begin{itemize}\small\setlength{\itemsep}{0.7mm}
+  \item \textbf{occasionally binding constraints} --- the Euler equation holds with an inequality;
+  \item \textbf{discrete choice} --- default, retirement, entry: no derivative to set to zero;
+  \item \textbf{kinks} --- a borrowing limit, an irreversibility.
+\end{itemize}
+\smallskip
+
+So go back one step, to the object the FOCs were derived \emph{from}:
+\[
+  V(k)=\max_{k'}\bigl\{u(c)+\beta V(k')\bigr\},
+\]
+also a functional equation with a residual. \textbf{Make the residual small and you have solved it} --- and \textbf{no derivatives of the model are needed}, only derivatives of the \emph{network}. The price is the $\max$, which now sits \emph{inside} the loss.
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{researchbox}\small
+\textbf{The route with theory attached.}
+\medskip
+Feng \& Santos construct Markov equilibrium for a time-inconsistent economy from \textbf{value-function operators}, and obtain existence \emph{constructively} --- as the limit of a sequence of $\varepsilon$-equilibria.
+\medskip
+Where an economy is hard enough that \textbf{existence is itself in question}, the value function is where the argument gets made. That is a reason to prefer this road beyond convenience.
+\end{researchbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Feng \& Santos, ``Markov Equilibria with Quasi-Hyperbolic Discounting'', working paper.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Replace the Grid with a Network}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Instead of storing $V(k)$ at grid points, approximate both unknowns:
+\[
+  V(k)\approx\mathcal{V}(k;\theta_v),\qquad g(k)\approx\mathcal{G}(k;\theta_g).
+\]
+\medskip
+
+The loop keeps classical VFI's rhythm exactly --- \emph{evaluate the current policy, then improve it} --- with two substitutions:
+\begin{enumerate}\small\setlength{\itemsep}{0.9mm}
+  \item \textbf{sample} states $k\sim D(k)$ instead of laying down a grid;
+  \item \textbf{fit} the networks by gradient descent instead of writing into a table.
+\end{enumerate}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{takeawaybox}[title=\textbf{Why it scales}]\small
+A network handles high-dimensional $k$ without a mesh: states are sampled, the network \textbf{generalises} between them, and the parameter count grows polynomially in $d$ rather than as $N^{d}$.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+``Generalises between them'' is doing the work, and it is also the risk. A grid makes no claim about the points it does not contain. \textbf{A network always answers}, everywhere, whether or not it should.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Deep VFI, the Whole Loop in One Place}
+\begin{conceptbox}[title=\textbf{Deep value function iteration}]\footnotesize
+Represent $V\approx\mathcal{V}(\cdot;\theta_v)$ and $g\approx\mathcal{G}(\cdot;\theta_g)$, and iterate:
+\begin{enumerate}\footnotesize\setlength{\itemsep}{0.8mm}
+  \item \textbf{Sample} a batch of states $\{k_i\}\sim D(k)$ --- no grid.
+  \item \textbf{Value step (the critic).} Fit $\mathcal{V}$ by least squares to the Bellman target
+  $\hat V(k)=u\bigl(k,g(k)\bigr)+\beta\,\mathcal{V}\bigl(f(k,g(k))\bigr)$.
+  \item \textbf{Policy step (the actor).} Improve $\mathcal{G}$ by gradient \emph{ascent} on
+  $u\bigl(k,g(k)\bigr)+\beta\,\mathcal{V}\bigl(f(k,g(k))\bigr)$.
+  \item \textbf{Repeat} until both networks stop moving.
+\end{enumerate}
+\end{conceptbox}
+\medskip
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{takeawaybox}\footnotesize
+Steps 2 and 3 are \textbf{policy evaluation} and \textbf{policy improvement} --- 1.B2's two halves of value-function iteration, unchanged in logic and wholly changed in machinery.
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{cautionbox}\footnotesize
+Notice what is \emph{not} in step 3: an $\arg\max$. The policy network is nudged in the direction that raises the objective, rather than being resolved at each state.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Deep VFI Against Classical VFI}
+\vspace{-1mm}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+& \textbf{Classical VFI (3.A2)} & \textbf{Deep VFI} \\
+\midrule
+state space & a fixed grid $\{k_1,\dots,k_N\}$ & a sampled batch $k_i\sim D(k)$ \\
+representation & table, plus interpolation & a network $\mathcal{V}(k;\theta_v)$ \\
+value update & exact $\max_{k'}$ at each point & least-squares fit to $\hat V$ \\
+policy & $\arg\max$ by grid search & a learned network, by ascent \\
+expectation & quadrature on a grid & exact sum, or Monte Carlo \\
+cost in $d$ & $N^{d}$ & polynomial \\
+\textbf{convergence} & \textbf{a contraction (Banach)} & \textbf{no general guarantee} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{takeawaybox}\footnotesize
+\textbf{The trade, in one line.} Give up the exact maximisation and the contraction guarantee; gain dimension, and the ability to fit scattered, simulated data.
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{cautionbox}\footnotesize
+\textbf{Read the last row slowly.} 3.A2's error bound $\lVert V_n-V^{*}\rVert\le\beta^{n}\lVert V_0-V^{*}\rVert/(1-\beta)$ told you \emph{how far you were} without knowing the answer. \textbf{Nothing here replaces it.}
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Losing the bound is why 7.B3 exists.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Value Step, and the Detach That Makes It Work}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+Hold the policy $g^{(n-1)}$ fixed. The one-step Bellman target is
+\[
+  \hat V(k)=u\bigl(k,g^{(n-1)}(k)\bigr)+\beta\,\mathcal{V}^{(n-1)}\bigl(f(k,g^{(n-1)}(k))\bigr),
+\]
+and the value network is fitted to it by least squares:
+\[
+  \min_{\theta_v}\;\mathbb{E}_{k\sim D}\Bigl[\bigl(\mathcal{V}(k;\theta_v)-\hat V(k)\bigr)^{2}\Bigr].
+\]
+\medskip
+
+\textbf{This is supervised learning again}, with the ``label'' at each sampled state being the Bellman target.
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{cautionbox}[title=\textbf{\texttt{detach()} the target}]\small
+$\hat V$ contains $\mathcal{V}^{(n-1)}$, which is the \emph{same network}. If the gradient is allowed to flow into the target as well as the prediction, the optimizer can lower the loss by \textbf{moving the target} rather than fitting it.
+\medskip
+Detaching freezes the target for the step. It is one line of code and the difference between converging and not.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+The idea has a name in deep RL --- the \textbf{target network} --- and it returns in S8.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Policy Step, and Why Two Networks}
+\begin{columns}[T]
+\begin{column}{0.51\textwidth}
+\small
+\textbf{Where is the maximisation actually solved?}
+\smallskip
+
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}X@{}}
+\toprule
+grid VFI (3.A2) & at every grid point \\
+projection (5.B6) & at the \textbf{collocation nodes} only \\
+deep VFI & at every \textbf{sampled} state, every batch \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\smallskip
+
+\textbf{What makes it hard is not that a method is classical}, but whether the approximant \textbf{preserves concavity}. A concave interpolant leaves a concave program with one maximiser, which 4.A2's golden section finds every time; a rippling polynomial --- or a generic network --- does not.
+\smallskip
+
+So let a second network \textbf{output the action directly}, $k'=\mathcal{G}(k;\theta_g)$, improved by gradient \emph{ascent} on $u(k,\mathcal{G}(k))+\beta\,\mathcal{V}(f(k,\mathcal{G}(k)))$.
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{conceptbox}[title=\textbf{The two roles}]\footnotesize
+\textbf{The actor} $\mathcal{G}$ --- the doer. State in, action out; it never maximises anything, it is \emph{improved}.
+\medskip
+\textbf{The critic} $\mathcal{V}$ --- the judge. State in, value out; it scores what the actor did. The actor proposes, the critic evaluates, both improve together.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+\textbf{Actor--critic does not avoid the maximisation --- it \emph{amortises} it.} The actor learns the $\arg\max$ as a \emph{function of the state}: one gradient step over parameters instead of one exact maximisation everywhere.
+\medskip
+Which is why 7.B3 matters: \textbf{restore concavity and the inner problem is well behaved again.}
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Two Moving Targets}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+The awkwardness of the scheme is that \textbf{neither network is chasing a fixed object}.
+\medskip
+\begin{itemize}\small\setlength{\itemsep}{1.1mm}
+  \item The critic is fitted to a target built from the \emph{current} policy. Improve the policy and the target moves.
+  \item The actor ascends an objective built from the \emph{current} critic. Refit the critic and the landscape moves.
+\end{itemize}
+\medskip
+
+Classical VFI has this too --- but there the value step is a \textbf{contraction}, which is precisely what makes the alternation converge. Replace the exact update with a least-squares fit on sampled states and the contraction is gone.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{takeawaybox}[title=\textbf{What is done in practice}]\small
+\textbf{Freeze and sync.} Hold a frozen copy of the target network and refresh it every $n$ iterations, so each side chases something stationary for a while.
+\medskip
+\textbf{Unequal step sizes.} Let the critic learn faster than the actor, so the judge is roughly right before the doer trusts it.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+Both devices reappear in S8's frontier solver, where the frozen copy is what imposes \emph{perceived $=$ actual} in equilibrium.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{One Step or Many: a Bias--Variance Choice}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+\textbf{One step.} $\hat V(k_i)=u\bigl(k_i,g(k_i)\bigr)+\beta\,\mathcal{V}(k_{i,1})$.
+\smallskip
+
+\emph{Low variance} --- one transition. \emph{High bias} --- it leans almost entirely on the current $\mathcal{V}$, which is wrong early on.
+\smallskip
+
+\textbf{$T$ steps.}
+\[
+  \hat V(k_i)=\sum_{t=0}^{T-1}\beta^{t}u\bigl(k_{i,t},g(k_{i,t})\bigr)+\beta^{T}\mathcal{V}(k_{i,T}).
+\]
+\emph{Lower bias} --- $T$ periods of real simulated reward, the network used only for the tail. \emph{Higher variance} --- paths differ.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{takeawaybox}[title=\textbf{The dial}]\small
+$T$ trades the network's error against sampling noise. Typical values are $30$--$50$: long enough for $\beta^{T}$ to make the tail nearly irrelevant, short enough that the paths have not dispersed.
+\end{takeawaybox}
+\smallskip
+{\footnotesize At $\beta=0.99$ quarterly, $\beta^{50}\approx0.61$ and $\beta^{200}\approx0.13$: \textbf{the discount factor sets how much horizon must be simulated} before the critic's error stops mattering.
+\medskip
+S8 names the family --- $T=1$ is temporal difference, $T=\infty$ is Monte Carlo, in between is TD($\lambda$).}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Where to Sample, and Why Not Chebyshev}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Chebyshev and finite elements must approximate over the \textbf{entire} domain --- that is what a basis expansion is. As $d$ grows, covering the whole domain is exactly what becomes impossible.
+\medskip
+
+Sampling from the model's own \textbf{stationary distribution} does something different in kind: it spends the approximation budget on the region the economy actually visits, and ignores the rest.
+\medskip
+
+That is the synergy. \textbf{Monte Carlo generates data where it matters; the network fits scattered, mesh-free data.} Neither half works without the other.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{cautionbox}[title=\textbf{Three concerns, and their remedies}]\small
+\textbf{Rare but important states.} A crisis is off the ergodic path by construction --- mix in \emph{targeted} or importance sampling.
+\medskip
+\textbf{Multiple steady states.} One stationary distribution can miss an entire basin.
+\medskip
+\textbf{Out-of-distribution behaviour.} The network answers confidently outside the region it saw. \textbf{Stress-test separately.}
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+7.B1 measured the first of these: two decades of accuracy lost at the edge of the sampled band.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Equilibrium Conditions Can Be Built In}
+\begin{columns}[T]
+\begin{column}{0.51\textwidth}
+\small
+A network's output can be made to satisfy economic restrictions rather than merely approach them. Four devices, in increasing order of strength:
+\medskip
+\begin{enumerate}\small\setlength{\itemsep}{1mm}
+  \item \textbf{Output transformation} --- a sigmoid bounds the action into the feasible set. 7.B1 used it.
+  \item \textbf{Penalty} --- add $\lambda\sum(\text{violation})^{2}$ to the loss.
+  \item \textbf{Lagrangian} --- carry dual variables and update them during training.
+  \item \textbf{Architecture} --- structure the network so an identity holds automatically.
+\end{enumerate}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{takeawaybox}[title=\textbf{Which to reach for}]\small
+\textbf{An identity} --- market clearing, a budget constraint --- should be imposed by (1) or (4). A quantity that must equal another should never be \emph{learned}.
+\medskip
+\textbf{An inequality} that binds sometimes needs (2) or (3), or a Fischer--Burmeister reformulation.
+\end{takeawaybox}
+\medskip
+\begin{cautionbox}\footnotesize
+A penalty coefficient is a real hyperparameter with real consequences: too small and the constraint is violated, too large and it dominates the residual and nothing else is learned.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Device (4) is 7.B3.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Macroeconomics in Reinforcement-Learning Vocabulary}
+\vspace{-1mm}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.4cm} >{\raggedright\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{RL} & \textbf{Economics} & \textbf{Note} \\
+\midrule
+agent & household or firm & the optimiser \\
+environment & prices and constraints & the rules of the game \\
+state $S$ & $(k,z,\Gamma)$ & wealth, shocks, \textbf{the distribution} \\
+action $A$ & $c$, $i$, $l$ & the choice \\
+transition $P$ & $k'=(1-\delta)k+i$ & \textbf{micro: known exactly} \\
+ & $\Gamma'=H(\Gamma)$ & \textbf{macro: often unknown} \\
+reward $R$ & $u(c)$ & period utility \\
+discount $\gamma$ & $\beta$ & time preference \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{takeawaybox}\footnotesize
+\textbf{The two transition rows are the whole story of S8.} We know the household's law of motion exactly, which is why nothing in this deck needed exploration.
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{cautionbox}\footnotesize
+We do \emph{not} know $H$. In Krusell--Smith it is guessed and regressed; the frontier replaces the guess with a network that takes $\Gamma$ itself as an input.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{2.B1 promised this frame.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Two Practical Problems, and Their Standard Answers}
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\small
+\textbf{The horizon is infinite; a simulation is not.}
+\medskip
+
+Truncate at $T$ and close with the critic:
+\[
+  \sum_{t=0}^{T-1}\beta^{t}u_t+\beta^{T}\mathcal{V}(k_T).
+\]
+The tail is not dropped --- it is \emph{estimated}, and $\beta^{T}$ bounds the damage. The critic exists for exactly this.
+\end{column}
+\begin{column}{0.49\textwidth}
+\small
+\textbf{The expectation is unknown in closed form.}
+\medskip
+
+Simulate. Draw shock paths, average the realised returns, and let the noise be absorbed by the same stochastic descent that already tolerates mini-batch noise.
+\medskip
+
+Where the shock is a finite Markov chain --- as in 7.B1 --- \textbf{take the exact sum instead}. It costs one matrix product and removes a whole source of error.
+\end{column}
+\end{columns}
+\medskip
+\begin{takeawaybox}\footnotesize
+\textbf{A rule worth carrying:} never sample what you can sum. The inner expectation is contamination of the residual itself, and unlike outer sampling noise it buys you nothing.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Euler or Bellman? A Decision, Not a Doctrine}
+\vspace{-1mm}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.7cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+& \textbf{Euler residual (7.B1)} & \textbf{Deep VFI / actor--critic (7.B2)} \\
+\midrule
+networks & one & two \\
+requires & first-order conditions & only the Bellman equation \\
+flavour & supervised & reinforcement \\
+gives you & the policy & the policy \textbf{and} the value \\
+handles kinks & badly & naturally \\
+discrete choice & no & yes \\
+accuracy when FOCs exist & \textbf{higher} & lower \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{takeawaybox}\footnotesize
+\textbf{Use the Euler road when the FOCs are clean}: one network, a sharper residual, and a quantity you can audit directly against a classical solve.
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{cautionbox}\footnotesize
+\textbf{Use the Bellman road when they are not} --- and accept that you have given up the cleanest validation instrument along with them. 7.B3 supplies a replacement.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{The value function is worth having in its own right --- welfare comparisons need it, and Euler methods do not produce one.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Two Questions This Deck Cannot Answer}
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{conceptbox}[title=\textbf{Why sample along the state space at all?}]\footnotesize
+Because accuracy is only worth buying where the economy actually goes. But the ergodic distribution \textbf{depends on the policy being learned} --- so the sampler and the solution are a \emph{joint fixed point}, and each is chasing the other.
+\end{conceptbox}
+\smallskip
+{\footnotesize Train only where the current policy goes and it can settle in a corner, satisfy the Bellman equation beautifully there, and be wrong everywhere else --- with a small loss reporting success. \textbf{That is on-policy against off-policy.}}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{conceptbox}[title=\textbf{What goes wrong in a $T$-step rollout?}]\small
+\textbf{Uncertainty unfolds.} Every simulated step multiplies the branches the path could have taken, so the variance of the return estimate \textbf{compounds with $T$} --- while the bias from the critic falls.
+\end{conceptbox}
+\smallskip
+{\footnotesize Longer horizons buy less bias and pay in variance. \textbf{Controlling that exchange --- baselines, temporal-difference targets, variance reduction --- is most of what reinforcement learning is.}}
+\end{column}
+\end{columns}
+\smallskip
+\begin{takeawaybox}\footnotesize
+Both have the same shape: \textbf{the object being estimated depends on the policy doing the estimating.} Nothing here resolves that; the methods above work anyway because the growth model is forgiving. \textbf{Session 8 is where it stops being forgiving.}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways, and What 7.B3 Has to Fix}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{takeawaybox}\small
+\begin{itemize}\small\setlength{\itemsep}{1.1mm}
+  \item The Bellman equation is a functional equation with a residual, so it is a loss --- and it needs \textbf{no first-order conditions}.
+  \item The inner $\max$ is the obstacle, and \textbf{a second network removes it}: the actor acts, the critic judges.
+  \item The value target must be \textbf{detached}, or the optimizer lowers the loss by moving the target.
+  \item Sampling from the ergodic region is what makes this scale --- and is exactly why the answer \textbf{outside} that region is unconstrained.
+  \item \textbf{The contraction is gone.} No error bound survives into this deck.
+\end{itemize}
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}[title=\textbf{Bridge to 7.B3}]\small
+Two things are now owed.
+\medskip
+\textbf{First}, the networks obey no economics: nothing makes a value function concave or a policy monotone, though theory says both. \textbf{ICNN} and monotone networks impose it by construction.
+\medskip
+\textbf{Second}, with no contraction bound left, \textbf{how do you know any of this worked?}
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

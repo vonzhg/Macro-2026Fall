@@ -1,0 +1,377 @@
+%% ECON 282E -- Session 5, Deck B6: Worked Example -- the RBC Model by Projection
+%% The instructor's request: Block A solves the quarterly RBC by perturbation,
+%% Block B solves the SAME model by projection, and the session closes with one
+%% model and four methods in one table.
+%% Numbers and coordinates from tools/figures/s05_numbers.json, keys
+%% "worked_proj", "three_methods", "fig_proj_policy".
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+\lstset{language=Python, basicstyle=\ttfamily\scriptsize, frame=none,
+        backgroundcolor=\color{gray!8}, aboveskip=2pt, belowskip=2pt}
+
+\decktitle{5}{B6}{Worked Example: The RBC Model by Projection}{Thursday, October 22, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{5}{5.B6}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block B:} 5.B1 the residual $\;\cdot\;$ 5.B2 choosing a basis $\;\cdot\;$ 5.B3 Chebyshev $\;\cdot\;$ 5.B4 finite elements $\;\cdot\;$ 5.B5 determining the coefficients $\;\cdot\;$ \textbf{5.B6} the worked example.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Same Model, a Fourth Way}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Four sessions, one model.
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{1.35cm} >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{3.A4} & grid VFI, everything crude \\
+\textbf{4.B5} & grid VFI, Rouwenhorst $+$ interpolation $+$ golden section $+$ Howard \\
+\textbf{5.A6} & perturbation around $k^{*}$ \\
+\textbf{5.B6} & \textbf{Chebyshev collocation on a domain} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+Here the unknown is the \textbf{consumption policy}, written as a Chebyshev polynomial in $k$ for each of the seven shock states, and the coefficients are chosen to zero the Euler residual at the Chebyshev nodes.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{The commitments}]\small
+\textbf{Basis:} Chebyshev in $k$, degree $7$ (5.B3).\\[1mm]
+\textbf{Domain:} $k\in[0.5k^{*},1.5k^{*}]$ --- chosen, and it matters.\\[1mm]
+\textbf{Shock:} the same Rouwenhorst $7$-state chain as 4.B5, so the comparison is like for like.\\[1mm]
+\textbf{Projection:} orthogonal collocation (5.B5).
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}[fragile]{Steps 1 and 2: The Basis, and the Residual}
+\begin{columns}[T]
+\begin{column}{0.57\textwidth}
+\begin{lstlisting}
+def psi(k):                       # [klo,khi] -> [-1,1]
+    return 2*(k - klo)/(khi - klo) - 1
+
+def cpol(th, k, j):               # policy for state j
+    return chebval(psi(k), th[j])
+
+def resid(th, k, j):
+    c  = cpol(th, k, j)
+    y  = z[j]*k**alpha + (1-delta)*k
+    kp = np.clip(y - c, klo, khi)
+    rhs = 0.0
+    for l in range(n_z):
+        cp = cpol(th, kp, l)
+        R  = alpha*z[l]*kp**(alpha-1) + 1-delta
+        rhs += Pi[j,l] * R/cp
+    return 1.0 - c*beta*rhs
+\end{lstlisting}
+\end{column}
+\begin{column}{0.40\textwidth}
+\begin{conceptbox}[title=\textbf{Read the last line}]\small
+That is the \textbf{unit-free Euler residual} of 3.A1 --- the same expression we have used to grade every solver since Session 3.
+\medskip
+The difference is that here it is not a diagnostic. It \emph{is} the equation being solved.
+\end{conceptbox}
+\medskip
+\begin{cautionbox}\footnotesize
+The \texttt{clip} matters: during the solve the iterate can propose a $k'$ outside the domain, where a Chebyshev polynomial diverges like $\cosh$.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}[fragile]{Step 3: Warm Start From Perturbation}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{lstlisting}
+# 5.A4's four numbers, reused as a starting guess
+P, F, _, _ = klein(A, B, n_x=2)
+
+nodes = cos(pi*(2*arange(1,n+2)-1)/(2*(n+1)))
+kn = klo + 0.5*(nodes+1)*(khi - klo)
+
+th0 = np.zeros((n_z, n+1))
+for j in range(n_z):
+    ch = F[0,0]*log(kn/kss) + F[0,1]*logz[j]
+    th0[j] = chebfit(psi(kn), css*exp(ch), n)
+\end{lstlisting}
+\medskip
+\small
+The first-order perturbation policy, evaluated at the Chebyshev nodes and fitted. Six lines, and the nonlinear solve that follows converges from it without trouble.
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{takeawaybox}\footnotesize
+\textbf{This is the honest reason to learn Block A.} Projection needs a good initial guess for a $56$-dimensional nonlinear system, and perturbation produces one in under a millisecond.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+5.B1 promised the two methods mix rather than compete. This is where it happens, and it is standard practice, not a trick.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{worked\_proj.warm\_start}.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}[fragile]{Steps 4 and 5: Solve, Then Grade}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{lstlisting}
+def equations(flat):
+    th = flat.reshape(n_z, n+1)
+    return np.concatenate([resid(th, k_cheb, j)
+                           for j in range(n_z)])
+
+sol = root(equations, th0.ravel(),
+           method="hybr", tol=1e-12)
+th = sol.x.reshape(n_z, n+1)
+#  56 unknowns, 0.13 s, residual 5.1e-15
+
+E = euler_errors(cpol, th, n_test=2000)
+#  graded on 2000 RANDOM points, not the nodes
+\end{lstlisting}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}[title=\textbf{The grading rule}]\small
+The residual is zero \emph{at the collocation nodes} by construction, so evaluating there would report $10^{-15}$ and mean nothing.
+\medskip
+Grade on \textbf{different points} --- 3.A1's separation of grids, and the single most common way to fool yourself here.
+\end{conceptbox}
+\medskip
+\begin{examplebox}\footnotesize
+$56$ unknowns: $8$ coefficients $\times$ $7$ shock states.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{worked\_proj}: degree $7$, $56$ unknowns, $0.129$\,s.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Does It Work? Plot the Saving, Not the Policy}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=7.7cm, height=5.3cm,
+    xmin=14, xmax=43, ymin=-0.62, ymax=0.62,
+    xlabel={\scriptsize capital $k$}, ylabel={\scriptsize saving $g(k)-k$},
+    tick label style={font=\scriptsize}, label style={font=\scriptsize},
+    scaled ticks=false, /pgf/number format/fixed,
+    /pgf/number format/precision=1,
+    axis x line*=bottom, axis y line*=left]
+  \addplot[very thick, RedTitle] coordinates {
+      (14.1742,0.49434) (14.7431,0.47710) (15.3119,0.45952) (15.8808,0.44164) (16.4497,0.42346) 
+      (17.0185,0.40502) (17.5874,0.38632) (18.1563,0.36739) (18.7251,0.34823) (19.2940,0.32887) 
+      (19.8629,0.30931) (20.4317,0.28957) (21.0006,0.26964) (21.5694,0.24956) (22.1383,0.22931) 
+      (22.7072,0.20892) (23.2760,0.18838) (23.8449,0.16771) (24.4138,0.14691) (24.9826,0.12599) 
+      (25.5515,0.10496) (26.1204,0.08381) (26.6892,0.06256) (27.2581,0.04120) (27.8270,0.01975) 
+      (28.3958,-0.00180) (28.9647,-0.02343) (29.5336,-0.04515) (30.1024,-0.06695) 
+      (30.6713,-0.08883) (31.2401,-0.11078) (31.8090,-0.13281) (32.3779,-0.15491) 
+      (32.9467,-0.17707) (33.5156,-0.19930) (34.0845,-0.22160) (34.6533,-0.24395) 
+      (35.2222,-0.26636) (35.7911,-0.28883) (36.3599,-0.31136) (36.9288,-0.33393) 
+      (37.4977,-0.35656) (38.0665,-0.37924) (38.6354,-0.40196) (39.2043,-0.42473) 
+      (39.7731,-0.44754) (40.3420,-0.47040) (40.9108,-0.49330) (41.4797,-0.51624) 
+      (42.0486,-0.53921) };
+  \draw[black!45] (axis cs:14,0) -- (axis cs:43,0);
+  \draw[black!35, dotted, thick] (axis cs:28.348,-0.62) -- (axis cs:28.348,0.62);
+  \node[font=\tiny, text=black!55, anchor=south west] at (axis cs:28.6,-0.58) {$k^{*}=28.35$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.44\textwidth}
+\small
+Saving $g(k)-k$ at the middle shock state. Plotting $g(k)$ itself would show a straight line at $45^{\circ}$ and hide everything.
+\medskip
+
+The curve crosses zero \textbf{at $k^{*}$} --- saving there is $2.8\times10^{-6}$ --- is positive below and negative above, and is smooth throughout. Three behaviour checks on one picture.
+\medskip
+
+Compare 4.B5, where the same crossing landed \textbf{ten grid spacings} away from $k^{*}$ because the policy was quantized. Here there is no grid to quantize it.
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{fig\_proj\_policy}; the deviation is formed by pgfplots from the ledger's $(k,g)$ pairs.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What One More Coefficient Buys}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\small
+Re-solve at a range of degrees, everything else identical:
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}r r >{\raggedleft\arraybackslash}X r@{}}
+\toprule
+degree & unknowns & $\max|\mathcal{E}|$ & sec \\
+\midrule
+$3$ & $28$ & $10^{-3.84}$ & $0.06$ \\
+$5$ & $42$ & $10^{-5.15}$ & $0.09$ \\
+$7$ & $56$ & $10^{-6.40}$ & $0.13$ \\
+$9$ & $70$ & $10^{-7.63}$ & $0.18$ \\
+$11$ & $84$ & $\mathbf{10^{-8.85}}$ & $0.50$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\textbf{About $1.2$ decades for every two degrees}, dead straight over five decades of error. That is the geometric convergence 5.B3 promised for a smooth function, arriving on schedule.
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{takeawaybox}\footnotesize
+Compare a grid method, where 3.A1 measured the value error falling like $h^{2}$ and the policy error like $h$. To gain $1.2$ decades there you multiply the grid by $16$. Here you add two coefficients.
+\end{takeawaybox}
+\medskip
+\begin{cautionbox}\footnotesize
+This only holds while the policy is \textbf{smooth}. Put a binding constraint in the domain and the same table would flatten out at $O(1/n)$ --- 5.B2's kinked function, exactly.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{worked\_proj.rows}; all five converged, graded on the same $2{,}000$ random points.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{One Model, Four Methods}
+\small
+\begin{center}
+\begin{tabularx}{0.97\linewidth}{@{}>{\raggedright\arraybackslash}p{3.3cm} r r >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X@{}}
+\toprule
+\textbf{Method} & \textbf{numbers} & \textbf{sec} & $\max|\mathcal{E}|$ \textbf{near} $k^{*}$ & $\max|\mathcal{E}|$ \textbf{wide} \\
+\midrule
+global VFI (4.B5) & $2{,}100$ & $0.94$ & $10^{-2.82}$ & $10^{-2.51}$ \\
+perturbation, 1st order & $\mathbf{4}$ & $<0.001$ & $10^{-4.01}$ & $10^{-2.56}$ \\
+perturbation, 2nd order & $12$ & $0.02$ & $10^{-6.14}$ & $10^{-4.50}$ \\
+Chebyshev collocation & $56$ & $0.13$ & $10^{-6.82}$ & $\mathbf{10^{-6.40}}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{takeawaybox}\footnotesize
+\textbf{The grid method is last on every measure.} It stores $37\times$ more numbers than collocation, takes $7\times$ longer, and is \textbf{four decades} less accurate.
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{conceptbox}[title=\textbf{The flat column}]\footnotesize
+Only collocation is nearly as accurate far from $k^{*}$ as near it: $10^{-6.40}$ against $10^{-6.82}$. That is what ``global'' means, measured.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{three\_methods}. Identical model, chain, domain and residual definition; the 4.B5 row reproduces that deck's own ledger to $0.002$ decades and its $66$ policy updates exactly.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{So Why Did We Spend Two Sessions on Grids?}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Because the table is about \textbf{this model}: smooth, one-dimensional and unconstrained --- the best case for a polynomial basis and the worst for a grid. Change any one and the ranking moves.
+\medskip
+\begin{itemize}\small
+  \item \textbf{A binding constraint.} The policy kinks; Chebyshev gets Gibbs, perturbation does not exist, and VFI does not care.
+  \item \textbf{A discrete choice.} Same, worse.
+  \item \textbf{More dimensions.} The grid dies first, then complete polynomials, then Smolyak.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{The decision}]\footnotesize
+\textbf{Smooth, low-$d$, want speed} $\to$ perturbation.\\[0.5mm]
+\textbf{Smooth, need global accuracy} $\to$ projection.\\[0.5mm]
+\textbf{Kinks, constraints, discrete choice} $\to$ VFI or EGM.\\[0.5mm]
+\textbf{High-$d$ and smooth} $\to$ Smolyak, then neural nets (S7).
+\end{conceptbox}
+\medskip
+\begin{cautionbox}\footnotesize
+And whichever you choose, grade it on points you did not solve at.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Comparisons of this kind are often attributed to Aruoba, Fern\'andez-Villaverde \& Rubio-Ram\'irez (2006), which compares VFI, perturbation, Chebyshev projection, finite elements and PEA on this model. The table above is our own run, on our own calibration.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What We Deliberately Did Not Do}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+\begin{itemize}\small
+  \item \textbf{No constraint.} The one case where the grid methods win, and the case every model in Session 2 has.
+  \item \textbf{No second endogenous state.} At $d=2$ the tensor basis is $8^{2}=64$ coefficients per shock state; at $d=5$ it is $32{,}768$. That is why 5.B3 spent three frames on Smolyak.
+  \item \textbf{We chose the domain by hand.} Too narrow and the solution is wrong where you need it; too wide and the polynomial wastes degrees. Nothing in the method chooses it.
+  \item \textbf{No guarantee off the domain.} Outside $[k_{lo},k_{hi}]$ the approximation does not degrade gracefully --- it diverges.
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{cautionbox}[title=\textbf{The honest summary}]\small
+Projection is the most accurate method in this course so far, on the problems it suits, and it has \textbf{two free choices} --- basis and domain --- that it cannot make for you and will not warn you about.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+Perturbation had one such choice (the expansion point) and it was forced. Projection has two and neither is.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways}
+\begin{takeawaybox}
+\begin{itemize}\small
+  \item The same model, a fourth way: an $8$-term Chebyshev polynomial per shock state, coefficients chosen to \textbf{zero the Euler residual at the Chebyshev nodes}. $56$ unknowns, $0.13$ seconds.
+  \item \textbf{Warm-start from perturbation.} Block A's four numbers give the nonlinear solver its initial guess --- the two methods cooperate rather than compete.
+  \item \textbf{Grade on points you did not solve at.} At the collocation nodes the residual is $10^{-15}$ by construction and means nothing.
+  \item Measured convergence: \textbf{$1.2$ decades for every two degrees}, straight over five decades. That is the geometric rate smoothness buys.
+  \item \textbf{One model, four methods}: the grid solver stores $37\times$ more numbers, runs $7\times$ slower and is \textbf{four decades} less accurate than collocation --- and only collocation is as accurate far from $k^{*}$ as near it.
+  \item That ranking is a property of a \textbf{smooth, one-dimensional, unconstrained} model. Add a binding constraint and it reverses, which is the single most important sentence in this session.
+\end{itemize}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: The Models We Actually Care About}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Session 5 ends with the best solution of the growth model this course will produce by classical means. It also ends with the condition that made it possible, stated four times: \textbf{smooth, one-dimensional, unconstrained}.
+\medskip
+
+Session 2's models are none of those. Aiyagari households sit at a borrowing limit; Krusell--Smith carries a distribution as a state; the life-cycle model has eighty cohorts. Every method in Sessions 3 to 5 has now met the case that defeats it.
+\medskip
+
+Next week we take these tools to those models, and find out exactly where they stop.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{Next week (S6)}]\small
+Heterogeneous agents by classical methods: \textbf{Aiyagari} as a nested fixed point, \textbf{Krusell--Smith}, \textbf{OLG} and transitions --- and the complexity wall that Sessions 7 and 8 exist to break.
+\end{conceptbox}
+\medskip
+\begin{examplebox}\footnotesize
+\textbf{Homework 1} was due today. The \textbf{practice midterm} is posted this afternoon; the \textbf{midterm} is next Thursday, Block B, closed book, covering Sessions 1--5.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

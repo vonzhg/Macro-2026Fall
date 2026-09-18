@@ -1,0 +1,577 @@
+%% ECON 282E -- Session 7, Deck B3: Structure and Validation
+%% Sources: AI-ECON Lec04_T4_Structured_NNs_Validation.tex, carried WHOLE
+%% (27 frames); AI-ECON Lec03_T4 section "Specialized Architectures", carried
+%% whole; Quant_Macro Lec.6 "Structured Neural Networks for Equilibrium
+%% Models", "ICNN Example & Implementation" and "Monotonic Neural Networks";
+%% Feng & Miao, "AI for Economists" (Book1), ch.10 "Embedding equilibrium
+%% properties in the network" and "Accuracy validation and convergence
+%% diagnostics".
+%% Numbers from tools/figures/s07_numbers.json, keys "icnn", "five_methods",
+%% "worked_nn_growth"; the classical rows are read from s05_numbers.json.
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+%% Deck-local: the shared preamble is never edited (its md5 marks every deck stale).
+\newcommand{\repo}[2]{\href{https://github.com/vonzhg/Macro-2026Fall/blob/main/#1}{\texttt{#2}}}
+
+\lstset{language=Python, basicstyle=\ttfamily\scriptsize, frame=none,
+        backgroundcolor=\color{gray!8}, aboveskip=2pt, belowskip=2pt}
+
+\decktitle{7}{B3}{Structure, and How You Know It Worked}{Thursday, November 5, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{7}{7.B3}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block B:} 7.B1 the model as a loss function $\;\cdot\;$ 7.B2 deep VFI and actor--critic $\;\cdot\;$ \textbf{7.B3} structure and validation.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Two Debts}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+Block B has produced two working solvers and two unpaid debts.
+\medskip
+
+\textbf{First, the networks obey no economics.} Theory says a value function is concave in capital and a consumption policy is increasing in wealth. Nothing in 7.B1 or 7.B2 imposes either. The network may satisfy them approximately where it was trained and violate them anywhere else --- and a violated shape restriction is not a small error, it is a \emph{qualitatively wrong} object.
+\medskip
+
+\textbf{Second, the \emph{a priori} bound is gone.} 3.A2 could bound the distance to the true value function \textbf{before looking at the answer}. Nothing in Block B can do that.
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{conceptbox}[title=\textbf{This deck pays both}]\small
+\textbf{Structure} --- build the restriction into the architecture, so it holds \emph{identically} rather than approximately. 7.A4's \textbf{fourth} constraint class.
+\medskip
+\textbf{Validation} --- replace the lost error bound with a measurement you can actually make.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+The course's first deck said it: \textbf{a numerical solution is a claim.} This is where that claim gets adjudicated for a network.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Injecting Economic Structure}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+A generic feedforward network is \emph{deliberately} assumption-free: 7.A4 called a dense $\mathbf{W}$ the refusal to assume anything about the input. For images that refusal costs parameters. \textbf{In economics it costs something worse}, because we are not ignorant --- theory tells us the shape.
+\medskip
+
+\begin{itemize}\small\setlength{\itemsep}{1mm}
+  \item $V(k)$ is \textbf{concave} in capital, from concave $u$ and $f$;
+  \item $c(a)$ is \textbf{increasing} in wealth;
+  \item a demand function is \textbf{monotone} in price;
+  \item a cost function is \textbf{convex} in input prices.
+\end{itemize}
+\medskip
+
+Every one of these is a restriction that can be built into the parameterisation instead of hoped for.
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{takeawaybox}[title=\textbf{7.A4's fourth class}]\small
+CNN: $\mathbf{W}$ sparse and repeated. RNN: $\mathbf{W}$ shared across dates. GNN: $\mathbf{W}$ follows the adjacency.
+\medskip
+\textbf{Here: constrain the \emph{signs} of the weights}, and the function is convex or monotone by construction.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+And it is the same trade as ever. True, it buys parameters, data and reliability. False, it is bias --- which is why the restriction must come from theory, not from convenience.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Measured: What an Unconstrained Network Does to Convexity}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+Fit a plain ReLU network ($1{,}153$ parameters) to a function that is \textbf{exactly convex} --- $0.6x^{2}+0.25x+0.1$, second derivative $1.2$ everywhere --- at \textbf{5 random seeds}.
+\smallskip
+
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{1.9cm} >{\raggedleft\arraybackslash}p{2.6cm}@{}}
+\toprule
+& \textbf{median RMSE} & \textbf{worst $-f''$} \\
+\midrule
+plain network & $\mathbf{0.00172}$ & $5.93$ \ \tiny(range $0$--$10.4$) \\
+ICNN & $0.01345$ & $\mathbf{<7.1\times10^{-11}}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\smallskip
+``Worst $-f''$'' is the \textbf{most negative curvature the fitted function reaches}: zero means it came out convex everywhere. At a typical seed the plain network fits the \emph{level} well and is \textbf{locally concave by about $5.9$}, against a true curvature of $1.2$.
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{cautionbox}[title=\textbf{Fatal, not untidy}]\small
+A concave patch breaks 7.B2's inner maximisation: local maxima appear, ascent lands in the wrong one, the policy \textbf{jumps}. \textbf{And it is invisible in the loss.}
+\end{cautionbox}
+\smallskip
+\begin{takeawaybox}\footnotesize
+\textbf{Read the range, not the median.} At one seed in five the plain network came out convex anyway: \textbf{not reliably broken, but unreliable} --- and you cannot tell which you have without checking. The ICNN never exceeds $7.1\times10^{-11}$.
+\smallskip
+\textbf{Not free:} the ICNN's RMSE is $\mathbf{7.8\times}$ larger. \emph{That is the price of the guarantee.}
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{icnn}, five seeds. ``Worst $-f''$'' is the largest negative second difference; zero means convex. Code: \repo{tools/figures/s07_generate.py}{s07\_generate.py}, \texttt{run\_icnn}; \repo{labs/L07_ML_and_Deep_Growth.ipynb}{L07} Part 6.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Input Convex Neural Networks}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+The architecture is a feedforward network with one extra channel and two restrictions:
+\[
+  z_{l+1}=\sigma_l\Bigl(W^{(z)}_{l}z_l+W^{(x)}_{l}x+b_l\Bigr).
+\]
+\medskip
+
+\textbf{Sufficient for $f(x)$ to be convex in $x$:}
+\begin{enumerate}\small\setlength{\itemsep}{0.7mm}
+  \item the \textbf{recurrent} weights are non-negative, $W^{(z)}_l\ge0$;
+  \item the activations $\sigma_l$ are \textbf{convex and non-decreasing} --- ReLU and softplus both are.
+\end{enumerate}
+\medskip
+
+\textbf{The direct input weights $W^{(x)}_l$ are unconstrained}, including negative: every layer sees $x$ again through a free linear map, so the network can place and tilt the function freely.
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{conceptbox}[title=\textbf{The proof, by induction}]\small
+\textbf{Base.} $z_0=x$ is linear, hence convex.
+\medskip
+\textbf{Step.} $z_l$ convex; $W^{(z)}_l\ge0$ makes $W^{(z)}_lz_l$ a \textbf{non-negative combination of convex functions}. Adding the affine term preserves convexity, and so does applying a convex \emph{non-decreasing} $\sigma$.
+\end{conceptbox}
+\medskip
+{\footnotesize Both conditions are load-bearing: a non-monotone activation such as $\tanh$ breaks the induction at the last step.}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Amos, Xu \& Kolter (2017), \emph{ICML}, ``Input Convex Neural Networks''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Does the Constraint Cost Expressivity?}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+The obvious worry: with $W^{(z)}\ge0$, is universal approximation lost?
+\medskip
+
+\begin{conceptbox}[title=\textbf{Theorem (Chen, Shi \& Zhang, 2019)}]\small
+An input convex neural network can approximate \textbf{any convex function} on a compact domain to arbitrary accuracy.
+\end{conceptbox}
+\medskip
+
+The intuition is one line: a maximum of affine functions $\max_i\{a_i^{\top}x+b_i\}$ is convex, and \emph{any} convex shape is a limit of such maxima. An ICNN with ReLU units is a hierarchical max-affine approximator.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{takeawaybox}[title=\textbf{The reading that matters}]\small
+You are \textbf{not} imposing a functional form --- not CES, not Cobb--Douglas, not translog.
+\medskip
+You are imposing a \textbf{shape restriction}, and keeping full non-parametric flexibility inside it.
+\medskip
+\emph{Architecture encodes the theory; the data choose the function within it.}
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+Exactly the situation an economist is usually in: theory pins the \emph{global shape} and says nothing about the curvature.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Chen, Shi \& Zhang (2019), \emph{ICLR}, ``Optimal Control via Neural Networks: A Convex Approach''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{And What the Constraint Refuses}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Point the same ICNN at $\sin 3x$ on $[-1,1]$, which is \textbf{not} convex, and train it identically.
+\medskip
+
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{2.2cm}@{}}
+\toprule
+\textbf{ICNN on $\sin 3x$} & \\
+\midrule
+RMSE, median of 5 & $0.3449$ \\
+convexity violation & $<8.9\times10^{-11}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+
+It fails, completely --- and it fails while remaining \textbf{exactly convex}. The architecture did not bend; it could not.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{takeawaybox}[title=\textbf{This is the guarantee, from the other side}]\small
+A constraint that can be violated when the data push hard enough is not a guarantee. \textbf{This one cannot be}, which is the entire point.
+\medskip
+The cost is stated exactly: if the true function is not convex, the ICNN will not find it, and the residual will say so loudly.
+\end{takeawaybox}
+\medskip
+{\footnotesize And that is a diagnostic worth having: \textbf{a structured network that cannot fit is telling you the theory you imposed is wrong} --- an informative failure, unlike a silently wrong fit.}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{icnn.nonconvex}; same architecture, optimizer and budget as the convex case. Code: \repo{tools/figures/s07_generate.py}{s07\_generate.py}, \texttt{run\_icnn}.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What Convexity Buys a Macro Solver}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+\textbf{1. The inner maximisation becomes convex.} 7.B2's obstacle was $\max_{k'}\{u(k,k')+\beta\hat V(k')\}$ with $\hat V$ a non-convex network. With $\hat V$ concave by construction the objective is a \textbf{single-basin concave program}: gradient methods find the global maximum every time --- no bracketing, no multi-start, no policy flips.
+\medskip
+
+\textbf{2. The contraction comes back.} The Bellman operator preserves concavity, so an ICNN value function keeps $T$ a $\beta$-contraction on the relevant space. \textbf{Geometric convergence is restored}, at the classical rate.
+\medskip
+
+\textbf{3. Prices behave.} Convex preferences give monotone demand, hence a unique, stable market-clearing price in a calibration loop.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{takeawaybox}[title=\textbf{Read benefit 2 again}]\small
+7.B2's comparison table had one genuinely alarming row: \emph{no general convergence guarantee}.
+\medskip
+\textbf{Imposing the shape the theory already gives you is what buys it back.} That is a far better reason to use an ICNN than accuracy.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+\textbf{The cost is real and measured:} the constrained network fitted $7.8\times$ less accurately here. You are buying a \emph{guarantee} with \emph{fit} --- and for a Bellman solver that is a good trade.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Partial Convexity, Because Macro Is Not That Tidy}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+A value function $V(k,z)$ is typically:
+\begin{itemize}\small\setlength{\itemsep}{0.5mm}
+  \item \textbf{concave in the endogenous states} $k$ --- capital, assets;
+  \item \textbf{of no particular shape in the exogenous states} $z$ --- TFP, income risk.
+\end{itemize}
+\medskip
+
+A plain ICNN would impose convexity on $z$ too. The \textbf{partially input convex} network splits the inputs:
+\[
+  z_{l+1}=\sigma\Bigl(\underbrace{W^{(z)}_l z_l}_{\ge0}+\underbrace{W^{(u)}_l(u\circ v)}_{\text{interaction}}+\underbrace{W^{(v)}_l v}_{\text{free}}+b_l\Bigr),
+\]
+with $k$ down the constrained path and $z$ down an ordinary one.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{takeawaybox}[title=\textbf{The general principle}]\small
+Impose the restriction \textbf{exactly where theory gives you one}, and nowhere else. Over-imposing is bias by another route --- and unlike under-imposing, it does not show up in the residual.
+\end{takeawaybox}
+\smallskip
+\begin{cautionbox}[title=\textbf{Softplus, not clamp}]\footnotesize
+Enforce $W^{(z)}\ge0$ by \textbf{reparameterising}, $W=\mathrm{softplus}(\tilde W)$, never by clamping: a clamped weight at the boundary gets \textbf{zero gradient} and is dead. 7.A2's dying ReLU by another door.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Monotone Networks, and the Conflict They Create}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+The same device gives monotonicity. If every weight along a path from input $x_j$ to the output is non-negative and the activations are non-decreasing, then $\partial f/\partial x_j\ge0$ \textbf{identically}.
+\medskip
+
+\textbf{Partial monotonicity} is what is usually wanted: increasing in wealth, unrestricted in the shock. Constrain the signs only on the paths from the monotone inputs.
+\medskip
+
+\textbf{Cases where theory says exactly this:} consumption increasing in cash on hand, saving in wealth, demand decreasing in own price, the value function increasing in the state.
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{cautionbox}[title=\textbf{The optimization conflict}]\small
+Sign constraints \textbf{shrink the parameter set} and bend the loss surface, so a constrained network often trains more slowly and to a \emph{higher} training loss.
+\medskip
+\textbf{Not a defect:} the unconstrained network reaches its lower loss partly by using functions the theory forbids.
+\end{cautionbox}
+\medskip
+{\footnotesize Two routes: \textbf{constrain} the architecture (exact, costs flexibility) or \textbf{penalise} violations in the loss (flexible, only approximate).}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Instrument You Gave Up}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+3.A2 proved that value-function iteration is a contraction, and handed you a bound that needs no knowledge of the answer:
+\[
+  \lVert V_n-V^{*}\rVert_\infty\le\frac{\beta^{n}}{1-\beta}\lVert V_1-V_0\rVert_\infty .
+\]
+You could stop when it was small enough, and \textbf{know} how wrong you were.
+\medskip
+
+\textbf{No training loss replaces it.} That number is measured on the states the optimizer just drew, and 7.A3's whole regularisation discipline exists because it does not mean what it appears to mean.
+\medskip
+
+So the honest question is: \textbf{what \emph{can} be measured?} --- and the answer, next frame, is a bound that needs no training loss at all.
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{cautionbox}[title=\textbf{Three things a small loss is consistent with}]\small
+\textbf{1.} A policy that is excellent where you sampled and arbitrary elsewhere --- 7.B1 measured two decades lost at the band edge.
+\medskip
+\textbf{2.} A policy satisfying a \emph{necessary} condition on an explosive path.
+\medskip
+\textbf{3.} An actor and a critic that agree with each other and with nothing else.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Feng \& Miao, \emph{AI for Economists}, ch.~10, ``Accuracy validation and convergence diagnostics''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Off-Sample Euler Residual}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+The workhorse diagnostic, and the one every number in this course uses. After training, evaluate
+\[
+  \log_{10}\bigl|\mathcal{R}(k_i,z_i)\bigr|,\qquad i=1,\dots,M,
+\]
+on states \textbf{drawn independently of training} --- a fine grid, or a fresh sample, and deliberately including the edges.
+\medskip
+
+It is \textbf{unit-free}: divided by $u'(c)$, it reads as the relative consumption error a household makes by following this policy --- $-3$ is one part in a thousand.
+\smallskip
+
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X@{}}
+\toprule
+$\log_{10}|\mathcal{R}|<-3$ & acceptable \\
+$\log_{10}|\mathcal{R}|<-5$ & good \\
+$\log_{10}|\mathcal{R}|<-7$ & excellent \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{takeawaybox}[title=\textbf{Why it is the right instrument}]\footnotesize
+Computed from the \textbf{model's own equilibrium conditions}, it needs no true solution to compare against --- exactly the situation you are in when no classical method can solve the model.
+\medskip
+\textbf{And it is a bound, not a proxy.} Santos (2000): the policy error is at most a constant times the maximum residual, the constant set by the curvature of $u$. 3.A1 states it; 5.B1 measured it.
+\end{takeawaybox}
+\medskip
+{\footnotesize \textbf{Report the maximum, not the mean.} A mean hides a failure concentrated in part of the region: 7.B1's mean was $-3.43$ and its maximum $-1.61$.}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{The benchmark scale is Judd (1998), \emph{Numerical Methods in Economics}.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Measured: This Session's Solutions on Judd's Scale}
+\vspace{-1mm}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{2.1cm} >{\raggedleft\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.8cm}@{}}
+\toprule
+& \multicolumn{2}{c}{$\log_{10}\max|\mathcal{R}|$, off-sample} & \\
+\textbf{Method} & \textbf{whole band} & \textbf{near $k^{*}$} & \textbf{verdict} \\
+\midrule
+Chebyshev collocation (5.B6) & $-6.40$ & $-6.82$ & good, nearly excellent \\
+perturbation, 2nd order (5.A6) & $-4.50$ & $-6.14$ & acceptable; good near $k^{*}$ \\
+global VFI (4.B5) & $-2.51$ & $-2.82$ & below acceptable \\
+\textbf{neural network (7.B1)} & $\mathbf{-1.61}$ & $-3.25$ & \textbf{below acceptable on the band} \\
+\quad \emph{interior $90\%$ only} & $-2.54$ & --- & still below $-3$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{cautionbox}\footnotesize
+\textbf{Say it plainly: our network does not reach Judd's ``acceptable'' across the band.} It reaches $-3.25$ near the steady state and $-1.61$ at the edge.
+\end{cautionbox}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{takeawaybox}\footnotesize
+\textbf{Which is what reporting the number is for.} The published figure for this kind of solver is $-3.5$ to $-5$; ours is worse, and a slide that quoted the literature instead of the run would have hidden that.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{five\_methods}, \texttt{worked\_nn\_growth}; classical rows read from \texttt{s05\_numbers.json}. Code: \repo{tools/figures/s07_generate.py}{s07\_generate.py}, \repo{tools/figures/s05_generate.py}{s05\_generate.py}.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Why Run It Anyway}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+At $d=1$ the network spent thousands of parameters and minutes of compute to come \textbf{last} --- the \emph{expected} answer, not a disappointment.
+\smallskip
+
+\textbf{A network is not a more accurate approximator. It is a differently scaling one.} 7.A2 measured it with the parameter counts matched:
+\smallskip
+
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{1.9cm} >{\raggedleft\arraybackslash}p{1.9cm}@{}}
+\toprule
+$\max|\text{err}|$ & \textbf{Chebyshev} & \textbf{network} \\
+ & $17$ coef. & $16$ par. \\
+\midrule
+smooth target & $\mathbf{2.5\times10^{-11}}$ & $2.5\times10^{-1}$ \\
+kinked target & $1.8\times10^{-2}$ & $\mathbf{2.0\times10^{-4}}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{conceptbox}[title=\textbf{Where the crossover is}]\footnotesize
+7.A2's rates say it plainly: a basis fixed in advance is capped at $O(m^{-2/d})$ --- the exponent carries $d$ --- while Barron's rate for a network does \textbf{not}.
+\medskip
+So the gap closes as $d$ grows, then reverses. \textbf{The crossover is not at $d=1$; it is out where a basis can no longer be written down.}
+\end{conceptbox}
+\smallskip
+{\footnotesize And the same reversal appears at $d=1$ the moment the function is \textbf{kinked} --- which is what a borrowing limit does to a policy.}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\begin{takeawaybox}\footnotesize
+\textbf{So the rule is not ``networks are worse''.} It is: \textbf{if a classical method can solve your model, use it} --- and reach for the network when the state is a distribution, or the function has kinks you cannot locate in advance. S8 is entirely the first case.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{The Benchmark Hierarchy}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+Validate against the strongest benchmark available, and be explicit about which one you had.
+\medskip
+
+\begin{enumerate}\small\setlength{\itemsep}{1.2mm}
+  \item \textbf{A closed form.} The strongest, and rare --- Brock--Mirman with $\delta=1$. Tests \emph{correctness}: a method that cannot recover $k'=\alpha\beta k^{\alpha}$ has a bug.
+  \item \textbf{A trusted classical solution.} 5.B6's Chebyshev solve, itself measured. Tests \emph{accuracy} on a model with no closed form.
+  \item \textbf{The model's own conditions.} Off-sample Euler residuals. The only rung available at the frontier.
+  \item \textbf{Self-consistency.} Different seeds, widths, samplers agreeing. The weakest, and not nothing.
+\end{enumerate}
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{takeawaybox}[title=\textbf{The discipline}]\small
+\textbf{Climb down the ladder, never up.} Establish correctness on a model where rung 1 exists, then carry the \emph{same code} to a model where only rung 3 does.
+\medskip
+This is what 1.A1 meant by grading a neural solver gate by gate against a classical solution before the government is allowed into the model.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+S8 does exactly this: a neural heterogeneous-agent solver graded against a validated Aiyagari reference before any new economics is added.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Feng \& Miao, \emph{AI for Economists}, ch.~10's layered diagnostic system.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What Even a Good Residual Will Not Catch}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+\begin{itemize}\small\setlength{\itemsep}{1.2mm}
+  \item \textbf{A necessary condition satisfied on the wrong path.} The Euler residual says nothing about transversality. A small residual is compatible with an explosive path.
+  \item \textbf{Shape violations that do not move the residual.} A value function with a small concave patch can have a fine residual and a broken maximisation.
+  \item \textbf{Regions never visited.} The residual is only measured where you measured it.
+  \item \textbf{A wrong equilibrium.} With multiple equilibria, every one of them has a zero residual.
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{takeawaybox}[title=\textbf{So check the economics too}]\small
+Simulate and look at the \textbf{ergodic distribution}: does capital settle where theory says?
+\medskip
+Check \textbf{shape} directly --- the sign of the fitted second derivative on a grid, which is the number reported three frames back.
+\medskip
+Check \textbf{aggregates} against any moment you believe.
+\end{takeawaybox}
+\medskip
+\begin{cautionbox}\footnotesize
+And vary the seed. A result that moves with the random seed is not a result --- which is why width-stability across seeds is reported as evidence at all.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Feng \& Miao, \emph{AI for Economists}, ch.~10, ``Special challenges in a deep-learning setting''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{One Model, Five Methods --- the Reprise}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+The arc closes where it opened. The same quarterly RBC model has now been solved by \textbf{grid VFI} (4.B5), \textbf{first-} and \textbf{second-order perturbation} (5.A6), \textbf{Chebyshev collocation} (5.B6), and \textbf{a neural network} (7.B1).
+\medskip
+
+On this model the ranking is unambiguous and unflattering to the newest method. \textbf{Every column scales differently}, and that is the only reason the last row exists.
+\medskip
+
+\textbf{The rule to leave with:} if a classical method can solve your model, use it. Reach for the network when the state is a distribution, or when $d$ is large enough that a basis cannot be written down.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{takeawaybox}[title=\textbf{What the network did buy, even here}]\small
+\textbf{A mesh-free policy} --- 4.B5's grid quantisation is simply absent.
+\medskip
+\textbf{Feasibility by construction}, not by clipping.
+\medskip
+\textbf{A method whose cost in $d$ is polynomial}, which is the only one of the five of which that is true.
+\end{takeawaybox}
+\medskip
+\begin{cautionbox}\footnotesize
+And what it cost is narrower than it looks: the \textbf{a priori} guarantee, 3.A2's $\beta^{n}/(1-\beta)$. What survives is the \textbf{a posteriori} bound --- Santos (2000) --- and, with shape constraints, the contraction itself.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{five\_methods}. The comparison was the point of running the network on a problem it was always going to lose. Code: \repo{tools/figures/s07_generate.py}{s07\_generate.py}; \repo{labs/L07_ML_and_Deep_Growth.ipynb}{L07}.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways, and Where Session 8 Goes}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{takeawaybox}\small
+\begin{itemize}\small\setlength{\itemsep}{1.1mm}
+  \item Theory gives shapes, and a generic network obeys none of them. \textbf{Measured over 5 seeds: a plain net fitted to an exactly convex function came out locally concave by $5.9$ at the median} --- and convex at one. Not reliably wrong: \textbf{unreliable}.
+  \item An \textbf{ICNN} is convex at every seed and approximates \emph{any} convex function --- and fitted $\mathbf{7.8\times}$ less accurately. \textbf{The guarantee has a price.}
+  \item The deepest reason to impose it is not accuracy: \textbf{concavity restores the Bellman contraction} that 7.B2 gave up.
+  \item Validation is the \textbf{off-sample} maximum Euler residual, on a known scale.
+\end{itemize}
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}[title=\textbf{Bridge to Session 8}]\small
+Every model in this session had a \textbf{small} state: $k$, or $(k,z)$. The networks were never needed --- that was the point of measuring.
+\medskip
+\textbf{S8 removes the training wheels.} The state becomes a \emph{distribution}; the transition $H(\Gamma)$ is no longer known; and the methods of this session become the only ones available.
+\medskip
+7.A4 already named the bridge: \textbf{permutation invariance}.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

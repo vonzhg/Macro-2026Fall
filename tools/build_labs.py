@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the Session 3 lab notebooks.
+"""Generate the course lab notebooks (L00, L03, L04, L05).
 
 Writing .ipynb by hand is error-prone, so the notebooks are generated from this
 file and executed through tools/run_code.slurm.  Edit here, not in the .ipynb.
@@ -1430,10 +1430,1062 @@ md("""
 ]
 
 
+# =============================================================== L05
+L05 = [
+md("""
+# Lab 5 — Perturbation and Projection
+
+**ECON 282E · Session 5 · October 22, 2026**
+
+Sessions 3 and 4 put values on a grid and iterated. This lab does neither.
+
+| Part | What you build | Deck |
+|---|---|---|
+| 1 | steady state, log-linearization, and the matrices $A$, $B$ | 5.A4 |
+| 2 | the QZ solve, and the Blanchard--Kahn count | 5.A4 |
+| 3 | determinacy in a New Keynesian model: the Taylor principle | 5.A4 |
+| 4 | second order by residual matching, and the risk correction | 5.A5 |
+| 5 | pruning, and when it matters | 5.A5 |
+| 6 | Chebyshev: conditioning, nodes, and what smoothness buys | 5.B2--5.B3 |
+| 7 | collocation on the same RBC model | 5.B5--5.B6 |
+| 8 | one model, four methods | 5.B6 |
+
+**Prerequisite:** L04. Everything is NumPy and SciPy; nothing needs the internet or a GPU.
+The measured numbers quoted in the exercises are the lecture's, from
+`tools/figures/s05_numbers.json`.
+"""),
+
+code("""
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy.polynomial import chebyshev as npcheb
+from scipy.linalg import ordqz
+from scipy.optimize import root
+
+np.set_printoptions(precision=6, suppress=True)
+
+# Quarterly RBC, the calibration of Session 4 and HW1 Part B Q3
+ALPHA, BETA, DELTA = 0.33, 0.99, 0.025
+RHO, SIG_EPS = 0.95, 0.007
+"""),
+
+md("""
+## Part 1 — The steady state, and the linearized system
+
+Perturbation needs one point: the deterministic steady state. Everything else is
+derivatives evaluated there.
+"""),
+
+code("""
+def steady_state(alpha=ALPHA, beta=BETA, delta=DELTA):
+    k = ((1/beta - 1 + delta)/alpha)**(1/(alpha - 1))
+    y = k**alpha
+    c = y - delta*k
+    return k, y, c
+
+kss, yss, css = steady_state()
+kappa = BETA*ALPHA*kss**(ALPHA - 1)
+print(f"k* = {kss:.6f}   y* = {yss:.6f}   c* = {css:.6f}   kappa = {kappa:.6f}")
+print("4.B5 reported k* = 28.3484 -- the cheapest cross-check available.")
+"""),
+
+code("""
+def growth_matrices(alpha=ALPHA, beta=BETA, delta=DELTA, rho=RHO):
+    \"\"\"A E_t s' = B s,  s = (khat, z, chat).
+
+    Rows: resource constraint, shock process, Euler equation.
+    \"\"\"
+    k, y, c = steady_state(alpha, beta, delta)
+    kap = alpha*k**(alpha - 1)*beta
+    A = np.array([[k,                0.0,   0.0],
+                  [0.0,              1.0,   0.0],
+                  [-kap*(alpha - 1), -kap,  1.0]])
+    B = np.array([[alpha*y + (1 - delta)*k, y,   -c],
+                  [0.0,                     rho,  0.0],
+                  [0.0,                     0.0,  1.0]])
+    return A, B
+
+A, B = growth_matrices()
+print("A =\\n", A, "\\n\\nB =\\n", B)
+"""),
+
+md("""
+**Exercise 1.** Every entry of `A` and `B` is an elasticity at the steady state. Which entry is
+$\\kappa$, and why is it only $0.035$? (Hint: at $\\delta=0.025$, how much of next period's gross
+return is undepreciated capital that does not respond to anything?)
+
+## Part 2 — One QZ decomposition
+
+The whole first-order solve. `ordqz` returns the generalized Schur form with the stable
+eigenvalues ordered first; Blanchard--Kahn is then a count.
+"""),
+
+code("""
+def klein(A, B, n_x):
+    \"\"\"Solve A E_t s' = B s with s = (x; y), x predetermined.  Klein (2000).\"\"\"
+    def stable(a, b):
+        return np.abs(b) < np.abs(a)          # |omega| = |b/a| < 1
+
+    S, T, aa, bb, Q, Z = ordqz(A, B, sort=stable, output="real")
+    omega = np.abs(bb)/np.where(np.abs(aa) < 1e-14, 1e-14, np.abs(aa))
+    n_unstable = int(np.sum(omega > 1 + 1e-9))
+
+    Z11, Z21 = Z[:n_x, :n_x], Z[n_x:, :n_x]
+    try:
+        # If the BK count is wrong, Z11 is singular: there is no P and F to form.
+        Z11i = np.linalg.inv(Z11)
+        F = Z21 @ Z11i
+        P = Z11 @ np.linalg.solve(S[:n_x, :n_x], T[:n_x, :n_x]) @ Z11i
+    except np.linalg.LinAlgError:
+        P = F = None
+    return P, F, np.sort(omega), n_unstable
+
+
+P, F, omega, n_unst = klein(A, B, 2)
+print("eigenvalue moduli :", np.round(omega, 6))
+print("outside unit circle:", n_unst, " jump variables:", 1)
+print("\\nk' on (khat, z):", np.round(P[0], 6))
+print("c  on (khat, z):", np.round(F[0], 6))
+"""),
+
+md("""
+**Exercise 2.** The lecture reports $0.962061$ and $0.080097$ for capital, $0.590408$ and
+$0.322850$ for consumption. Do you reproduce them?
+
+**Exercise 3.** Re-run with `DELTA = 1.0`, `ALPHA = 0.36`, `BETA = 0.95` — the Brock--Mirman
+benchmark. The exact policy is $k' = \\alpha\\beta e^{z}k^{\\alpha}$, which in logs is
+$\\hat{k}' = \\alpha\\hat{k} + z$. You should get $P[0] = [0.36, 1.00]$ to machine precision, and
+the unstable root should be exactly $1/(\\alpha\\beta) = 2.923977$. **This is a correctness test,
+not an accuracy test** — see 5.A2.
+"""),
+
+code("""
+A1, B1 = growth_matrices(alpha=0.36, beta=0.95, delta=1.0)
+P1, F1, om1, nu1 = klein(A1, B1, 2)
+print("P =", np.round(P1[0], 12), "   exact: [0.36, 1.0]")
+print("F =", np.round(F1[0], 12), "   exact: [0.36, 1.0]")
+print("roots:", np.round(om1, 6), "   1/(alpha*beta) =", round(1/(0.36*0.95), 6))
+"""),
+
+md("""
+## Part 3 — Determinacy: the Taylor principle as an eigenvalue count
+
+The growth model can only ever satisfy Blanchard--Kahn. To see the count actually bite, take the
+three-equation New Keynesian model with two jump variables $(\\pi, x)$ — so uniqueness needs
+**two** unstable roots.
+"""),
+
+code("""
+def nk_matrices(phi_pi, kappa=0.1275, sigma_is=1.0, rho_u=0.8, beta=BETA):
+    A = np.array([[1.0, 0.0,          0.0],
+                  [0.0, beta,         0.0],
+                  [0.0, 1.0/sigma_is, 1.0]])
+    B = np.array([[rho_u, 0.0,             0.0],
+                  [0.0,   1.0,            -kappa],
+                  [0.0,   phi_pi/sigma_is, 1.0]])
+    return A, B
+
+print(f"{'phi_pi':>7}  {'|omega|':>26}  {'unstable':>8}  verdict")
+for phi in (0.0, 0.8, 1.0, 1.5, 2.5):
+    Pk, _, om, nu = klein(*nk_matrices(phi), n_x=1)
+    verdict = "unique" if nu == 2 else ("indeterminate" if nu < 2 else "no stable solution")
+    print(f"{phi:7.1f}  {str(np.round(om, 3)):>26}  {nu:8d}  {verdict}")
+"""),
+
+md("""
+**Exercise 4.** The switch happens at $\\phi_\\pi = 1$. That is the **Taylor principle**, recovered
+from nothing but an eigenvalue count. What happens to `P` for $\\phi_\\pi < 1$, and why is that the
+right behaviour rather than a bug?
+
+## Part 4 — Second order, and the risk correction
+
+First order is certainty equivalent: the shock scale enters no coefficient. To get risk you need
+the second-order block — twelve conditions in twelve unknowns, exactly as 5.A5 describes.
+
+We impose them directly: write the policies as second-order polynomials in $(\\hat{k}, z)$ and
+require $F = F_k = F_z = F_{kk} = F_{kz} = F_{zz} = 0$ at the steady state.
+"""),
+
+code("""
+def gauss_hermite(n):
+    x, w = np.polynomial.hermite_e.hermegauss(n)
+    return x, w/w.sum()
+
+
+def make_conditions(sigma, order, alpha=ALPHA, beta=BETA, delta=DELTA, rho=RHO, n_gh=7):
+    kss, yss, css = steady_state(alpha, beta, delta)
+    xe, we = gauss_hermite(n_gh)
+
+    def unpack(th):
+        if order == 1:
+            return (np.array([th[0], th[1], th[2], 0, 0, 0]),
+                    np.array([th[3], th[4], th[5], 0, 0, 0]))
+        return np.asarray(th[:6]), np.asarray(th[6:])
+
+    def poly(p, kh, z):
+        return p[0] + p[1]*kh + p[2]*z + 0.5*(p[3]*kh**2 + 2*p[4]*kh*z + p[5]*z**2)
+
+    def Ffun(th, kh, z):
+        a, b = unpack(th)
+        c = max(css*np.exp(np.clip(poly(a, kh, z), -50, 50)), 1e-12)
+        khp = poly(b, kh, z)
+        kp = max(kss*np.exp(np.clip(khp, -50, 50)), 1e-12)
+        k = kss*np.exp(kh)
+        f2 = c + kp - np.exp(z)*k**alpha - (1 - delta)*k
+        zp = rho*z + sigma*xe
+        cp = np.maximum(css*np.exp(np.clip(poly(a, khp, zp), -50, 50)), 1e-12)
+        R = alpha*np.exp(zp)*kp**(alpha - 1) + (1 - delta)
+        f1 = 1.0/c - beta*np.sum(we*R/cp)
+        return np.array([f1, f2])
+
+    h = 1e-5 if order == 1 else 1e-3      # second differences divide by h^2
+
+    def conditions(th):
+        f00 = Ffun(th, 0.0, 0.0)
+        out = [f00,
+               (Ffun(th, h, 0) - Ffun(th, -h, 0))/(2*h),
+               (Ffun(th, 0, h) - Ffun(th, 0, -h))/(2*h)]
+        if order >= 2:
+            out += [(Ffun(th, h, 0) - 2*f00 + Ffun(th, -h, 0))/h**2,
+                    (Ffun(th, h, h) - Ffun(th, h, -h)
+                     - Ffun(th, -h, h) + Ffun(th, -h, -h))/(4*h**2),
+                    (Ffun(th, 0, h) - 2*f00 + Ffun(th, 0, -h))/h**2]
+        return np.concatenate(out)
+
+    return conditions
+
+
+def solve_pert(sigma, order, guess=None):
+    cond = make_conditions(sigma, order)
+    n = 6 if order == 1 else 12
+    if guess is None:
+        guess = np.zeros(n)
+        guess[1] = guess[4 if order == 1 else 7] = 0.5
+    sol = root(cond, guess, method="hybr", tol=1e-13)
+    return sol.x, float(np.max(np.abs(cond(sol.x))))
+"""),
+
+code("""
+# first order at sigma = 0 IS the deterministic expansion -- compare with QZ
+th0, r0 = solve_pert(0.0, 1)
+print(f"matching vs QZ, max abs diff: "
+      f"{max(abs(th0[4]-P[0,0]), abs(th0[5]-P[0,1]), abs(th0[1]-F[0,0]), abs(th0[2]-F[0,1])):.3e}")
+print(f"constants (certainty equivalence): a0 = {th0[0]:.3e}, b0 = {th0[3]:.3e}")
+
+g = np.concatenate([th0[:3], np.zeros(3), th0[3:], np.zeros(3)])
+th2, r2 = solve_pert(SIG_EPS, 2, guess=g)
+print(f"\\nsecond order, worst condition residual: {r2:.2e}")
+print(f"risk correction: consumption {100*th2[0]:+.5f}% of s.s., capital {100*th2[6]:+.5f}%")
+print(f"first-order coefficients moved by: "
+      f"{max(abs(th2[1]-th0[1]), abs(th2[2]-th0[2]), abs(th2[7]-th0[4]), abs(th2[8]-th0[5])):.2e}")
+"""),
+
+md("""
+**Exercise 5.** Two independent routes to the same four numbers — QZ and root-finding on the
+derivative conditions — agreeing to about $10^{-11}$. That is the cross-check this course keeps
+asking for.
+
+**Exercise 6.** Re-solve at $\\sigma \\in \\{1, 5, 10, 20\\}\\times$ the calibrated value and plot the
+consumption risk correction against $\\sigma^2$. The lecture measures the quadratic law holding to
+$2\\%$ at $5\\times$ and failing by $60\\%$ at $20\\times$. Why does it fail, and what does that tell
+you about extrapolating a perturbation result?
+
+**Exercise 7 (trap).** Change `h` in `make_conditions` from `1e-3` to `1e-4` for the second-order
+case and re-run. The residual degrades from $\\sim 10^{-9}$ to $\\sim 10^{-2}$. Second derivatives
+divide by $h^2$, so rounding error is amplified by $10^8$ — 4.A4's U-curve, in a place where it
+silently corrupts a coefficient. This is why Dynare differentiates analytically.
+
+## Part 5 — Pruning
+"""),
+
+code("""
+def simulate2(b, sigma, T=20000, seed=0, pruned=False):
+    rng = np.random.default_rng(seed)
+    eps = rng.standard_normal(T)
+    z = 0.0
+    if not pruned:
+        kh, worst = 0.0, 0.0
+        for t in range(T):
+            z = RHO*z + sigma*eps[t]
+            kh = b[0] + b[1]*kh + b[2]*z + 0.5*(b[3]*kh**2 + 2*b[4]*kh*z + b[5]*z**2)
+            if not np.isfinite(kh) or abs(kh) > 1e3:
+                return np.inf, t
+            worst = max(worst, abs(kh))
+        return worst, T
+    k1 = k2 = worst = 0.0
+    for t in range(T):
+        z = RHO*z + sigma*eps[t]
+        k1, k2 = (b[1]*k1 + b[2]*z,
+                  b[0] + b[1]*k2 + 0.5*(b[3]*k1**2 + 2*b[4]*k1*z + b[5]*z**2))
+        if not np.isfinite(k1 + k2) or abs(k1 + k2) > 1e3:
+            return np.inf, t
+        worst = max(worst, abs(k1 + k2))
+    return worst, T
+
+
+print(f"{'sigma x':>8}  {'unpruned':>22}  {'pruned':>10}")
+for mult in (1, 10, 30, 60):
+    sg = SIG_EPS*mult
+    t1, _ = solve_pert(sg, 1)
+    gg = np.concatenate([t1[:3], np.zeros(3), t1[3:], np.zeros(3)])
+    t2, res = solve_pert(sg, 2, guess=gg)
+    wu, tu = simulate2(t2[6:], sg, pruned=False)
+    wp, _ = simulate2(t2[6:], sg, pruned=True)
+    u = "exploded at t=%d" % tu if not np.isfinite(wu) else "%.4f" % wu
+    print(f"{mult:8d}  {u:>22}  {wp:10.4f}")
+"""),
+
+md("""
+**Exercise 8.** At the model's own calibration, pruning changes nothing — four figures agree. You
+need thirty times the shock before the unpruned recursion blows up. So why prune anyway?
+
+## Part 6 — Chebyshev: why this basis
+"""),
+
+code("""
+# the measured reason not to use monomials
+print("Hilbert matrix (the monomial least-squares normal matrix on [0,1]):")
+for n in (3, 5, 7, 9, 11, 13):
+    H = np.array([[1.0/(i + j + 1) for j in range(n)] for i in range(n)])
+    print(f"   n={n:2d}   cond = {np.linalg.cond(H):.3e}")
+print("\\nDouble precision carries ~16 digits.  Read the last row.")
+"""),
+
+code("""
+print("Interpolation matrix at n Chebyshev nodes:")
+print(f"{'n':>4}  {'monomial':>12}  {'Chebyshev':>10}")
+for n in (5, 9, 13, 17, 21):
+    xs = np.cos(np.pi*(2*np.arange(1, n + 1) - 1)/(2*n))
+    Vm = np.vander(xs, n, increasing=True)
+    Vc = npcheb.chebvander(xs, n - 1)
+    print(f"{n:4d}  {np.linalg.cond(Vm):12.3e}  {np.linalg.cond(Vc):10.4f}")
+"""),
+
+code("""
+# what smoothness buys, and what a kink costs
+smooth = lambda x: np.exp(x)*np.sin(3*x)
+kinked = lambda x: np.abs(x)
+xt = np.linspace(-1, 1, 20001)
+
+print(f"{'n':>4}  {'e^x sin 3x':>14}  {'|x|':>12}")
+for n in (5, 9, 17, 33, 65):
+    nodes = np.cos(np.pi*(2*np.arange(1, n + 1) - 1)/(2*n))
+    row = []
+    for f in (smooth, kinked):
+        cf = npcheb.chebfit(nodes, f(nodes), n - 1)
+        row.append(np.max(np.abs(npcheb.chebval(xt, cf) - f(xt))))
+    print(f"{n:4d}  {row[0]:14.3e}  {row[1]:12.3e}")
+"""),
+
+md("""
+**Exercise 9.** The analytic function reaches machine precision by $n=33$; $|x|$ halves its error
+when $n$ doubles — $O(1/n)$, and sixty-five terms buy two digits. **The basis is not the problem;
+the function is.** Which economic models have policy functions like the second column?
+
+## Part 7 — Collocation on the RBC model
+"""),
+
+code("""
+def rouwenhorst(n, rho, sigma):
+    p = (1 + rho)/2
+    P = np.array([[p, 1 - p], [1 - p, p]])
+    for k in range(3, n + 1):
+        Z = np.zeros((k, k))
+        Z[:-1, :-1] += p*P; Z[:-1, 1:] += (1 - p)*P
+        Z[1:, :-1] += (1 - p)*P; Z[1:, 1:] += p*P
+        Z[1:-1, :] /= 2
+        P = Z
+    sz = sigma/np.sqrt(1 - rho**2)
+    return np.linspace(-sz*np.sqrt(n - 1), sz*np.sqrt(n - 1), n), P
+
+
+class Proj:
+    def __init__(self, n_coef=7, n_z=7, width=0.5):
+        self.alpha, self.beta, self.delta = ALPHA, BETA, DELTA
+        self.logz, self.Pi = rouwenhorst(n_z, RHO, SIG_EPS)
+        self.z = np.exp(self.logz)
+        self.n, self.n_z = n_coef, n_z
+        self.kss, _, self.css = steady_state()
+        self.klo, self.khi = (1 - width)*self.kss, (1 + width)*self.kss
+
+    def psi(self, k):
+        return 2*(k - self.klo)/(self.khi - self.klo) - 1
+
+    def cpol(self, th, k, j):
+        return npcheb.chebval(self.psi(np.atleast_1d(k)), th[j])
+
+    def resid(self, th, k, j):
+        k = np.atleast_1d(k)
+        c = np.maximum(self.cpol(th, k, j), 1e-10)
+        y = self.z[j]*k**self.alpha + (1 - self.delta)*k
+        kp = np.clip(y - c, self.klo, self.khi)
+        rhs = np.zeros_like(k)
+        for l in range(self.n_z):
+            cp = np.maximum(self.cpol(th, kp, l), 1e-10)
+            R = self.alpha*self.z[l]*kp**(self.alpha - 1) + (1 - self.delta)
+            rhs += self.Pi[j, l]*R/cp
+        return 1.0 - c*self.beta*rhs
+
+    def guess(self):
+        \"\"\"Warm start from the first-order perturbation solution.\"\"\"
+        _, Fm, _, _ = klein(*growth_matrices(), n_x=2)
+        nodes = np.cos(np.pi*(2*np.arange(1, self.n + 2) - 1)/(2*(self.n + 1)))
+        kn = self.klo + 0.5*(nodes + 1)*(self.khi - self.klo)
+        th = np.zeros((self.n_z, self.n + 1))
+        for j in range(self.n_z):
+            ch = Fm[0, 0]*np.log(kn/self.kss) + Fm[0, 1]*self.logz[j]
+            th[j] = npcheb.chebfit(self.psi(kn), self.css*np.exp(ch), self.n)
+        return th
+
+    def nodes(self):
+        r = np.cos(np.pi*(2*np.arange(1, self.n + 2) - 1)/(2*(self.n + 1)))
+        return self.klo + 0.5*(r + 1)*(self.khi - self.klo)
+"""),
+
+code("""
+def solve_collocation(P):
+    kn = P.nodes()
+
+    def eqs(flat):
+        th = flat.reshape(P.n_z, P.n + 1)
+        return np.concatenate([P.resid(th, kn, j) for j in range(P.n_z)])
+
+    t0 = time.perf_counter()
+    sol = root(eqs, P.guess().ravel(), method="hybr", tol=1e-12)
+    return sol.x.reshape(P.n_z, P.n + 1), time.perf_counter() - t0, sol
+
+
+def euler_err(cfun, P, n_test=2000, seed=0, band=None):
+    \"\"\"Graded on RANDOM points, never on the collocation nodes.\"\"\"
+    rng = np.random.default_rng(seed)
+    lo, hi = (P.klo, P.khi) if band is None else band
+    kt = rng.uniform(lo, hi, n_test)
+    jt = rng.integers(0, P.n_z, n_test)
+    E = np.empty(n_test)
+    for i in range(n_test):
+        j = int(jt[i]); c = float(cfun(np.array([kt[i]]), j)[0])
+        y = P.z[j]*kt[i]**P.alpha + (1 - P.delta)*kt[i]
+        kp = min(max(y - c, P.klo), P.khi)
+        rhs = 0.0
+        for l in range(P.n_z):
+            cp = float(cfun(np.array([kp]), l)[0])
+            R = P.alpha*P.z[l]*kp**(P.alpha - 1) + (1 - P.delta)
+            rhs += P.Pi[j, l]*R/max(cp, 1e-12)
+        E[i] = abs(1 - c*P.beta*rhs)
+    return E[np.isfinite(E)]
+
+
+Pj = Proj(n_coef=7)
+th, secs, sol = solve_collocation(Pj)
+E = euler_err(lambda k, j: Pj.cpol(th, k, j), Pj)
+print(f"{(Pj.n+1)*Pj.n_z} unknowns, {secs:.3f} s, "
+      f"worst residual at the nodes {np.max(np.abs(sol.fun)):.2e}")
+print(f"graded off the nodes: max |E| = 10^{np.log10(E.max()):.2f}")
+"""),
+
+code("""
+# plot the SAVING, not the policy -- a level plot hides everything
+kg = np.linspace(Pj.klo, Pj.khi, 300)
+jm = Pj.n_z//2
+c_mid = Pj.cpol(th, kg, jm)
+g_mid = Pj.z[jm]*kg**Pj.alpha + (1 - Pj.delta)*kg - c_mid
+
+fig, ax = plt.subplots(figsize=(6.2, 3.6))
+ax.plot(kg, g_mid - kg, lw=2)
+ax.axhline(0, color="0.6", lw=0.8)
+ax.axvline(Pj.kss, color="0.6", lw=0.8, ls=":")
+ax.set_xlabel("capital $k$"); ax.set_ylabel("saving $g(k)-k$")
+ax.set_title("crosses zero at $k^*$, positive below, negative above")
+plt.tight_layout(); plt.show()
+
+print("saving at k*:", np.interp(Pj.kss, kg, g_mid - kg))
+"""),
+
+md("""
+**Exercise 10.** Sweep the degree over $3, 5, 7, 9, 11$ and tabulate the error. The lecture measures
+about **1.2 decades for every two degrees**. Do you reproduce the rate, and does it keep going?
+
+**Exercise 11.** Grade the solution **at the collocation nodes** instead of at random points. You
+will get about $10^{-15}$. Explain in one sentence why that number is meaningless.
+
+## Part 8 — One model, four methods
+"""),
+
+code("""
+def c_pert(order):
+    if order == 1:
+        _, Fm, _, _ = klein(*growth_matrices(), n_x=2)
+        return lambda k, j: Pj.css*np.exp(Fm[0, 0]*np.log(np.atleast_1d(k)/Pj.kss)
+                                          + Fm[0, 1]*Pj.logz[j])
+    a = th2[:6]
+    def f(k, j):
+        kh = np.log(np.atleast_1d(k)/Pj.kss); z = Pj.logz[j]
+        return Pj.css*np.exp(a[0] + a[1]*kh + a[2]*z
+                             + 0.5*(a[3]*kh**2 + 2*a[4]*kh*z + a[5]*z**2))
+    return f
+
+
+near = (0.95*Pj.kss, 1.05*Pj.kss)
+rows = [("perturbation, 1st order", c_pert(1), 4),
+        ("perturbation, 2nd order", c_pert(2), 12),
+        ("Chebyshev collocation", lambda k, j: Pj.cpol(th, k, j), (Pj.n+1)*Pj.n_z)]
+
+print(f"{'method':<26} {'numbers':>8}  {'near k*':>10}  {'wide':>10}")
+for name, f, store in rows:
+    ew = euler_err(f, Pj); en = euler_err(f, Pj, band=near)
+    print(f"{name:<26} {store:8d}  10^{np.log10(en.max()):<7.2f}  10^{np.log10(ew.max()):<7.2f}")
+print("\\nThe lecture's fourth row, the 4.B5 grid solver: 2,100 numbers, "
+      "10^-2.82 near k*, 10^-2.51 wide.")
+"""),
+
+md("""
+**Exercise 12.** The grid solver stores $37\\times$ more numbers than collocation and is four decades
+less accurate. Write down the three properties of *this model* that make that true, and name one
+model from Session 2 for which each of them fails.
+
+## What to take away
+
+1. **Perturbation changes the representation**, from $N$ values on a grid to a few derivatives at
+   one point. The steady state is all it needs, which is why it generalizes.
+2. **Blanchard--Kahn is a count**: unstable roots against jump variables. When it fails, the QZ
+   routine cannot form a solution — that is the algorithm telling you the truth.
+3. **First order is certainty equivalent.** Risk lives in the second-order constant, and it
+   scales like $\\sigma^2$ only while $\\sigma$ is small.
+4. **Prune second-order simulations**, even though at realistic calibrations it changes nothing.
+   The failure it prevents is silent until it is catastrophic.
+5. **Never use monomials.** The Hilbert matrix reaches condition $3\\times10^{18}$ at degree 13 and
+   the solver returns numbers anyway.
+6. **Projection redefines "solved" as "the residual is zero"** — in a chosen sense. The weight
+   function matters less than one extra basis coefficient.
+7. **Warm-start projection from perturbation.** The two methods cooperate; that is the practical
+   reason to know both.
+8. **Grade on points you did not solve at.** At the collocation nodes the residual is zero by
+   construction, and reporting it is self-deception.
+9. **Plot the deviation, not the level.** Again.
+"""),
+]
+
+
+# =============================================================== L07
+L07 = [
+md("""
+# Lab 7 — Machine Learning, and a Macro Model as a Loss Function
+
+*ECON 282E · Session 7 · Thursday, November 5, 2026*
+
+Session 7 stopped choosing the approximating family in advance. This lab builds the instrument and
+then points it at a model.
+
+**Part 1** a network is a basis you do not choose · **Part 2** the training loop, in five lines ·
+**Part 3** backpropagation by hand, checked against `autograd` · **Part 4** the growth model as a
+loss function · **Part 5** the quarterly RBC, and how wrong it is · **Part 6** shape restrictions
+that hold identically.
+
+Everything runs on a CPU in a few minutes. This is the first lab where a GPU helps, and it is still
+not needed.
+
+> Numbers quoted from the lecture come from `tools/figures/s07_numbers.json`. Where this notebook
+> reproduces one, it says so — and where your run disagrees, **the notebook is the check on the
+> deck, not the other way round**.
+"""),
+
+code("""
+import numpy as np
+import torch
+import torch.nn as nn
+import matplotlib.pyplot as plt
+
+torch.set_default_dtype(torch.float64)   # 3.A1: accounting identities do not tolerate float32
+np.random.seed(0); torch.manual_seed(0)
+
+ALPHA, BETA, DELTA = 0.33, 0.99, 0.025   # quarterly, as in S4-S7
+RHO, SIG_EPS = 0.95, 0.007
+BM_ALPHA, BM_BETA = 0.36, 0.95           # Brock-Mirman, delta = 1, closed form available
+print("torch", torch.__version__)
+"""),
+
+md("""
+## Part 1 — A network is a basis you do not choose
+
+Session 5 wrote every approximation as $\\sum_i \\theta_i \\psi_i(x)$ with $\\{\\psi_i\\}$ fixed in
+advance. Take the simplest possible network — one hidden ReLU layer — and write it out:
+
+$$\\hat y(x) = a_0 + \\sum_{i=1}^{N} a_i \\,\\mathrm{ReLU}(x - b_i).$$
+
+The shifts $b_i$ are the **kinks**; the coefficients $a_i$ set the slope on each piece.
+
+**Fix the $b_i$** and this is linear in the remaining parameters — an ordinary least-squares
+regression on a piecewise-linear basis. Let us do that first.
+"""),
+
+code("""
+def relu_design(x, b):
+    \"\"\"Design matrix: a constant, then one ReLU column per shift.\"\"\"
+    return np.column_stack([np.ones_like(x)] + [np.maximum(0.0, x - bi) for bi in b])
+
+x = np.linspace(-np.pi, np.pi, 801)
+y = np.sin(x)
+
+def fit_fixed(N):
+    b = np.linspace(-np.pi, np.pi, N + 2)[1:-1]     # evenly spaced knots
+    A = relu_design(x, b)
+    a, *_ = np.linalg.lstsq(A, y, rcond=None)       # 5.B5's least squares
+    return b, A @ a
+
+for N in (2, 4, 8, 16):
+    _, yhat = fit_fixed(N)
+    print(f"N = {N:2d}   unknowns = {N+1:2d}   max|err| = {np.abs(yhat - y).max():.4f}")
+"""),
+
+md("""
+Doubling $N$ roughly halves the error — the $O(h)$ rate of a linear element, exactly as 5.B4 would
+predict. **There is no network here yet.**
+
+Now let the shifts be trained too. That single change turns the regression into a one-hidden-layer
+ReLU network.
+"""),
+
+code("""
+def fit_learned(N, target=None, lo=-np.pi, hi=np.pi, iters=4000, seed=0):
+    \"\"\"Same functional form; now b is a parameter as well.\"\"\"
+    torch.manual_seed(seed)
+    xt = torch.tensor(x if target is None else target[0]).view(-1, 1)
+    yt = torch.tensor(y if target is None else target[1]).view(-1, 1)
+    b  = torch.tensor(np.linspace(lo, hi, N + 2)[1:-1], requires_grad=True)
+    a  = torch.zeros(N, requires_grad=True)
+    a0 = torch.zeros(1, requires_grad=True)
+    opt = torch.optim.Adam([a, b, a0], lr=0.05)
+    for _ in range(iters):
+        opt.zero_grad()
+        pred = a0 + (torch.relu(xt - b) * a).sum(1, keepdim=True)
+        ((pred - yt) ** 2).mean().backward()
+        opt.step()
+    with torch.no_grad():
+        pred = (a0 + (torch.relu(xt - b) * a).sum(1, keepdim=True)).numpy().ravel()
+    return b.detach().numpy(), pred
+
+print(f"{'N':>3} {'fixed knots':>12} {'learned knots':>14}")
+for N in (2, 4, 8, 16):
+    _, yf = fit_fixed(N)
+    _, yl = fit_learned(N)
+    print(f"{N:>3} {np.abs(yf-y).max():>12.4f} {np.abs(yl-y).max():>14.4f}")
+"""),
+
+md("""
+**Exercise 1.** At $N=8$ the learned version should be about ten times better. At $N=4$ it is
+*worse*. Explain the second fact in one sentence, and name the frame in 7.A2 that predicts it.
+
+*(Hint: least squares is a solved problem. Training is not.)*
+
+### Where it really matters: a kink
+
+A borrowing constraint puts a kink in the consumption function. A fixed, evenly spaced basis has to
+be lucky to have a knot there; a trained one can go and find it.
+"""),
+
+code("""
+xk = np.linspace(0.0, 4.0, 801)
+yk = np.minimum(xk, 1.0 + 0.25 * (xk - 1.0))       # kink exactly at x = 1
+
+print(f"{'N':>3} {'fixed':>10} {'learned':>10}   nearest learned knot to the true kink")
+for N in (2, 4, 8):
+    bfix = np.linspace(0.0, 4.0, N + 2)[1:-1]
+    A = relu_design(xk, bfix); c, *_ = np.linalg.lstsq(A, yk, rcond=None)
+    ef = np.abs(A @ c - yk).max()
+    bl, yl = fit_learned(N, target=(xk, yk), lo=0.0, hi=4.0)
+    el = np.abs(yl - yk).max()
+    near = min(bl, key=lambda v: abs(v - 1.0))
+    print(f"{N:>3} {ef:>10.4f} {el:>10.4f}   {near:.4f}")
+"""),
+
+md("""
+With only **two** kinks to spend, training puts one essentially exactly at $x=1$. Nobody told it
+where the constraint binds. That is the whole of 7.A2 in one number, and it is the reason the rest
+of this session is worth the trouble.
+
+**Exercise 2.** Fit a degree-16 Chebyshev polynomial to the same kinked target and compare the
+maximum error. You should see 5.B2's Gibbs ringing across the whole domain.
+"""),
+
+md("""
+## Part 2 — The training loop, in five lines
+
+Everything from here on is the same five steps: **zero, forward, score, backward, step**.
+"""),
+
+code("""
+net = nn.Sequential(nn.Linear(1, 32), nn.Tanh(), nn.Linear(32, 32), nn.Tanh(), nn.Linear(32, 1))
+opt = torch.optim.AdamW(net.parameters(), lr=1e-3, weight_decay=1e-2)   # course default
+
+xt = torch.tensor(x).view(-1, 1)
+yt = torch.tensor(y).view(-1, 1)
+
+for it in range(3000):
+    opt.zero_grad()                    # 1. zero  -- the line people forget
+    pred = net(xt)                     # 2. forward
+    loss = ((pred - yt) ** 2).mean()   # 3. score
+    loss.backward()                    # 4. backward
+    opt.step()                         # 5. step
+
+print("final loss", float(loss.detach()))
+print("parameters", sum(p.numel() for p in net.parameters()))
+"""),
+
+md("""
+## Part 3 — Backpropagation by hand, checked against `autograd`
+
+The worked example from 7.A3. One input, one sigmoid hidden unit, one sigmoid output unit:
+
+$$z_1 = w_1x+b_1,\\quad h=\\sigma(z_1),\\quad z_2=w_2h+b_2,\\quad \\hat y=\\sigma(z_2),\\quad
+L=\\tfrac12(\\hat y-t)^2.$$
+
+Do it by hand first. Then let the tape do it, and check they agree.
+"""),
+
+code("""
+import math
+sig = lambda v: 1.0 / (1.0 + math.exp(-v))
+
+xv, t = 1.0, 0.0
+w1, b1, w2, b2, eta = 0.5, 0.0, 2.0, 0.0, 0.1
+
+z1 = w1 * xv + b1;  h  = sig(z1)
+z2 = w2 * h  + b2;  yh = sig(z2)
+L  = 0.5 * (yh - t) ** 2
+print(f"forward : z1={z1:.4f}  h={h:.4f}  z2={z2:.4f}  yhat={yh:.4f}  L={L:.4f}")
+
+d2     = (yh - t) * yh * (1 - yh)          # dL/dz2, the reusable error signal
+dL_dw2 = d2 * h
+dL_dh  = d2 * w2
+d1     = dL_dh * h * (1 - h)               # dL/dz1
+dL_dw1 = d1 * xv
+print(f"backward: delta2={d2:.4f}  dL/dw2={dL_dw2:.4f}  dL/dw1={dL_dw1:.4f}")
+print(f"update  : w2 -> {w2 - eta*dL_dw2:.4f}   w1 -> {w1 - eta*dL_dw1:.4f}")
+"""),
+
+code("""
+tw1 = torch.tensor(w1, requires_grad=True); tb1 = torch.tensor(b1, requires_grad=True)
+tw2 = torch.tensor(w2, requires_grad=True); tb2 = torch.tensor(b2, requires_grad=True)
+th  = torch.sigmoid(tw1 * xv + tb1)
+ty  = torch.sigmoid(tw2 * th + tb2)
+(0.5 * (ty - t) ** 2).backward()
+
+print("autograd dL/dw1 =", float(tw1.grad), " by hand:", dL_dw1)
+print("autograd dL/dw2 =", float(tw2.grad), " by hand:", dL_dw2)
+assert abs(float(tw1.grad) - dL_dw1) < 1e-12 and abs(float(tw2.grad) - dL_dw2) < 1e-12
+print("they agree to machine precision")
+"""),
+
+md("""
+**Exercise 3.** Both $\\hat y(1-\\hat y)$ and $h(1-h)$ are at most $0.25$. Stack $L$ sigmoid layers
+and the error signal reaching the first one is multiplied by at most $0.25^L$. Compute that for
+$L=1,\\dots,7$ and say at what depth the first layer has effectively stopped learning.
+
+**Exercise 4.** Replace the hidden sigmoid with a ReLU and redo the hand calculation. Which factor
+disappears, and why is that most of the reason ReLU displaced the sigmoid?
+"""),
+
+md("""
+## Part 4 — A macro model as a loss function
+
+No data from here on. The **model's own Euler equation** supplies the target: the label attached to
+every sampled state is zero.
+
+Start with the case where the answer is known. Brock–Mirman with log utility and $\\delta=1$ has the
+closed-form policy $k' = \\alpha\\beta k^{\\alpha}$ — 1.B1's benchmark. *If a method cannot recover
+this, do not trust it on anything harder.*
+"""),
+
+code("""
+a, b = BM_ALPHA, BM_BETA
+kss   = (a * b) ** (1.0 / (1.0 - a))
+klo, khi = 0.5 * kss, 1.5 * kss
+print(f"Brock-Mirman steady state k* = {kss:.6f}   band = [{klo:.4f}, {khi:.4f}]")
+
+class Policy(nn.Module):
+    \"\"\"c(k) = sigmoid(net) * output, so 0 < c < k^alpha IDENTICALLY (7.B1).\"\"\"
+    def __init__(self, hidden=32):
+        super().__init__()
+        self.f = nn.Sequential(nn.Linear(1, hidden), nn.Tanh(),
+                               nn.Linear(hidden, hidden), nn.Tanh(),
+                               nn.Linear(hidden, 1))
+    def forward(self, k):
+        kn = 2.0 * (k - klo) / (khi - klo) - 1.0      # normalise the input
+        return torch.sigmoid(self.f(kn))
+
+pol = Policy()
+opt = torch.optim.Adam(pol.parameters(), lr=3e-3)
+sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=25000, eta_min=1e-6)
+
+for it in range(25000):
+    k  = torch.rand(512, 1) * (khi - klo) + klo       # a FRESH batch of states each step
+    y  = k ** a
+    c  = pol(k) * y
+    kp = torch.clamp(y - c, klo, khi)
+    cp = pol(kp) * kp ** a
+    resid = 1.0 - (c / cp) * b * a * kp ** (a - 1.0)  # unit-free Euler residual
+    loss = (resid ** 2).mean()
+    opt.zero_grad(); loss.backward(); opt.step(); sched.step()
+    if (it + 1) % 5000 == 0:
+        print(f"  iter {it+1:5d}   loss {float(loss.detach()):.3e}")
+"""),
+
+code("""
+# Grade it against the closed form -- the only rung of the hierarchy that tests CORRECTNESS.
+kt = np.linspace(klo, khi, 400)
+with torch.no_grad():
+    c_net = (pol(torch.tensor(kt).view(-1, 1)).numpy().ravel()) * kt ** a
+kp_net = kt ** a - c_net
+kp_true = a * b * kt ** a
+
+print(f"max |k'_net - k'_true|   = {np.abs(kp_net - kp_true).max():.3e}")
+rel = np.abs(kp_net / kp_true - 1.0)
+print(f"max  relative error      = {rel.max():.3e}")
+print(f"median relative error    = {np.median(rel):.3e}")
+print(f"implied saving rate      = {np.median(kp_net/kt**a):.4f}   (true alpha*beta = {a*b:.4f})")
+print(f"worst k                  = {kt[np.argmax(rel)]:.4f}   "
+      f"(band is [{klo:.4f}, {khi:.4f}])")
+
+fig, ax = plt.subplots(1, 2, figsize=(11, 3.4))
+ax[0].plot(kt, kp_net - kt, label="network"); ax[0].plot(kt, kp_true - kt, "--", label="closed form")
+ax[0].axhline(0, color="0.7", lw=0.8); ax[0].set_xlabel("k"); ax[0].set_ylabel("k' - k")
+ax[0].set_title("saving (deviation, not level)"); ax[0].legend()
+ax[1].plot(kt, np.log10(np.abs(kp_net/kp_true - 1) + 1e-16))
+ax[1].set_xlabel("k"); ax[1].set_ylabel("log10 relative error"); ax[1].set_title("where the error lives")
+plt.tight_layout(); plt.show()
+"""),
+
+md("""
+**Exercise 5.** The *median* relative error is tiny and the implied saving rate is $\alpha\beta$ to
+four decimals — the network has solved the model. The *maximum* is enormous, and the cell prints
+where it is. Look at the right-hand panel and say what is happening there. Why? (7.B1 measured the same thing on the quarterly model: two decades of accuracy lost
+between $k^*$ and $0.5k^*$.)
+
+**Exercise 6.** Retrain sampling $k$ from $[0.4k^*, 1.6k^*]$ but evaluate on $[0.5k^*, 1.5k^*]$.
+State the rule this suggests in one line.
+
+**Exercise 7.** Plot the level $k'$ against $k$ instead of $k'-k$. Convince yourself that it shows
+nothing, and note the house rule: *plot the deviation, not the level*.
+"""),
+
+md("""
+## Part 5 — The quarterly RBC, and how wrong it is
+
+Now the model 3.A4, 4.B5, 5.A6 and 5.B6 all solved, with a seven-state Rouwenhorst chain. There is
+no closed form, so we grade on **off-sample Euler residuals** against Judd's (1998) scale:
+
+| $\\log_{10}|\\mathcal{R}|$ | verdict |
+|---|---|
+| $< -3$ | acceptable |
+| $< -5$ | good |
+| $< -7$ | excellent |
+"""),
+
+code("""
+def rouwenhorst(n, rho, sigma):
+    \"\"\"Copied from tools/figures/s04_generate.py so every ledger uses one chain.\"\"\"
+    p = (1.0 + rho) / 2.0
+    P = np.array([[p, 1 - p], [1 - p, p]])
+    for k in range(3, n + 1):
+        Z = np.zeros((k, k))
+        Z[:-1, :-1] += p * P; Z[:-1, 1:] += (1 - p) * P
+        Z[1:, :-1] += (1 - p) * P; Z[1:, 1:] += p * P
+        Z[1:-1, :] /= 2.0
+        P = Z
+    sz = sigma / np.sqrt(1.0 - rho ** 2)
+    psi = sz * np.sqrt(n - 1)
+    return np.linspace(-psi, psi, n), P
+
+logz, Pi = rouwenhorst(7, RHO, SIG_EPS)
+zs = np.exp(logz); nz = len(zs)
+kss_q = ((1.0 / BETA - 1.0 + DELTA) / ALPHA) ** (1.0 / (ALPHA - 1.0))
+qlo, qhi = 0.5 * kss_q, 1.5 * kss_q
+print(f"quarterly k* = {kss_q:.4f}   band = [{qlo:.3f}, {qhi:.3f}]   7 shock states")
+"""),
+
+code("""
+class PolicyZ(nn.Module):
+    \"\"\"c(k, z) with feasibility built in; the shock enters one-hot.\"\"\"
+    def __init__(self, hidden=64, layers=3):
+        super().__init__()
+        seq, prev = [], 1 + nz
+        for _ in range(layers):
+            seq += [nn.Linear(prev, hidden), nn.Tanh()]; prev = hidden
+        seq += [nn.Linear(prev, 1)]
+        self.f = nn.Sequential(*seq)
+    def forward(self, kn, zoh):
+        return torch.sigmoid(self.f(torch.cat([kn, zoh], 1)))
+
+zt, Pit = torch.tensor(zs), torch.tensor(Pi)
+eye = torch.eye(nz)
+norm = lambda k: 2.0 * (k - qlo) / (qhi - qlo) - 1.0
+
+torch.manual_seed(0)
+netq = PolicyZ()
+optq = torch.optim.Adam(netq.parameters(), lr=3e-3)
+schq = torch.optim.lr_scheduler.CosineAnnealingLR(optq, T_max=12000, eta_min=1e-5)
+
+for it in range(12000):
+    k = torch.rand(1024, 1) * (qhi - qlo) + qlo
+    j = torch.randint(0, nz, (1024,))
+    y = zt[j].view(-1, 1) * k ** ALPHA + (1 - DELTA) * k
+    c = netq(norm(k), eye[j]) * y
+    kp = torch.clamp(y - c, qlo, qhi)
+    rhs = torch.zeros_like(c)
+    for l in range(nz):                                  # EXACT sum: never sample what you can sum
+        cp = netq(norm(kp), eye[l].expand(1024, nz)) * (zt[l] * kp ** ALPHA + (1 - DELTA) * kp)
+        rhs = rhs + Pit[j, l].view(-1, 1) * (ALPHA * zt[l] * kp ** (ALPHA - 1) + (1 - DELTA)) / cp
+    loss = ((1.0 - c * BETA * rhs) ** 2).mean()
+    optq.zero_grad(); loss.backward(); optq.step(); schq.step()
+    if (it + 1) % 4000 == 0:
+        print(f"  iter {it+1:5d}   loss {float(loss.detach()):.3e}")
+"""),
+
+code("""
+def cfun(kv, j):
+    with torch.no_grad():
+        kt_ = torch.tensor(np.atleast_1d(kv)).view(-1, 1)
+        y = zs[j] * kt_ ** ALPHA + (1 - DELTA) * kt_
+        return (netq(norm(kt_), eye[j].expand(kt_.shape[0], nz)) * y).numpy().ravel()
+
+def euler_errors(band, n_test=2000, seed=0):
+    rng = np.random.default_rng(seed)
+    kt_ = rng.uniform(band[0], band[1], n_test)
+    jt  = rng.integers(0, nz, n_test)
+    out = []
+    for i in range(n_test):
+        j = int(jt[i]); c = float(cfun(np.array([kt_[i]]), j)[0])
+        y = zs[j] * kt_[i] ** ALPHA + (1 - DELTA) * kt_[i]
+        kp = min(max(y - c, qlo), qhi)
+        rhs = sum(Pi[j, l] * (ALPHA * zs[l] * kp ** (ALPHA - 1) + (1 - DELTA))
+                  / max(float(cfun(np.array([kp]), l)[0]), 1e-12) for l in range(nz))
+        out.append(abs(1.0 - c * BETA * rhs))
+    return np.array(out)
+
+wide = euler_errors((qlo, qhi))
+near = euler_errors((0.9 * kss_q, 1.1 * kss_q))
+span = qhi - qlo
+inner = euler_errors((qlo + 0.05 * span, qhi - 0.05 * span))
+print(f"max log10 |R|, whole band   = {np.log10(wide.max()):+.2f}")
+print(f"max log10 |R|, interior 90% = {np.log10(inner.max()):+.2f}")
+print(f"max log10 |R|, near k*      = {np.log10(near.max()):+.2f}")
+print(f"\\nFor comparison, 5.B6's Chebyshev collocation on THIS MODEL: -6.40 across the band,")
+print( "with 56 stored numbers and 0.13 seconds.")
+"""),
+
+md("""
+**Exercise 8.** Your network has thousands of parameters, took minutes, and does not reach Judd's
+*acceptable* across the band. Chebyshev reaches nearly *excellent* with 56 numbers in a tenth of a
+second. **Is the network implemented badly, or is this the right answer?** Defend your view in
+three sentences, using 7.A2's Theorem 6.
+
+**Exercise 9.** Every column of that comparison scales differently with the number of state
+variables. Write down how each one scales, and say roughly where the crossover is.
+"""),
+
+md("""
+## Part 6 — Structure that holds identically
+
+Theory says a value function is concave. A generic network does not know that. Fit one to a function
+that is *exactly* convex and look at what comes out.
+"""),
+
+code("""
+xs = np.linspace(-1, 1, 401)
+ys = 0.6 * xs ** 2 + 0.25 * xs + 0.1          # second derivative is 1.2 everywhere
+
+def convexity_violation(xv, yv):
+    \"\"\"Largest negative second difference; zero means convex.\"\"\"
+    h = xv[1] - xv[0]
+    d2 = (yv[2:] - 2 * yv[1:-1] + yv[:-2]) / h ** 2
+    return max(0.0, -d2.min())
+
+torch.manual_seed(0)
+ff = nn.Sequential(nn.Linear(1, 32), nn.ReLU(), nn.Linear(32, 32), nn.ReLU(), nn.Linear(32, 1))
+o  = torch.optim.Adam(ff.parameters(), lr=0.01)
+xtt, ytt = torch.tensor(xs).view(-1, 1), torch.tensor(ys).view(-1, 1)
+for _ in range(4000):
+    o.zero_grad(); ((ff(xtt) - ytt) ** 2).mean().backward(); o.step()
+with torch.no_grad():
+    yff = ff(xtt).numpy().ravel()
+
+print(f"plain network: RMSE = {np.sqrt(((yff-ys)**2).mean()):.5f}"
+      f"   worst -f'' = {convexity_violation(xs, yff):.2f}   (true curvature is 1.2)")
+"""),
+
+md("""
+The fit looks acceptable and the function is **locally concave in places**. In a Bellman solver that
+is not untidy, it is fatal: the inner maximisation acquires local maxima and the policy jumps.
+
+An **input convex neural network** (Amos, Xu & Kolter 2017) cannot do this. Keep the recurrent
+weights non-negative and use a convex, non-decreasing activation, and convexity is an identity.
+"""),
+
+code("""
+class ICNN(nn.Module):
+    \"\"\"Non-negative recurrent weights (via softplus, NOT clamp) + ReLU => convex in x.\"\"\"
+    def __init__(self, hidden=32, layers=2):
+        super().__init__()
+        self.Wy = nn.ModuleList([nn.Linear(1, hidden) for _ in range(layers)] + [nn.Linear(1, 1)])
+        self.Wz = nn.ModuleList([nn.Linear(hidden, hidden, bias=False) for _ in range(layers - 1)]
+                                + [nn.Linear(hidden, 1, bias=False)])
+    def forward(self, xv):
+        z = torch.relu(self.Wy[0](xv))
+        for i, W in enumerate(self.Wz):
+            z = torch.nn.functional.linear(z, torch.nn.functional.softplus(W.weight)) + self.Wy[i+1](xv)
+            if i < len(self.Wz) - 1:
+                z = torch.relu(z)
+        return z
+
+torch.manual_seed(0)
+ic = ICNN(); o2 = torch.optim.Adam(ic.parameters(), lr=0.01)
+for _ in range(4000):
+    o2.zero_grad(); ((ic(xtt) - ytt) ** 2).mean().backward(); o2.step()
+with torch.no_grad():
+    yic = ic(xtt).numpy().ravel()
+print(f"ICNN         : RMSE = {np.sqrt(((yic-ys)**2).mean()):.5f}"
+      f"   worst -f'' = {convexity_violation(xs, yic):.2e}")
+"""),
+
+md("""
+**Exercise 10.** Point the same ICNN at $\\sin 3x$, which is not convex. It will fail — and it will
+fail *while remaining exactly convex*. Explain why that failure is more useful than a silently wrong
+fit.
+
+**Exercise 11.** The implementation uses `softplus` on the weights rather than `clamp`. Replace it
+with `clamp(min=0)` and watch what happens to the weights that hit the boundary. Which frame in 7.A2
+is this?
+"""),
+
+md("""
+## What to take away
+
+1. **Fix the knots and a one-layer ReLU network is least squares on a piecewise-linear basis.** Let
+   them move and it finds the kink. That is the entire difference Session 7 is about.
+2. **Training is not least squares.** At $N=4$ the learned version was worse. Universal
+   approximation is existence, not a recipe.
+3. **An economic model supplies its own labels** — zero, at every sampled state, with an unlimited
+   supply of states.
+4. **Feasibility belongs in the parameterisation**, not in a clip: $c=\\sigma(\\cdot)\\times$ cash.
+5. **Never sample what you can sum.** The inner expectation over a finite Markov chain is exact and
+   costs one matrix product.
+6. **A sampled method is weakest at the edge of the region it sampled.** Sample wider than you
+   evaluate.
+7. **On a smooth, one-dimensional model the network loses, decisively.** Report the number anyway.
+   The case for the method is how its cost scales, not how it does here.
+8. **Impose the shape theory gives you.** An ICNN is convex identically — and here it was more
+   accurate too, because the constraint removed wrong functions from the search.
+"""),
+]
+
+
 if __name__ == "__main__":
     os.makedirs(LABS, exist_ok=True)
     for name, cells in [("L00_Getting_Started", L00), ("L03_Python_and_VFI", L03),
-                        ("L04_Numerical_Methods", L04)]:
+                        ("L04_Numerical_Methods", L04),
+                    ("L05_Perturbation_and_Projection", L05),
+                    ("L07_ML_and_Deep_Growth", L07)]:
         path = os.path.join(LABS, name + ".ipynb")
         with open(path, "w") as f:
             json.dump(notebook(cells), f, indent=1)

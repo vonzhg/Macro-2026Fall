@@ -1,0 +1,339 @@
+%% ECON 282E -- Session 5, Deck B5: Determining the Coefficients
+%% Source: Quant_Macro Lec.9 frames 96-108 (L2415-2742).  Follows
+%% Fernandez-Villaverde & Guerron-Quintana, Solution Methods IV pp.39-47;
+%% rewritten here and cited.  Source defects are recorded in slides/SOURCES.md,
+%% not on the slides.
+%% Numbers from tools/figures/s05_numbers.json, key "collocation".
+
+\input{../preamble/course_preamble.tex}
+\graphicspath{{./figures/}}
+
+\lstset{language=Python, basicstyle=\ttfamily\scriptsize, frame=none,
+        backgroundcolor=\color{gray!8}, aboveskip=2pt, belowskip=2pt}
+
+\decktitle{5}{B5}{Determining the Coefficients}{Thursday, October 22, 2026}
+
+\begin{document}
+
+\makedecktitle
+
+%=============================================================================
+\begin{frame}{Where We Are}
+\CourseMap{5}{5.B5}
+\vspace{-1mm}
+\begin{center}
+\small \textbf{Block B:} 5.B1 the residual $\;\cdot\;$ 5.B2 choosing a basis $\;\cdot\;$ 5.B3 Chebyshev $\;\cdot\;$ 5.B4 finite elements $\;\cdot\;$ \textbf{5.B5} determining the coefficients $\;\cdot\;$ 5.B6 the worked example.
+\end{center}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Weighted Residuals}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+The standard answer to ``what does small mean'' is: \textbf{zero in a weighted integral sense}. Choose $n+1$ weight functions $w_i:\Omega\to\mathbb{R}^{m}$ and require
+\[
+  \int_{\Omega} w_i(x)\,R(x;\theta)\,dx \;=\; 0,
+  \qquad i=0,\dots,n .
+\]
+That is $n+1$ equations for $n+1$ coefficients --- square, and generically solvable.
+\medskip
+
+This is why projection methods are also called \textbf{weighted residual methods}. Every named method in the literature is one choice of $\{w_i\}$.
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{takeawaybox}\footnotesize
+And the payoff: an \textbf{intractable functional equation} has become a \textbf{standard nonlinear system}. Newton for small problems, conjugate gradient for large ones --- all of 4.A1 and 4.A3, unchanged.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+Notation: the literature writes the weights as $f_i$ and the basis as $\psi_i$, $g_i$ or $\varphi_i$ depending on the author. Here the basis is always $\psi_i$ and the weights always $w_i$.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Objective function''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{What the Weight Is Actually For}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+A policy function does not misbehave uniformly. It may bend sharply near a constraint and be almost linear elsewhere --- so a residual of a given size means different things in different regions.
+\medskip
+
+The weight lets you say where accuracy matters: put more weight where the function varies rapidly, and the solve will spend its coefficients there.
+\medskip
+
+The source's analogy is apt: the weight handles \textbf{``heteroskedasticity'' in the function being approximated}. It is the same instinct as weighted least squares, and the same instinct as 3.A2's log-spaced asset grid.
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}[title=\textbf{Basis functions as weights}]\small
+A natural choice is to use the \textbf{basis itself}. If the basis was chosen to match the features of the function, it already puts its variation where the function's is --- so weighting by it emphasises exactly the right regions.
+\medskip
+That choice has a name: \textbf{Galerkin}.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Weight function'' (both frames).}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{I. Least Squares}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+Take $\;w_i(x)=\dfrac{\partial R(x;\theta)}{\partial\theta_i}$.
+\medskip
+
+This is not arbitrary --- it is the first-order condition of the variational problem
+\[
+  \min_{\theta}\int_{\Omega}R^{2}(x;\theta)\,dx,
+\]
+whose FOC is exactly $\int_\Omega \partial_{\theta_i}R\cdot R\,dx=0$.
+\medskip
+
+So least squares is the \textbf{regression} answer: minimise the squared residual over the domain, and you are choosing the weights without realising it.
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}[title=\textbf{Why it is attractive}]\small
+It always generates \textbf{symmetric} matrices --- convenient in the proofs, and exploitable by algorithms that are faster and use less memory.
+\end{conceptbox}
+\medskip
+\begin{cautionbox}\footnotesize
+And why it is not: least squares is prone to \textbf{ill-conditioning}, and the resulting systems can be awkward to solve. Squaring the residual squares the condition number too.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Weight function I: Least Squares''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{II. Subdomain, and III. Moments}
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\small
+\textbf{Subdomain.} Split $\Omega$ into $n+1$ pieces $\Omega_i$ and take step functions,
+\[
+  w_i(x)=\mathbf{1}\{x\in\Omega_i\},
+\]
+so the condition is that the residual \textbf{averages to zero on each piece}. It may be large inside a piece, as long as it cancels.
+\medskip
+
+\textbf{Moments.} Take $\{1,x,x^{2},\dots,x^{n}\}$ as weights:
+\[
+  \int_{\Omega}x^{i}R(x;\theta)\,dx=0 .
+\]
+The first $n$ moments of the residual are zero.
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{cautionbox}[title=\textbf{Read it carefully}]\footnotesize
+The weights are $\{1,x,x^{2},\dots\}$ --- the first one is the constant, so the first condition just says the residual \emph{integrates to zero}. The rest set its higher moments to zero.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+The verdict on moments is 5.B2's argument again: fine for $n=2$ or $3$, and for higher orders the monomials are so collinear that rounding error dominates. \textbf{``Moments are to be avoided.''}
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Weight Function II: Subdomain Approach'' and ``Weight function III: Moments''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{IV. Collocation}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\small
+Take the weights to be Dirac deltas:
+\[
+  w_i(x)=\delta(x-x_i).
+\]
+Since $\int \delta(x-x_i)R(x)\,dx = R(x_i)$, the conditions collapse to
+\[
+  R(x_i;\theta)=0,\qquad i=0,\dots,n .
+\]
+\textbf{The residual is exactly zero at $n+1$ points and unconstrained in between} --- 5.B1's picture.
+\medskip
+
+The attraction is cost: no integral is ever computed. Each condition is one function evaluation, which matters when $R$ is expensive and strongly nonlinear.
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}[title=\textbf{Picking the points}]\footnotesize
+A systematic choice uses a density $\mu_\gamma$, placing $x_j$ so that $\int_{-1}^{x_j}\mu_\gamma=j/n$. Larger $\gamma$ clusters points at the endpoints; equi-spacing is the limit $\gamma\to0$.
+\end{conceptbox}
+\medskip
+\begin{cautionbox}\footnotesize
+Read the limit carefully: $\gamma=0$ substituted into $\mu_\gamma$ gives \textbf{the zero function}, which is not a density. Equi-spacing is the limit $\gamma\to0$, not the value $\gamma=0$.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Weight function IV: Collocation or pseudospectral'' and ``Intuition: $\mu_\gamma(x)$ and the Case $\gamma=0$''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Collocation Against Subdomain}
+\small
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{@{}>{\raggedright\arraybackslash}p{2.0cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+ & \textbf{Collocation} & \textbf{Subdomain} \\
+\midrule
+Weight & $\delta(x-x_i)$ & step function on $\Omega_i$ \\
+Residual is & zero \textbf{at points} & zero \textbf{on average} over each piece \\
+Evaluation & pointwise only & an integral per condition \\
+Cost & \textbf{lower} & higher \\
+Best for & strongly \textbf{nonlinear}, spectral bases & \textbf{smooth}, PDE-like problems \\
+Limitation & says nothing between the points & integration overhead \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\medskip
+\begin{center}
+\begin{minipage}{0.88\linewidth}
+\begin{conceptbox}[title=\textbf{The shared weakness}]\footnotesize
+Neither controls the residual \emph{between} the conditions. Collocation leaves it free between points; subdomain lets it cancel within a piece. That is why you always grade the finished solution on a \textbf{different, finer set of points} --- 3.A1's separation of grids.
+\end{conceptbox}
+\end{minipage}
+\end{center}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Dirac Delta Function $\delta$ and Comparison''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{V. Orthogonal Collocation, and VI. Galerkin}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\small
+\textbf{Orthogonal collocation.} Collocation, with two extra commitments: the basis is a family of \textbf{orthogonal polynomials}, and the collocation points are the \textbf{roots of the $n$-th one}.
+\medskip
+
+Those roots are not equi-spaced --- they cluster at the endpoints, which is exactly where 5.B3 said an equi-spaced rule fails. The result converges exponentially for smooth functions, and the standing verdict in this literature is ``surprisingly good performance''.
+\medskip
+
+\textbf{Galerkin.} Make the residual \textbf{orthogonal to every basis function}:
+\[
+  \int_{\Omega}\psi_i(x)\,R(x;\theta)\,dx=0 .
+\]
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{conceptbox}[title=\textbf{What Galerkin means}]\small
+The residual has \textbf{no component the basis could still represent}. Anything left over is invisible in this function space --- so you have extracted everything the basis can give.
+\end{conceptbox}
+\medskip
+\begin{takeawaybox}\footnotesize
+If the basis is complete, the Galerkin solution converges \textbf{pointwise} to the truth. It is accurate and robust, and \emph{difficult to code}: every condition is an integral of a nonlinear function.
+\medskip
+Rule of thumb: Galerkin at order $n$ is about as accurate as collocation at $n+1$ or $n+2$.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Quant\_Macro Lec.~9, ``Weight function V: Orthogonal collocation'' and ``VI: Galerkin or Rayleigh-Ritz''.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Measured: Six Weight Functions, One Model, One Basis}
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\small
+The quarterly RBC of Block A, Chebyshev degree $6$ in $k$ for each of $7$ shock states --- \textbf{49 unknowns}, identical in every row. Only the weight function changes. All six converge; integrals by $40$-node Gauss--Legendre.
+\medskip
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X r r@{}}
+\toprule
+\textbf{Weight} & $\max|\mathcal{E}|$ & \textbf{sec} \\
+\midrule
+orthogonal collocation & $\mathbf{10^{-5.78}}$ & $0.11$ \\
+least squares & $10^{-5.61}$ & $0.80$ \\
+Galerkin & $10^{-5.55}$ & $0.20$ \\
+moments & $10^{-5.55}$ & $0.15$ \\
+collocation, equi-spaced & $10^{-5.39}$ & $0.11$ \\
+subdomain & $10^{-5.05}$ & $0.14$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{column}
+\begin{column}{0.41\textwidth}
+\begin{takeawaybox}\footnotesize
+\textbf{Every method lands within $0.73$ of a decade of every other} --- a factor of $5.4$ between
+best and worst. The choice of weight function is worth less than one extra basis coefficient, which
+5.B6 measures at $1.2$ decades for two.
+\end{takeawaybox}
+\medskip
+\begin{examplebox}\footnotesize
+And the cheapest is the best: orthogonal collocation wins on accuracy \emph{and} ties for fastest, because it evaluates no integrals at all.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{collocation}. Warm-started from the first-order perturbation solution; residual norms $\le 1.4\times10^{-14}$ except least squares, $6.9\times10^{-7}$.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Two Things the Table Says}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\small
+\textbf{1. Moments and Galerkin are the same method here.} Their errors agree to nine decimal places: $-5.5515379662$ against $-5.5515379670$.
+\medskip
+
+That is not luck. $\{1,x,\dots,x^{n}\}$ and $\{T_0,\dots,T_n\}$ \textbf{span the same space}, so ``orthogonal to every monomial'' and ``orthogonal to every Chebyshev polynomial'' are the same $n+1$ linear conditions. In exact arithmetic they are identical.
+\medskip
+
+The warning against moments is therefore \textbf{purely numerical}: the conditions are right, and the basis you write them in destroys them. At $n=6$ that has not bitten yet; 5.B2's Hilbert table says where it will.
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{cautionbox}[title=\textbf{2. Least squares is 7x slower}]\small
+$0.80$\,s against $0.11$\,s, for no accuracy gain --- and it is the one method that did not drive its residual to machine zero, stopping at $6.9\times10^{-7}$.
+\medskip
+Exactly the predicted ill-conditioning, showing up as a solver that will not converge the last six digits.
+\end{cautionbox}
+\medskip
+\begin{examplebox}\footnotesize
+The source's ``Galerkin $\approx$ collocation at $n+1$ or $n+2$'' is not what we measure: here \emph{orthogonal} collocation beats Galerkin at the same $n$.
+\end{examplebox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\src{Ledger \texttt{collocation.rows}; full precision in the JSON.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Takeaways}
+\begin{takeawaybox}
+\begin{itemize}\small
+  \item ``Make the residual small'' becomes $\int_\Omega w_i R\,dx=0$ for $n+1$ weights --- a square \textbf{nonlinear system}, solved with the tools of 4.A1 and 4.A3. Every named projection method is one choice of $\{w_i\}$.
+  \item \textbf{Least squares} is the regression answer and gives symmetric matrices; it is also the most ill-conditioned, and was measured $7\times$ slower with the worst final residual.
+  \item \textbf{Subdomain} zeroes the residual on average over pieces; \textbf{moments} zeroes its first $n$ moments and is to be avoided at high order; \textbf{collocation} zeroes it at points and computes no integrals at all.
+  \item \textbf{Galerkin} makes the residual orthogonal to the basis --- nothing is left that the basis could represent --- and converges pointwise if the basis is complete.
+  \item Measured on one model with one basis: \textbf{all six land within $0.73$ of a decade}. The weight function matters less than one extra coefficient.
+  \item \textbf{Orthogonal collocation wins on accuracy and ties for fastest}, which is why it is the default in this literature.
+  \item And \textbf{moments and Galerkin agreed to nine decimals} --- they are the same conditions in two bases. The objection to moments is conditioning, not mathematics.
+\end{itemize}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: Now Solve the Model}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\small
+Block B now has both halves: a basis (Chebyshev, on a domain, with clustered nodes) and a projection (orthogonal collocation, because it is cheapest and best).
+\medskip
+
+That is a complete method. The last deck runs it on the model Sessions 3, 4 and 5 have all solved --- and then puts every method in this course into one table.
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{conceptbox}[title=\textbf{Next (5.B6)}]\small
+The worked example: the same quarterly RBC by Chebyshev collocation, five steps, warm-started from perturbation. Then \textbf{one model, four methods} --- and the answer to which one you should reach for.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

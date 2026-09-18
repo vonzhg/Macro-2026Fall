@@ -110,12 +110,12 @@ PCHIP & yes & yes \\
 \end{center}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{cautionbox}[title=\textbf{A correction to the standard table}]\small
-The usual comparison table marks linear interpolation ``concavity: \emph{no}''. That is wrong. The chord of a concave function lies below it and the piecewise-linear interpolant is concave --- worst second difference here, $4\times10^{-16}$.
+\begin{cautionbox}[title=\textbf{Read the concavity row}]\small
+Linear interpolation \textbf{does} preserve concavity: the chord of a concave function lies below it, so the piecewise-linear interpolant is concave --- worst second difference here, $4\times10^{-16}$.
 \end{cautionbox}
 \medskip
 \begin{takeawaybox}\footnotesize
-It matters because the golden-section argument of 4.A2 needs a concave $\hat v$, and \textbf{linear interpolation is what supplies it}. The table, as usually printed, denies the property the method depends on.
+It matters because the golden-section argument of 4.A2 needs a concave $\hat v$, and \textbf{linear interpolation is what supplies it} --- the humblest scheme on the table guarantees the property the method depends on.
 \end{takeawaybox}
 \end{column}
 \end{columns}
