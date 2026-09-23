@@ -12,7 +12,7 @@
 %% concept/caution/example/takeaway boxes, \sectiondivider). Changes for this course:
 %%   * course title block (\decktitle / \makedecktitle) instead of \makebeamertitle
 %%   * \zh{...} typesets Chinese (book titles) under pdflatex via CJKutf8
-%%   * researchbox for the "Research in the wild" frames
+%%   * researchbox for the "Research in Practice" frames
 %%   * section pages off; TikZ libraries and the course map loaded here
 %% Build with pdflatex only (two passes); tools/build_slides.py does this for you.
 
@@ -158,7 +158,7 @@
   arc=1mm, left=2mm, right=2mm, top=1mm, bottom=1mm, #1}
 \newtcolorbox{researchbox}[1][]{enhanced, colback=violet!4, colframe=violet!60!black,
   boxrule=0.35mm, arc=1mm, left=2mm, right=2mm, top=1mm, bottom=1mm,
-  fonttitle=\bfseries\small, title={Research in the wild}, #1}
+  fonttitle=\bfseries\small, title={Research in Practice}, #1}
 
 \newcommand{\compacttables}{\renewcommand{\arraystretch}{1.15}}
 \newcommand{\src}[1]{{\tiny\color{black!55}#1}}

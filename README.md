@@ -33,8 +33,9 @@ compressed tour of that material; the companion repository develops it in full, 
 
 - **Everything** — syllabus, slides, labs, assignments — is linked from the
   [course home page](https://vonzhg.github.io/Macro-2026Fall/).
-- **Slides** are free PDF downloads, no password. Each page carries a copyright watermark; please
-  don't redistribute or repost them without permission.
+- **Slides** are posted session by session, a few days before each class. They are free PDF
+  downloads, no password. Each page carries a copyright watermark; please don't redistribute or
+  repost them without permission.
 - **Labs** ship with **no stored output**, on purpose — you are meant to produce the numbers:
 
   ```bash
@@ -54,7 +55,7 @@ compressed tour of that material; the companion repository develops it in full, 
 index.html              Course home — schedule, grading, quick links
 syllabus.html           Syllabus in brief; syllabus/syllabus.pdf is authoritative
 slides/index.html       Session decks (watermarked PDFs)
-slides/S03, S04/        LaTeX sources for the sessions built so far
+slides/S03/, S04/, ...  LaTeX sources, posted with each session
 slides/preamble/        Shared Beamer preamble and the course map
 labs/                   Jupyter notebooks + requirements.txt
 homeworks-exams/HW1/    Homework 1, Parts A and B

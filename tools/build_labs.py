@@ -2480,11 +2480,521 @@ md("""
 ]
 
 
+# =============================================================== L06
+# The Session 6 lab does NOT re-type the Aiyagari solver.  It inlines the very
+# functions that wrote tools/figures/s06_numbers.json, so a student's run and
+# the numbers quoted in the lecture cannot drift apart.  Edit the solver in
+# tools/figures/s06_generate.py; this picks the change up on the next build.
+def _s06():
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    "figures"))
+    import s06_generate
+    return s06_generate
+
+
+def _s06_consts():
+    S6 = _s06()
+    names = ["ALPHA", "BETA", "DELTA", "SIGMA", "SIGMA_RA", "RHO_Z", "SD_LOG_Z",
+             "N_Z", "A_MIN", "A_MAX", "N_A", "CURV", "TOL_POL", "TOL_DIST",
+             "TOL_R"]
+    return "\n".join("%s = %r" % (n, getattr(S6, n)) for n in names)
+
+
+def _s06_source(names):
+    import inspect
+    S6 = _s06()
+    return "\n\n".join(inspect.getsource(getattr(S6, n)).rstrip()
+                        for n in names)
+
+
+
+L06 = [
+md("""
+# Lab 6 — Aiyagari, End to End
+
+**ECON 282E · Session 6 · October 29, 2026**
+
+Session 2 defined these equilibria. Session 6 computed them. This lab is the code.
+
+| Part | What you build | Deck |
+|---|---|---|
+| 1 | the household problem by EGM, and the kink | 6.A1 |
+| 2 | the Young lottery, the operator $Q$, and the invariant $\\lambda$ | 6.A1 |
+| 3 | clearing the market: bisection on $r$ | 6.A1 |
+| 4 | accuracy: the refinement ladder and Euler residuals | 6.A1 |
+| 5 | what persistence does | 6.A1 |
+| 6 | a transition after a capital-tax reform | 6.A2 |
+| 7 | welfare: the consumption-equivalent variation | 6.B3 |
+| 8 | complete markets: two distributions, one aggregate | 6.B1 |
+| 9 | Negishi: the weight fixed point | 6.B2 |
+
+**Prerequisite:** L04 (interpolation, Rouwenhorst, root-finding). Everything is NumPy;
+no GPU and no internet.
+
+**Where the code comes from.** Part 0 inlines the *same* functions that generated
+`tools/figures/s06_numbers.json`, which is where every number quoted in the Session 6
+decks comes from. If your run disagrees with a lecture slide, one of you has a bug —
+and it is worth finding out which.
+
+**Timing.** Parts 1–5 run in a few minutes. Part 6 is the slow one (a couple of minutes).
+Reduce `N_A` to 200 while you are experimenting.
+"""),
+
+code("""
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.set_printoptions(precision=6, suppress=True)
+
+# ---- the Session 6 calibration, quarterly (continuing S4 and S5) ----------
+""" + _s06_consts() + """
+
+print("quarterly:", ALPHA, BETA, DELTA, "| CRRA", SIGMA,
+      "| earnings rho", RHO_Z, "sd log z", SD_LOG_Z)
+"""),
+
+md("""
+---
+## Part 0 — the solver
+
+Read these functions before you run them. There are only six ideas here:
+Rouwenhorst, a curved grid, EGM, the Young lottery, the operator $Q$, and bisection.
+"""),
+
+code("""
+# Inlined verbatim from tools/figures/s06_generate.py -- do not edit here.
+""" + _s06_source([
+    "rouwenhorst", "make_grid", "prices_from_r", "solve_egm",
+    "young_lottery", "push_forward", "stationary_dist", "gini",
+    "aiyagari_at_r", "solve_r"]) + """
+
+print("loaded")
+"""),
+
+md("""
+---
+## Part 1 — the household problem, and the kink
+
+Fix a return `r` and solve one household problem. Nothing is in equilibrium yet.
+"""),
+
+code("""
+z, Pi, pi = rouwenhorst(N_Z, RHO_Z, SD_LOG_Z)
+grid = make_grid(N_A, A_MIN, A_MAX)
+print("z =", np.round(z, 4))
+print("E[z] =", pi @ z, "  sd(log z) =",
+      np.sqrt(pi @ (np.log(z) - pi @ np.log(z))**2))
+
+r_try = 0.008
+kl, w = prices_from_r(r_try)
+t0 = time.time()
+ap, c, n_it, diff = solve_egm(r_try, w, grid, z, Pi)
+print("EGM: %d iterations, change %.2e, %.2fs" % (n_it, diff, time.time()-t0))
+
+fig, ax = plt.subplots(1, 2, figsize=(11, 3.6))
+sel = grid <= 60
+for q in (0, N_Z//2, N_Z-1):
+    ax[0].plot(grid[sel], ap[sel, q], label="z = %.2f" % z[q])
+ax[0].plot(grid[sel], grid[sel], "k--", lw=0.8, label="45 degrees")
+ax[0].set_xlabel("a"); ax[0].set_ylabel("a'"); ax[0].legend(fontsize=7)
+ax[0].set_title("saving policy")
+for q in (0, N_Z-1):
+    ax[1].plot(grid[sel], c[sel, q], label="z = %.2f" % z[q])
+ax[1].set_xlabel("a"); ax[1].set_ylabel("c"); ax[1].legend(fontsize=7)
+ax[1].set_title("consumption policy")
+plt.tight_layout(); plt.show()
+
+at_limit = ap <= A_MIN + 1e-9
+print("grid nodes at the borrowing limit:", at_limit.sum(), "of", ap.size)
+"""),
+
+md("""
+**Exercise 1.** The kink in `a'(a, z)` is where the borrowing constraint stops binding.
+Locate it for the lowest `z` and report the asset level. Then re-solve with `CURV = 1.0`
+(a uniform grid) at the same `N_A` and report how the location moves. Which discretization
+resolves the kink better, and why does grid curvature matter *here* specifically?
+
+**Exercise 2.** Verify that EGM never solves an optimization problem. Instrument
+`solve_egm` to count calls to any root-finder or maximizer. Then explain in two sentences
+what replaced the search.
+"""),
+
+md("""
+---
+## Part 2 — from a policy to a population
+
+The policy sends a household off the grid. The Young lottery decides where its mass goes.
+"""),
+
+code("""
+j, wt = young_lottery(ap, grid)
+q_show = 0
+print("a' = %.4f lands between a[%d] = %.4f and a[%d] = %.4f, weight %.4f"
+      % (ap[50, q_show], j[50, q_show], grid[j[50, q_show]],
+         j[50, q_show]+1, grid[j[50, q_show]+1], wt[50, q_show]))
+
+t0 = time.time()
+lam, it_d, d_d = stationary_dist(ap, grid, Pi, pi)
+print("lambda: %d applications of Q, change %.2e, %.2fs"
+      % (it_d, d_d, time.time()-t0))
+print("mass conservation error: %.2e" % abs(lam.sum() - 1.0))
+print("mass at the top of the grid: %.2e" % lam.sum(axis=1)[-1])
+
+lam_a = lam.sum(axis=1)
+fig, ax = plt.subplots(1, 2, figsize=(11, 3.4))
+sel = grid <= 120
+ax[0].plot(grid[sel], lam_a[sel])
+ax[0].set_xlabel("a"); ax[0].set_title("marginal distribution of assets")
+ax[1].plot(grid[sel], np.cumsum(lam_a)[sel])
+ax[1].set_xlabel("a"); ax[1].set_title("CDF")
+plt.tight_layout(); plt.show()
+print("wealth Gini at this r:", round(gini(grid, lam_a), 4))
+"""),
+
+md("""
+**Exercise 3.** Replace the lottery with nearest-grid-point rounding. Total mass is still
+one, so the distribution is still a distribution. Show that the mean of `a` under
+$\\lambda$ is nevertheless biased, at `N_A = 200` and at `N_A = 800`. Roughly what power
+of the grid spacing is the bias?
+
+**Exercise 4.** Get $\\lambda$ three ways: the power iteration above, a dense solve of
+$(Q' - I)\\lambda = 0$ with a normalization row, and a sparse eigenvector at eigenvalue 1
+(`scipy.sparse.linalg.eigs`). Report wall time and the largest disagreement between them.
+At what `N_A` does the dense solve stop being competitive?
+"""),
+
+md("""
+---
+## Part 3 — closing the model
+
+Now impose market clearing. Excess demand is
+`d(r) = (household supply) - (firm demand)`, and **both** terms must depend on `r`.
+"""),
+
+code("""
+rs = np.linspace(-0.002, 1.0/BETA - 1.0 - 2e-4, 12)
+Ks, Kd, warm = [], [], None
+for rr in rs:
+    f = aiyagari_at_r(rr, grid, z, Pi, pi, c_init=warm)
+    warm = f["c"]
+    Ks.append(f["K_supply"]); Kd.append(f["K_demand"])
+
+plt.figure(figsize=(5.4, 3.8))
+plt.plot(Ks, rs, label="supply A(r)")
+plt.plot(Kd, rs, label="demand K^d(r)")
+plt.axhline(1.0/BETA - 1.0, color="k", ls="--", lw=0.8, label="1/beta - 1")
+plt.xlabel("capital"); plt.ylabel("r (quarterly)"); plt.legend(fontsize=8)
+plt.xlim(0, 56); plt.tight_layout(); plt.show()
+"""),
+
+code("""
+t0 = time.time()
+sol = solve_r(grid, z, Pi, pi, verbose=True)
+print("\\nr* = %.6f (quarterly)  =  %.4f%% annual"
+      % (sol["r"], 100*((1+sol["r"])**4 - 1)))
+print("rbar = 1/beta - 1 = %.6f   wedge = %.1f basis points"
+      % (1/BETA - 1, 1e4*((1/BETA - 1) - sol["r"])))
+print("K* = %.4f   K/Y (annual) = %.3f"
+      % (sol["K_supply"], sol["K_supply"]/(4*sol["K_supply"]**ALPHA)))
+lam = sol["lam"]; lam_a = lam.sum(axis=1)
+print("wealth Gini = %.4f   at the limit = %.4f%%"
+      % (gini(grid, lam_a), 100*lam[0, :].sum()))
+print("solved in %.1fs" % (time.time()-t0))
+"""),
+
+md("""
+**Exercise 5.** The lecture reports $r^* = 0.00804$, a wedge of 20.6 basis points, and a
+wealth Gini of 0.469. Reproduce all three. If you do not, the most likely culprits are
+`N_A`, `A_MAX` and `CURV` — show which one moves your answer most.
+
+**Exercise 6.** Replace bisection with Newton on a finite-difference derivative of `d(r)`.
+Count household solves for each method. Then explain why bisection is still the
+recommendation: look at what happens to the *set of constrained nodes* as `r` moves, and
+what that does to the smoothness of `A(r)`.
+
+**Exercise 7 (trap).** Someone defines excess demand as `d(r) = K(r) - integral a dlambda`
+where `K(r)` is set to household *supply*. Show that this is identically zero in a
+stationary equilibrium, so any `r` "clears" it. What would you see in the output?
+"""),
+
+md("""
+---
+## Part 4 — do you believe it?
+
+Five checks. Only the fourth is expensive, and it is the one that most often moves an answer.
+"""),
+
+code("""
+rows = []
+for n_a in (100, 200, 400):
+    g2 = make_grid(n_a, A_MIN, A_MAX)
+    t0 = time.time()
+    s2 = solve_r(g2, z, Pi, pi)
+    rows.append((n_a, s2["r"], s2["K_supply"],
+                 gini(g2, s2["lam"].sum(axis=1)), time.time()-t0))
+print(" n_a        r*          K*      Gini     sec")
+for a, b, cc, d, e in rows:
+    print("%4d  %.6f  %8.4f  %.4f  %6.1f" % (a, b, cc, d, e))
+"""),
+
+code("""
+# unit-free Euler residual, where the constraint is slack and a' is not clipped
+ap, c = sol["ap"], sol["c"]
+R = 1.0 + sol["r"]
+Euc = np.zeros_like(c)
+for q in range(N_Z):
+    cp = np.empty((grid.size, N_Z))
+    for qq in range(N_Z):
+        cp[:, qq] = np.interp(ap[:, q], grid, c[:, qq])
+    Euc[:, q] = (cp ** (-SIGMA)) @ Pi[q, :]
+resid = np.abs(1.0 - (BETA*R*Euc) ** (-1.0/SIGMA) / c)
+off = (ap > A_MIN + 1e-9) & (ap < grid[-1]*(1-1e-9))
+v = resid[off]
+for p in (50, 90, 99, 100):
+    print("p%-4s  %.3e   (log10 %.2f)"
+          % (p, np.percentile(v, p), np.log10(np.percentile(v, p))))
+print("nodes above 1e-2:", int((v > 1e-2).sum()), "of", v.size)
+"""),
+
+md("""
+**Exercise 8.** The worst few nodes are not where you expect. Find the `(a, z)` at which
+the residual is largest and report the asset level. Then report how much of $\\lambda$ sits
+there. Argue, in two sentences, whether the median or the maximum is the honest summary of
+this solution — and what you would have to change for the maximum to become the right one.
+"""),
+
+md("""
+---
+## Part 5 — persistence, with dispersion held fixed
+"""),
+
+code("""
+out = []
+for rho in (0.90, 0.95, 0.99):
+    zz, PP, pp = rouwenhorst(N_Z, rho, SD_LOG_Z)     # same unconditional sd
+    s3 = solve_r(grid, zz, PP, pp)
+    la = s3["lam"]
+    out.append((rho, SD_LOG_Z*np.sqrt(1-rho**2), 100*((1+s3["r"])**4 - 1),
+                gini(grid, la.sum(axis=1)), 100*la[0, :].sum()))
+print(" rho   sigma_eps   r* ann     Gini   at limit")
+for a, b, cc, d, e in out:
+    print("%.2f    %.4f     %.3f%%   %.4f   %6.2f%%" % (a, b, cc, d, e))
+"""),
+
+md("""
+**Exercise 9.** The lecture reports the constrained share rising from 0.51% to 12.98% as
+$\\rho$ goes from 0.90 to 0.99, with the dispersion of $\\log z$ held fixed. Reproduce it.
+Then redo the sweep holding the *conditional* standard deviation fixed instead. Does the
+lecture's claim survive? State precisely what changed.
+"""),
+
+md("""
+---
+## Part 6 — a transition
+
+A permanent 20% capital-income tax, rebated lump sum, announced at $t = 0$.
+Backward on decisions, forward on the distribution, damped update in between.
+"""),
+
+code("""
+""" + _s06_source(["solve_egm_with_transfer", "_backward_policies",
+                   "_value_ss", "_values_along", "_halflife"]) + """
+
+print("loaded the transition machinery")
+"""),
+
+code("""
+TAU_K, T = 0.20, 200
+
+def ss_with_tax(tau_k, n_bisect=45):
+    lo, hi, s = 0.0005, 1.0/BETA - 1.0 - 1e-6, None
+    for _ in range(n_bisect):
+        mid = 0.5*(lo + hi)
+        kl, w = prices_from_r(mid)
+        ap_, c_, _, _ = solve_egm_with_transfer(
+            (1-tau_k)*mid, w, tau_k*mid*kl, grid, z, Pi,
+            c_init=None if s is None else s["c"])
+        la, _, _ = stationary_dist(ap_, grid, Pi, pi)
+        Ks = float((la.sum(axis=1)*grid).sum())
+        s = dict(r=mid, w=w, ap=ap_, c=c_, lam=la, K_supply=Ks, K_demand=kl)
+        hi, lo = (mid, lo) if Ks - kl > 0 else (hi, mid)
+    return s
+
+t0 = time.time()
+ss0, ss1 = ss_with_tax(0.0), ss_with_tax(TAU_K)
+print("old K = %.4f   new K = %.4f   (%.2f%%)   [%.0fs]"
+      % (ss0["K_supply"], ss1["K_supply"],
+         100*(ss1["K_supply"]/ss0["K_supply"] - 1), time.time()-t0))
+"""),
+
+code("""
+K0, K1 = ss0["K_supply"], ss1["K_supply"]
+Kpath = K0 + (K1-K0)*(1 - np.exp(-np.arange(T+1)/25.0)); Kpath[0] = K0
+damp = 0.30
+for outer in range(1, 201):
+    r_pre = ALPHA*Kpath**(ALPHA-1) - DELTA
+    w_p   = (1-ALPHA)*Kpath**ALPHA
+    rnet  = (1-TAU_K)*r_pre; rnet[0] = ss0["r"]
+    reb   = TAU_K*r_pre*Kpath
+    c_path, ap_path = _backward_policies(rnet, w_p, reb, grid, z, Pi, ss1["c"])
+    lam_t, K_new = ss0["lam"].copy(), np.empty(T+1); K_new[0] = K0
+    for t in range(T):
+        jj, ww = young_lottery(ap_path[t], grid)
+        lam_t = push_forward(lam_t, jj, ww, Pi)
+        K_new[t+1] = float((lam_t.sum(axis=1)*grid).sum())
+    gap = float(np.abs(K_new - Kpath).max())
+    Kpath = (1-damp)*Kpath + damp*K_new
+    if gap < 1e-6:
+        break
+print("converged in %d outer iterations, max|A_t - K_t| = %.2e" % (outer, gap))
+print("lambda_T distance to the new steady state (L1): %.4f"
+      % np.abs(lam_t - ss1["lam"]).sum())
+
+fig, ax = plt.subplots(1, 2, figsize=(11, 3.4))
+ax[0].plot(Kpath); ax[0].axhline(K0, ls="--", c="k", lw=0.8)
+ax[0].axhline(K1, ls=":", c="k", lw=0.8); ax[0].set_title("capital")
+ax[1].plot(ALPHA*Kpath**(ALPHA-1) - DELTA); ax[1].set_title("pre-tax r")
+for a_ in ax: a_.set_xlabel("quarters")
+plt.tight_layout(); plt.show()
+"""),
+
+md("""
+**Exercise 10.** Set `T = 80` and then `T = 400`, and report the aggregate CEV of Part 7
+each time. How large must `T` be before the third decimal stops moving? Explain what the
+`lambda_T` distance printed above is telling you, and why it is the right thing to check.
+
+**Exercise 11.** Remove the damping (`damp = 1.0`). Describe what happens and why.
+"""),
+
+md("""
+---
+## Part 7 — who wins
+"""),
+
+code("""
+V0 = _value_ss(ss0["c"], ss0["ap"], grid, Pi)
+V1 = _value_ss(ss1["c"], ss1["ap"], grid, Pi)
+Vtr = _values_along(c_path, ap_path, grid, Pi, V1)
+g_tr = (Vtr[0]/V0)**(1.0/(1.0-SIGMA)) - 1.0      # along the transition
+g_ss = (V1  /V0)**(1.0/(1.0-SIGMA)) - 1.0        # steady states only
+w0 = ss0["lam"]/ss0["lam"].sum()
+print("aggregate CEV, transition   : %+.4f%%" % (100*(g_tr*w0).sum()))
+print("aggregate CEV, steady states: %+.4f%%" % (100*(g_ss*w0).sum()))
+print("share worse off             : %.1f%%"  % (100*w0[g_tr < 0].sum()))
+print("share changing sign         : %.1f%%"
+      % (100*w0[np.sign(g_tr) != np.sign(g_ss)].sum()))
+"""),
+
+md("""
+**Exercise 12.** Report the CEV by decile of the *initial* wealth distribution and say who
+gains. Then explain the sign of the gap between the two aggregate numbers above — and why
+it runs the opposite way from the Auerbach–Kotlikoff warning you met in 2.B2.
+"""),
+
+md("""
+---
+## Part 8 — the case where none of this was necessary
+"""),
+
+code("""
+""" + _s06_source(["_k_ss_ra", "_shoot", "_planner_path"]) + """
+
+kss = _k_ss_ra(); k0 = 0.5*kss
+paths = []
+for th in ([0.5, 0.5], [0.2, 0.8], [0.05, 0.95]):
+    kk, CC, mu, _, _ = _planner_path(th, [SIGMA_RA, SIGMA_RA], [0.5, 0.5], k0, 300)
+    paths.append(kk[:150])
+print("common curvature, max |K^A - K^B| over 150 quarters: %.3e"
+      % max(np.abs(paths[0]-q).max() for q in paths[1:]))
+
+paths_h = []
+for th in ([0.5, 0.5], [0.2, 0.8], [0.05, 0.95]):
+    kk, CC, mu, _, _ = _planner_path(th, [1.0, 5.0], [0.5, 0.5], k0, 300)
+    paths_h.append(kk[:150])
+print("mixed curvature,  max |K^A - K^B|:                   %.3e"
+      % max(np.abs(paths_h[0]-q).max() for q in paths_h[1:]))
+"""),
+
+md("""
+**Exercise 13.** The first number is zero to machine precision and the second is not.
+Say exactly which Gorman condition the second experiment breaks, and predict — before
+running it — what happens if instead you give the two households the same curvature but
+different *discount factors*. Then run it.
+"""),
+
+md("""
+---
+## Part 9 — Negishi
+"""),
+
+code("""
+""" + _s06_source(["_ra_path"]) + """
+
+ra = _ra_path(0.5*_k_ss_ra(), T=400)
+n_i = np.array([0.5, 0.5])
+k_i0 = np.array([0.25, 1.75])*ra["k"][0]
+W = (1.0 + ra["r"][0])*k_i0 + ra["PV_w"]
+print("capital ratio      : %.2f" % (k_i0[1]/k_i0[0]))
+print("wealth ratio       : %.4f" % (W[1]/W[0]))
+print("human wealth share : %.1f%%" % (100*ra["PV_w"]/float(n_i @ W)))
+print("Walras check       : %.2e"
+      % (abs(float(n_i @ W) - ra["PV_C"]) / ra["PV_C"]))
+
+lo, hi = 1e-8, 1.0/n_i[0] - 1e-8
+for it in range(1, 121):
+    mid = 0.5*(lo + hi)
+    h1 = mid*ra["PV_C"] - W[0]
+    hi, lo = (mid, lo) if h1 > 0 else (hi, mid)
+    if abs(h1) < 1e-13*ra["PV_C"]:
+        break
+print("theta_1 = %.6f in %d bisections; closed form %.6f"
+      % (0.5*(lo+hi), it, W[0]/float(n_i @ W)))
+"""),
+
+md("""
+**Exercise 14.** Solve the same two-household economy the other way: guess the price path,
+compute each household's demand, and iterate until markets clear at every date. Report the
+number of unknowns and the iterations each method needs. Then say what would happen to each
+method if you added a borrowing constraint — and which one stops being *correct* rather
+than merely slow.
+"""),
+
+md("""
+---
+## What to take away
+
+1. **Aiyagari is three nested fixed points.** A dynamic program inside an invariant
+   distribution inside a scalar price. Every outer residual evaluation costs both inner solves.
+2. **EGM removes the inner search** by gridding tomorrow's assets and inverting the Euler
+   equation. The borrowing constraint becomes a comparison, not a solver.
+3. **The Young lottery is not interpolation for its own sake.** It is what lets you push a
+   distribution forward deterministically, and it is why none of this needs simulation noise.
+4. **Bisection beats Newton here** because the set of constrained households changes
+   discretely with `r`, so `A(r)` is only piecewise smooth.
+5. **Report the median residual and say where the maximum is.** A single bad node at the
+   edge of a grid is not the same kind of problem as a bad node in the middle of the mass.
+6. **Persistence, not variance, creates constrained households** — and the constrained
+   households are the entire reason this model is not the representative-agent model.
+7. **A transition needs both steady states and a check that it arrived.** If `lambda_T` is
+   far from the new stationary distribution, `T` was too short and every welfare number is
+   contaminated.
+8. **Steady-state welfare comparisons are not welfare comparisons.** They can differ in
+   magnitude, and for a third of households here they differ in sign.
+9. **None of this work is necessary under complete markets with preferences that
+   aggregate** — and that is a much smaller set of models than the habit of writing down a
+   representative agent suggests.
+"""),
+]
+
+
 if __name__ == "__main__":
     os.makedirs(LABS, exist_ok=True)
     for name, cells in [("L00_Getting_Started", L00), ("L03_Python_and_VFI", L03),
                         ("L04_Numerical_Methods", L04),
                     ("L05_Perturbation_and_Projection", L05),
+                    ("L06_Aiyagari_End_To_End", L06),
                     ("L07_ML_and_Deep_Growth", L07)]:
         path = os.path.join(LABS, name + ".ipynb")
         with open(path, "w") as f:

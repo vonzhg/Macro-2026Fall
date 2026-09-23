@@ -39,8 +39,11 @@ __pycache__/
 # ---------------------------------------------------------------------------
 
 # ⚠ PUBLISH BLOCKERS: three decks show unpublished research (Feng, Han, Sargent
-# & Zhu 2026; Feng, Han & Zhu, under review) and two of them carry the notice
+# & Zhu 2026; Feng, Han & Zhu, under review). S02_A2 still carries the notice
 # "Confidential — work in progress. Please do not circulate without permission."
+# S01_A1 carried it too until 2026-09-22, when the instructor had it removed; the
+# deck stays blocked regardless, because its figure and all five of its numbers
+# still come from the uncleared paper.
 # Remove these lines ONLY after the instructor clears the material.
 slides/pdf/S01_A1_Who_I_Am.pdf
 slides/pdf/S02_A2_Aiyagari.pdf
@@ -61,3 +64,37 @@ homeworks-exams/PS*.lyx
 homeworks-exams/**/*.aux
 homeworks-exams/**/*.log
 homeworks-exams/**/*.out
+
+# Combined deck PDFs from tools/combine_slides.py.  The default merge contains
+# the three publish-blocker decks, so the invariant is: only files built with
+# --public may be handed out, and only those are tracked.
+slides/pdf/ECON282E_*.pdf
+!slides/pdf/ECON282E_*_public.pdf
+
+# ---------------------------------------------------------------------------
+# STAGED RELEASE — added 2026-09-23.  The instructor is posting the decks one
+# session at a time.  Sessions 1 and 2 are public; Sessions 3 onward are built
+# and tracked locally but held back until the course reaches them.  To release
+# a session, delete its line below and put its rows back into slides/index.html.
+# ---------------------------------------------------------------------------
+slides/pdf/S03_*.pdf
+slides/S03/
+slides/pdf/S04_*.pdf
+slides/S04/
+slides/pdf/S05_*.pdf
+slides/S05/
+slides/pdf/S06_*.pdf
+slides/S06/
+slides/pdf/S07_*.pdf
+slides/S07/
+slides/pdf/S08_*.pdf
+slides/S08/
+slides/pdf/S09_*.pdf
+slides/S09/
+slides/pdf/S10_*.pdf
+slides/S10/
+# The combined public deck spans every built session, so it waits too.
+slides/pdf/ECON282E_*_public.pdf
+
+# Core dumps from crashed processes (one appeared 2026-09-22, 5.6 GB)
+core.*
