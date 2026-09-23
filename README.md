@@ -82,8 +82,7 @@ such corrections are marked on the decks themselves.
 
 ## Not in this repository
 
-Answer keys, reference solutions, and the midterm are never published here. A few decks that show
-unpublished research are marked **“In class only”** on the slides page and are not posted.
+Answer keys, reference solutions, and the midterm are never published here.
 
 ## License
 
