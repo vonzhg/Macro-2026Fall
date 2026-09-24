@@ -82,7 +82,7 @@ such corrections are marked on the decks themselves.
 
 ## Not in this repository
 
-Answer keys, reference solutions, and the midterm are never published here.
+Answer keys and reference solutions are never published here.
 
 ## License
 

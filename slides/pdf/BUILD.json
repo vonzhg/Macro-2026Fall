@@ -1,378 +1,378 @@
 {
   "S01_A1_Who_I_Am.pdf": {
     "source": "slides/S01/S01_A1_Who_I_Am.tex",
-    "inputs_md5": "667ac34e1665032d373197fddd1f4777",
+    "inputs_md5": "0b94eb6de44c4d6373f3f1d8119f290d",
     "pages": 15,
     "frames": 15,
     "watermarked": true
   },
   "S01_A2_Macro_Frontier.pdf": {
     "source": "slides/S01/S01_A2_Macro_Frontier.tex",
-    "inputs_md5": "f0e0355ca70c6d83ea0792040703cd76",
+    "inputs_md5": "15d5c2c2c246e9b8918d468729db4492",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S01_A3_AI_Tool_and_Object.pdf": {
     "source": "slides/S01/S01_A3_AI_Tool_and_Object.tex",
-    "inputs_md5": "337b84e82fd92d41c2b274529f0bcc15",
+    "inputs_md5": "831ad0f38b1362bb800828a45ff31e59",
     "pages": 15,
     "frames": 15,
     "watermarked": true
   },
   "S01_B1_Planner_to_Equilibrium.pdf": {
     "source": "slides/S01/S01_B1_Planner_to_Equilibrium.tex",
-    "inputs_md5": "5268fcda192b1081aa8ebaa433599c42",
+    "inputs_md5": "e3d06e81a233728dc194d6743dc1d9ed",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S01_B2_Dynamic_Programming.pdf": {
     "source": "slides/S01/S01_B2_Dynamic_Programming.tex",
-    "inputs_md5": "465dee6b2bcf991b73dfaf6b77d710d3",
+    "inputs_md5": "327918f472a50ca6ec564a25ae18beb0",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S01_B3_Why_Reinforcement_Learning.pdf": {
     "source": "slides/S01/S01_B3_Why_Reinforcement_Learning.tex",
-    "inputs_md5": "07bd42534bc127cc7b29ba2efaddbe2d",
+    "inputs_md5": "2bb8313aa5098025da958b593eaf2775",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S02_A1_Bewley_Huggett.pdf": {
     "source": "slides/S02/S02_A1_Bewley_Huggett.tex",
-    "inputs_md5": "9427be1db5897720fc15c38c6255b3e1",
+    "inputs_md5": "935da6045bee41b835c1b49b8217652f",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S02_A2_Aiyagari.pdf": {
     "source": "slides/S02/S02_A2_Aiyagari.tex",
-    "inputs_md5": "4a5e6dd0a244dfbbcf8dfb0f0126a0d9",
+    "inputs_md5": "528a3fc6ebef8f8be0edc77a84af4bac",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S02_A3_Stationary_Distribution.pdf": {
     "source": "slides/S02/S02_A3_Stationary_Distribution.tex",
-    "inputs_md5": "6bfc4c1552d9087a4d4bf8e5a4953a03",
+    "inputs_md5": "5fed27e644051312b679c0596992187e",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S02_B1_Krusell_Smith.pdf": {
     "source": "slides/S02/S02_B1_Krusell_Smith.tex",
-    "inputs_md5": "5c7df6f89d3974e5150e63e151231b96",
+    "inputs_md5": "fa7d8650bf27e2fab1087e036a179480",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S02_B2_OLG.pdf": {
     "source": "slides/S02/S02_B2_OLG.tex",
-    "inputs_md5": "3bf30c9fddd81c6cfb9fefa9e0afe5aa",
+    "inputs_md5": "13e7cf0a1ab636bf05ea876e1e23b9d0",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S02_B3_Ramsey_Time_Consistency.pdf": {
     "source": "slides/S02/S02_B3_Ramsey_Time_Consistency.tex",
-    "inputs_md5": "a9a6ffab87f1de227d1465fdaa0eeb5a",
+    "inputs_md5": "121b4eaad5453293116965ac8d628250",
     "pages": 15,
     "frames": 15,
     "watermarked": true
   },
   "S03_A1_Solving_A_Model.pdf": {
     "source": "slides/S03/S03_A1_Solving_A_Model.tex",
-    "inputs_md5": "721cecd7798fc75738421b227ec5c58a",
+    "inputs_md5": "f7c8f1c7bfc60c1501911cf9742592af",
     "pages": 18,
     "frames": 18,
     "watermarked": true
   },
   "S03_A2_VFI_On_A_Grid.pdf": {
     "source": "slides/S03/S03_A2_VFI_On_A_Grid.tex",
-    "inputs_md5": "fcb9417dcacf8e5898066f78522a23d8",
+    "inputs_md5": "d5839279c28fbb1fa0fb1c4af96fcd02",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S03_A3_Euler_And_Time_Iteration.pdf": {
     "source": "slides/S03/S03_A3_Euler_And_Time_Iteration.tex",
-    "inputs_md5": "cb752f15f470de976f40b5e0920b67dd",
+    "inputs_md5": "3abc707f7f32cc063d5d34d237505f24",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S03_A4_Worked_Example_RBC.pdf": {
     "source": "slides/S03/S03_A4_Worked_Example_RBC.tex",
-    "inputs_md5": "5be40514e0acbfec5017c724b17c3c08",
+    "inputs_md5": "2be98a3d31643e3ccfbf52f0dde28656",
     "pages": 15,
     "frames": 15,
     "watermarked": true
   },
   "S03_B1_Your_Toolkit.pdf": {
     "source": "slides/S03/S03_B1_Your_Toolkit.tex",
-    "inputs_md5": "a9029e13e79a770ef02f62440ca2235f",
+    "inputs_md5": "c256f9aeafcbf33276e1f116dd664dee",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S03_B2_Loops_To_Arrays.pdf": {
     "source": "slides/S03/S03_B2_Loops_To_Arrays.tex",
-    "inputs_md5": "ee269975bc96536db8756527dff9b0a4",
+    "inputs_md5": "fd757bbbdf1af2cc6f67cef9c5235e23",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S03_B3_PyTorch_And_AI.pdf": {
     "source": "slides/S03/S03_B3_PyTorch_And_AI.tex",
-    "inputs_md5": "539bf68bee2cc5b5e1fb246a9c46eb9a",
+    "inputs_md5": "6ca756a5fe5a12b1bc3ee05348147f3c",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S03_B4_Data_Workflow.pdf": {
     "source": "slides/S03/S03_B4_Data_Workflow.tex",
-    "inputs_md5": "e3ad13a6f992d92b912302f1e7466b47",
+    "inputs_md5": "13865323a3dd25d409e3e813bf9a0e2e",
     "pages": 12,
     "frames": 12,
     "watermarked": true
   },
   "S04_A1_Root_Finding.pdf": {
     "source": "slides/S04/S04_A1_Root_Finding.tex",
-    "inputs_md5": "4f317baed5697946778789279f5aaa7f",
+    "inputs_md5": "7e405cbabc3ff5ddc3f87b3325de249c",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S04_A2_Optimization_Interval.pdf": {
     "source": "slides/S04/S04_A2_Optimization_Interval.tex",
-    "inputs_md5": "d2146a8d7d68fd18f70e3e57e66b744a",
+    "inputs_md5": "9bd892194b7fdb97374aaf5701e662a5",
     "pages": 11,
     "frames": 11,
     "watermarked": true
   },
   "S04_A3_Optimization_Many_Dimensions.pdf": {
     "source": "slides/S04/S04_A3_Optimization_Many_Dimensions.tex",
-    "inputs_md5": "3a1bf8b977c86b863a672e0c3a43b1b1",
+    "inputs_md5": "35ed7385e2e8161f067ec44e1a3d9f1b",
     "pages": 17,
     "frames": 17,
     "watermarked": true
   },
   "S04_A4_Differentiation.pdf": {
     "source": "slides/S04/S04_A4_Differentiation.tex",
-    "inputs_md5": "42a96cc91b9dc2b09a2ec6c70d96a733",
+    "inputs_md5": "5443f447447194873f927be32244764a",
     "pages": 11,
     "frames": 11,
     "watermarked": true
   },
   "S04_B1_Approximation.pdf": {
     "source": "slides/S04/S04_B1_Approximation.tex",
-    "inputs_md5": "e250b771c875b1ca54e7bd0e42bc834c",
+    "inputs_md5": "7b572c38f75805e3d82445319c229d2b",
     "pages": 18,
     "frames": 18,
     "watermarked": true
   },
   "S04_B2_Quadrature.pdf": {
     "source": "slides/S04/S04_B2_Quadrature.tex",
-    "inputs_md5": "08f57c8f8ab87e68685ae2ab70cf6c85",
+    "inputs_md5": "5907a76b591d89678e33280f63919927",
     "pages": 10,
     "frames": 10,
     "watermarked": true
   },
   "S04_B3_Discretizing_AR1.pdf": {
     "source": "slides/S04/S04_B3_Discretizing_AR1.tex",
-    "inputs_md5": "e53df653e33ff5f7c8f8f54fc67d7d40",
+    "inputs_md5": "696ffd7d03425859a47b2c40dd5c7c1b",
     "pages": 11,
     "frames": 11,
     "watermarked": true
   },
   "S04_B4_Fast_And_Accurate.pdf": {
     "source": "slides/S04/S04_B4_Fast_And_Accurate.tex",
-    "inputs_md5": "e3997ff89c9dbcddc6bfd6d851e813b1",
+    "inputs_md5": "7261ee4ab00e177063ecc65e878498df",
     "pages": 17,
     "frames": 17,
     "watermarked": true
   },
   "S04_B5_Worked_Example_Stochastic.pdf": {
     "source": "slides/S04/S04_B5_Worked_Example_Stochastic.tex",
-    "inputs_md5": "41c47b7b32772ffabdc49c816d1b9a18",
+    "inputs_md5": "e638c416497bf2cd1c1fdda80e35da7f",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S05_A1_What_Perturbation_Computes.pdf": {
     "source": "slides/S05/S05_A1_What_Perturbation_Computes.tex",
-    "inputs_md5": "eb5d3d645a04cfa291dbb91430e019bb",
+    "inputs_md5": "55656ed6e2c4604154e7bde41f6c57f1",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S05_A2_The_Model_And_The_Parameter.pdf": {
     "source": "slides/S05/S05_A2_The_Model_And_The_Parameter.tex",
-    "inputs_md5": "d5ccc1759dfd70a0810ae02693076bd9",
+    "inputs_md5": "d01b4096f7cb0e0c4f6aa1a35ef6374b",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S05_A3_First_Order.pdf": {
     "source": "slides/S05/S05_A3_First_Order.tex",
-    "inputs_md5": "979243932017301b61717d865a0c7ff5",
+    "inputs_md5": "994a7d0712365c9f7d24b694e8525ba8",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S05_A4_Linear_RE_Systems.pdf": {
     "source": "slides/S05/S05_A4_Linear_RE_Systems.tex",
-    "inputs_md5": "dee88578b548024a4fd42c8735dcbb42",
+    "inputs_md5": "68747ab21b1b157077c134cc5706fc3b",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S05_A5_Higher_Order_Risk_And_Pruning.pdf": {
     "source": "slides/S05/S05_A5_Higher_Order_Risk_And_Pruning.tex",
-    "inputs_md5": "45f807cca662ed14521f192801f45223",
+    "inputs_md5": "0043d7536900f115bc8d6ab713033b6a",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S05_A6_Worked_Example_Perturbation.pdf": {
     "source": "slides/S05/S05_A6_Worked_Example_Perturbation.tex",
-    "inputs_md5": "020d5781111e1ed23e1c92aecbffed16",
+    "inputs_md5": "84075a3d72210205c547621f29287dc1",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S05_B1_Projection_The_Residual.pdf": {
     "source": "slides/S05/S05_B1_Projection_The_Residual.tex",
-    "inputs_md5": "676c395f1c9297ecb02b69e7fd1273b5",
+    "inputs_md5": "a1eade725f77ef08fb6f146f5b5abd3b",
     "pages": 12,
     "frames": 12,
     "watermarked": true
   },
   "S05_B2_Choosing_A_Basis.pdf": {
     "source": "slides/S05/S05_B2_Choosing_A_Basis.tex",
-    "inputs_md5": "695cbc5939e10a401e9765dd866829c1",
+    "inputs_md5": "0a77fbeb88889e1d736e307019544be7",
     "pages": 16,
     "frames": 16,
     "watermarked": true
   },
   "S05_B3_Chebyshev.pdf": {
     "source": "slides/S05/S05_B3_Chebyshev.tex",
-    "inputs_md5": "04f6ca54899ca5caa4b35b5b50e00e39",
+    "inputs_md5": "25e2db5ca4dc4d68df69f5b2e83d1a25",
     "pages": 15,
     "frames": 15,
     "watermarked": true
   },
   "S05_B4_Finite_Elements.pdf": {
     "source": "slides/S05/S05_B4_Finite_Elements.tex",
-    "inputs_md5": "9fe511bf35dbdc5f022ecb469569ca32",
+    "inputs_md5": "3a35c87c2be41aa694fd45d56c8c2bde",
     "pages": 11,
     "frames": 11,
     "watermarked": true
   },
   "S05_B5_Determining_The_Coefficients.pdf": {
     "source": "slides/S05/S05_B5_Determining_The_Coefficients.tex",
-    "inputs_md5": "dae306ae67d4099ff8c07aeb915e1f17",
+    "inputs_md5": "c8b0f1ae189ef3e3e278494481f49323",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S05_B6_Worked_Example_Projection.pdf": {
     "source": "slides/S05/S05_B6_Worked_Example_Projection.tex",
-    "inputs_md5": "db14b0d5aeaeac565659eed25d3c6f61",
+    "inputs_md5": "44cf88b74307cfee59e1cd7c4ac33fab",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S06_A1_Solving_Aiyagari.pdf": {
     "source": "slides/S06/S06_A1_Solving_Aiyagari.tex",
-    "inputs_md5": "5470e46484af116789487c79701bbf9a",
+    "inputs_md5": "4f10c7b695bf10f77d20e3b6c729d637",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S06_A2_Krusell_Smith_OLG_And_Transitions.pdf": {
     "source": "slides/S06/S06_A2_Krusell_Smith_OLG_And_Transitions.tex",
-    "inputs_md5": "b6a772f480c735bc5577552ffdcbf87b",
+    "inputs_md5": "f6abd622c7388b223807256eed89df49",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S06_A3_HA_Optimal_Policy_And_The_Wall.pdf": {
     "source": "slides/S06/S06_A3_HA_Optimal_Policy_And_The_Wall.tex",
-    "inputs_md5": "b7c9f87888bd75ae600bfbe34af4e6e8",
+    "inputs_md5": "f59847643b20462b9ff88c18f9c9fb82",
     "pages": 11,
     "frames": 11,
     "watermarked": true
   },
   "S06_B1_When_A_Representative_Agent_Exists.pdf": {
     "source": "slides/S06/S06_B1_When_A_Representative_Agent_Exists.tex",
-    "inputs_md5": "74e3367e96ce4e0592e8dd93db837228",
+    "inputs_md5": "62c53f3dc668298f8f56f54b0ec9c839",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S06_B2_The_Negishi_Method.pdf": {
     "source": "slides/S06/S06_B2_The_Negishi_Method.tex",
-    "inputs_md5": "2d79accd16ddd5c5614016f374e215c3",
+    "inputs_md5": "d4b1bedfa0c5af03e9539ffd757b60b0",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S06_B3_Transitional_Dynamics.pdf": {
     "source": "slides/S06/S06_B3_Transitional_Dynamics.tex",
-    "inputs_md5": "786b53e31bb2a010e2926f6738291394",
+    "inputs_md5": "187d57b6e43c6e7dc10c82b726c0d1a7",
     "pages": 14,
     "frames": 14,
     "watermarked": true
   },
   "S07_A1_ML_For_Macroeconomists.pdf": {
     "source": "slides/S07/S07_A1_ML_For_Macroeconomists.tex",
-    "inputs_md5": "dc45066feb2e36e0bc5506f24fe634f4",
+    "inputs_md5": "e9594ebe0d3a5047fc1f8e48575f8a3d",
     "pages": 20,
     "frames": 20,
     "watermarked": true
   },
   "S07_A2_Neural_Nets_As_Approximators.pdf": {
     "source": "slides/S07/S07_A2_Neural_Nets_As_Approximators.tex",
-    "inputs_md5": "574324384ca14c3094f70220d742fa94",
+    "inputs_md5": "b7598a977910c28cbfea6dd8fba080cf",
     "pages": 28,
     "frames": 28,
     "watermarked": true
   },
   "S07_A3_Training.pdf": {
     "source": "slides/S07/S07_A3_Training.tex",
-    "inputs_md5": "e33c55a428840acd0f8c7959b42c4319",
+    "inputs_md5": "2a7d7e66e9c5e51e5a867fe1f9bbbae0",
     "pages": 39,
     "frames": 39,
     "watermarked": true
   },
   "S07_A4_Architecture_As_Constraint.pdf": {
     "source": "slides/S07/S07_A4_Architecture_As_Constraint.tex",
-    "inputs_md5": "62775e406dba892cb04c71a741f47594",
+    "inputs_md5": "8b792c713574cd953d10852e47710e56",
     "pages": 13,
     "frames": 13,
     "watermarked": true
   },
   "S07_B1_Growth_Via_Euler_Residuals.pdf": {
     "source": "slides/S07/S07_B1_Growth_Via_Euler_Residuals.tex",
-    "inputs_md5": "8c7d7f25b1de9d4ee6018ad23d94a3bc",
+    "inputs_md5": "51f8be96811ce4497a8cb69d4a13b3eb",
     "pages": 26,
     "frames": 26,
     "watermarked": true
   },
   "S07_B2_Deep_VFI_And_Actor_Critic.pdf": {
     "source": "slides/S07/S07_B2_Deep_VFI_And_Actor_Critic.tex",
-    "inputs_md5": "85a0857f1cc290bc54eb8b3a718b3b67",
+    "inputs_md5": "05b310877ccfec998219a17fbf366c45",
     "pages": 17,
     "frames": 17,
     "watermarked": true
   },
   "S07_B3_Structure_And_Validation.pdf": {
     "source": "slides/S07/S07_B3_Structure_And_Validation.tex",
-    "inputs_md5": "ef521ef9a65fbdde803e2f26b1c7532c",
+    "inputs_md5": "d431c7942b94f67ac95bdc88e54a5fb7",
     "pages": 19,
     "frames": 19,
     "watermarked": true

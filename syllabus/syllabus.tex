@@ -119,10 +119,10 @@ Each session has two blocks (A: 9:00--10:15; B: 10:35--11:50). The schedule may 
 \textbf{Numerical methods I (cont.).} Function approximation and interpolation; quadrature; discretizing AR(1) processes (Tauchen, Rouwenhorst); a fast and accurate stochastic growth model. & HW\,1 Part B out \\
 \textbf{5}\newline Oct 22 &
 \textbf{Numerical methods II: perturbation.} First- and second-order perturbation; Blanchard--Kahn conditions and linear rational-expectations systems; pruning. &
-\textbf{Numerical methods II: projection.} Chebyshev polynomials, Smolyak grids, finite elements; collocation vs.\ Galerkin; the same model solved four ways, and choosing the right tool. & HW\,1 due;\newline practice midterm out \\
+\textbf{Numerical methods II: projection.} Chebyshev polynomials, Smolyak grids, finite elements; collocation vs.\ Galerkin; the same model solved four ways, and choosing the right tool. & HW\,1 due \\
 \textbf{6}\newline Oct 29 &
-\textbf{Heterogeneous agents, classically.} Solving the Aiyagari model as a nested fixed point; Krusell--Smith; OLG and transition dynamics; optimal policy with heterogeneous agents; why grids and moments break down. &
-\textbf{Midterm examination} (in class, 75 minutes, closed book). & HW\,2 out \\
+\textbf{Heterogeneous agents I: stationary equilibria and aggregate risk.} Solving the Aiyagari model as a nested fixed point; the stationary distribution; Krusell--Smith; OLG and transition dynamics; optimal policy with heterogeneous agents, and why grids and moments break down. &
+\textbf{Heterogeneous agents II: when heterogeneity aggregates.} Complete markets and Gorman aggregation; the Negishi method as the representative-agent construction; transitional dynamics by shooting, and what is lost when markets are incomplete. & HW\,2 out \\
 \textbf{7}\newline Nov 5 &
 \textbf{Machine learning essentials.} Learning as function approximation; neural networks; training, backpropagation, and generalization. &
 \textbf{Deep learning for dynamic models.} Euler-residual minimization; deep value function iteration and actor--critic; structured networks and validation. & Project teams and topics \\
@@ -153,21 +153,17 @@ Dec 10 & \multicolumn{3}{@{}l}{\textbf{Final paper and replication package due} 
 \midrule
 Homework 1: dynamic programming and numerical methods & 15\% & out Oct 8 and Oct 15; due Oct 22 \\
 Homework 2: heterogeneity and learning & 15\% & out Oct 29; due Nov 12 \\
-Midterm examination (closed book, in class) & 20\% & Oct 29, Block B \\
 Final project (teams of 2--3) & 40\% & see below \\
 \quad Proposal (two pages) & \quad 5\% & due Monday, Nov 16 \\
 \quad Presentation and discussion & \quad 15\% & Dec 3, Block B \\
 \quad Paper ($\le$ 10 pages) and replication package & \quad 20\% & due Dec 10 \\
-Participation & 10\% & every session \\
+Participation & 30\% & every session \\
 \bottomrule
 \end{tabularx}
 \end{center}
 
 \subsection{Homework}
 Two homework assignments combine short theory questions with computational work in Python. \textbf{Homework~1} covers the growth model, value function iteration and its accelerations, the endogenous grid method, discretization of AR(1) processes, and accuracy analysis. \textbf{Homework~2} covers the stationary equilibrium of the Aiyagari model, projection methods, and neural-network solutions of dynamic models (with an optional reinforcement-learning bonus). Submit a PDF write-up, your code, and an \texttt{AI\_LOG.md} (see Section~\ref{sec:ai}). You may discuss homework with classmates, but each student writes and submits their own solutions and code and lists the people they worked with. Late homework loses 10\% per day and is not accepted after solutions are posted.
-
-\subsection{Midterm examination}
-The midterm is held in class on October 29 (Block B, 75 minutes). It is closed book, with no notes and no devices, and covers Sessions~1--5: equilibrium definitions and properties, dynamic-programming theory and algorithms, numerical methods worked by hand, and perturbation. A practice midterm with solutions is posted on October 22. Make-up exams are given only for documented emergencies arranged in advance whenever possible.
 
 \subsection{Final project}
 In teams of two or three, you will \emph{replicate a benchmark result and then extend it}. Projects follow one of four tracks:
@@ -180,7 +176,7 @@ In teams of two or three, you will \emph{replicate a benchmark result and then e
 Milestones: teams and topics by November 5; a two-page proposal by November 16 (question, benchmark to replicate, data or model, division of labor); presentations at the December 3 mini-conference, where each team also serves as discussant for another team; and a paper of at most ten pages with a replication package (code that reproduces every number and figure with one command) by December 10. Projects are evaluated on the economic question, correctness of the replication, rigor of validation, reproducibility, quality of AI collaboration, and communication. Detailed guidelines and a rubric will be posted by Session~3.
 
 \subsection{Participation}
-Participation includes exit tickets at the end of each session, engagement in discussion, and your role as a discussant at the final-project conference.
+There is no examination in this course. Participation carries 30\% and includes exit tickets at the end of each session, engagement in discussion and in the live demos, and your role as a discussant at the final-project conference.
 
 %-----------------------------------------------------------------------------
 \section{Use of AI Tools}\label{sec:ai}
@@ -191,7 +187,6 @@ This course teaches you to use AI as a research tool, so AI assistants are \text
   \item \textbf{Own it.} You must be able to explain and defend every line of code and every result you submit. ``The AI wrote it'' is never an explanation.
   \item \textbf{Verify.} Every numerical result needs a benchmark or an accuracy check.
 \end{enumerate}
-AI tools, notes, and devices are \textbf{not permitted} during the midterm examination.
 
 %-----------------------------------------------------------------------------
 \section{Course Policies}
@@ -224,7 +219,7 @@ Judd (1998), chs.~4--7; Tauchen, ``Finite State Markov-Chain Approximations to U
 \item[Session 5 --- Numerical methods II]
 Blanchard and Kahn, \emph{Econometrica} (1980); Klein, \emph{JEDC} (2000); Schmitt-Groh\'e and Uribe, \emph{JEDC} (2004); Andreasen, Fern\'andez-Villaverde, and Rubio-Ram\'irez, ``The Pruned State-Space System for Non-Linear DSGE Models,'' \emph{REStud} (2018); Fern\'andez-Villaverde, Rubio-Ram\'irez, and Schorfheide, ``Solution and Estimation Methods for DSGE Models,'' \emph{Handbook of Macroeconomics}, vol.~2 (2016); Judd, ``Projection Methods for Solving Aggregate Growth Models,'' \emph{JET} (1992); Gaspar and Judd, ``Solving Large-Scale Rational-Expectations Models,'' \emph{Macroeconomic Dynamics} (1997).
 
-\item[Session 6 --- Heterogeneous agents, classically]
+\item[Session 6 --- Heterogeneous agents I and II]
 Aiyagari, ``Uninsured Idiosyncratic Risk and Aggregate Saving,'' \emph{QJE} (1994); Young, ``Solving the Incomplete Markets Model with Aggregate Uncertainty Using the Krusell--Smith Algorithm and Non-Stochastic Simulations,'' \emph{JEDC} (2010); Den Haan, ``Assessing the Accuracy of the Aggregate Law of Motion in Models with Heterogeneous Agents,'' \emph{JEDC} (2010); Reiter, \emph{JEDC} (2009); Auclert, Bard\'oczy, Rognlie, and Straub, ``Using the Sequence-Space Jacobian to Solve and Estimate Heterogeneous-Agent Models,'' \emph{Econometrica} (2021); Conesa, Kitao, and Krueger, ``Taxing Capital? Not a Bad Idea After All!,'' \emph{AER} (2009). \emph{On aggregation and transitions:} Gorman, ``Community Preference Fields,'' \emph{Econometrica} (1953); Negishi, ``Welfare Economics and Existence of an Equilibrium for a Competitive Economy,'' \emph{Metroeconomica} (1960); Constantinides, ``Intertemporal Asset Pricing with Heterogeneous Consumers and Without Demand Aggregation,'' \emph{Journal of Business} (1982); Maliar and Maliar, ``The Representative Consumer in the Neoclassical Growth Model with Idiosyncratic Shocks,'' \emph{Review of Economic Dynamics} (2003); Chatterjee, ``Transitional Dynamics and the Distribution of Wealth in a Neoclassical Growth Model,'' \emph{Journal of Public Economics} (1994).
 
 \item[Session 7 --- Machine learning and deep learning for dynamic models]
