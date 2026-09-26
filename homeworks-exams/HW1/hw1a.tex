@@ -1,7 +1,7 @@
-%% ECON 282E -- Homework 1, Part A
-%% Reworked from PS1.lyx / PS1_IUBE.lyx (Quant Macro, HUST 2019), with the
-%% recorded defects fixed: Z and beta are now stated, the Z^b typo is gone, the
-%% accuracy measure is unit-free, and the step references are correct.
+%% ECON 282E -- Homework 1, Part A: From a Question to a Quantitative Answer
+%% Redesigned 2026-09-26: the student runs a small research project end to end
+%% (question -> model -> equilibrium -> validation -> data), resting on S1-S3.
+%% Part B (hw1b.tex) covers algorithm choice (S4-S5), the answers, and the write-up.
 %% Build:  python3 tools/build_docs.py homeworks-exams/HW1/hw1a.tex
 %% With answers:  python3 tools/build_docs.py --solutions homeworks-exams/HW1/hw1a.tex
 %% Answers live in solutions/ (gitignored); solution PDFs are gitignored too.
@@ -27,9 +27,9 @@
     {\GenericWarning{}{Answer key solutions/hw1a_key.tex not found}}\fi}
 
 \title{\vspace{-2em}\textbf{ECON 282E --- Homework 1, Part A}\\[2mm]
-       \large Dynamic Programming on the Computer}
+       \large From a Question to a Quantitative Answer: Scope, Model, Validation, Data}
 \author{Foundations of Macroeconomics \\ University of California, Riverside}
-\date{Out: Thursday, October 8, 2026 \quad\textbullet\quad Due: Thursday, October 22, 2026}
+\date{Out: Thursday, October 8, 2026 \quad\textbullet\quad Due (with Part B): Thursday, October 29, 2026}
 
 \begin{document}
 \maketitle
@@ -37,121 +37,194 @@
 
 \noindent\rule{\linewidth}{0.4pt}\par
 \small
-\textbf{What to hand in.} One PDF with your answers and figures, the code that produced them,
-and an \texttt{AI\_LOG.md} recording how you used any AI assistance. Part B is released on
-October 15 and is due the same day as this part.
+\textbf{The idea.} This homework is a small research project, and you are its \textbf{project
+manager}. AI assistants can now write most of the code for you. What they cannot do for you is
+decide which question is worth asking, which model can answer it, what the equilibrium is, which
+method is good enough, which data make the model relevant, and whether the answer is right. Those
+decisions are the skill this homework trains, and they are what is graded.
 
-\textbf{On the computational questions.} Every number you report must come from code you ran.
-State the grid, the tolerance and the dtype alongside each result --- the reporting standard
-from Session 3. Question 2(c) uses techniques taught on \textbf{October 15}; you can do 2(a)
-and 2(b) as soon as this sheet is out.
+\textbf{The project.} One model --- the stochastic growth model of Sessions 1, 3, 4 and 5 --- and
+two questions about the U.S.\ economy:
+\begin{itemize}[leftmargin=*,itemsep=0pt]
+  \item \textbf{A positive question.} How much of U.S.\ business-cycle volatility can shocks to
+        total factor productivity (TFP) account for?
+  \item \textbf{A normative question.} What is the welfare cost of aggregate fluctuations, in
+        consumption-equivalent terms --- and why might the answer be very different in an economy
+        where households cannot insure?
+\end{itemize}
+\textbf{Part A} (this sheet; Sessions 1--3) fixes the scope, writes the model down, validates your
+solver where the answer is known, and builds the data. \textbf{Part B} (out October 15; Sessions
+4--5) chooses the algorithm, answers both questions, and puts it all together as a short paper, a
+five-slide deck and a replication package. \textbf{Both parts are due Thursday, October 29.}
 
-\textbf{AI policy.} Assistance is allowed and expected. You remain responsible for every
-number. The validation is the part you cannot delegate.
+\textbf{What to hand in (with Part B).} One PDF; a repository whose \texttt{run\_all.py} reproduces
+every number and figure with one command; and an \texttt{AI\_LOG.md}. Templates are posted beside
+this sheet (\texttt{homeworks-exams/HW1/templates/}).
+
+\textbf{AI policy.} Assistance is allowed and expected. You remain responsible for every number,
+every citation and every line of code. \textbf{Validation is the part you cannot delegate.}
 \normalsize\par
 \noindent\rule{\linewidth}{0.4pt}\par
 
 %=============================================================================
-\section*{Question 1. The model on paper (30 points)}
+\section*{A0. The project charter (10 points)}
 
-A representative household solves
-\[
-  \max_{\{c_t,k_{t+1}\}_{t=0}^{\infty}} \; \sum_{t=0}^{\infty}\beta^{t}\ln c_t
-  \qquad\text{s.t.}\qquad
-  c_t+k_{t+1}=Z k_t^{\alpha}, \quad c_t\ge0,\; k_{t+1}\ge0,\; k_0>0 ,
-\]
-with $\alpha\in(0,1)$, $\beta\in(0,1)$, $Z>0$, and \textbf{full depreciation}, $\delta=1$.
-Throughout Part A use $\alpha=0.36$, $\beta=0.95$ and $Z=1$.
+Before writing any code, write a one-page charter (template \texttt{charter.md}). It must state:
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+  \item each question in one sentence, and whether it is positive or normative --- and what
+        makes it so;
+  \item the model you will use, and \textbf{why a representative agent is enough for the positive
+        question but only a benchmark for the normative one}. Use the complete-markets argument of
+        Session~2 (full insurance, aggregation) to say exactly what the representative agent
+        assumes away;
+  \item the equilibrium object you will compute (a function? a number? a distribution?);
+  \item the deliverables, and a \textbf{validation plan}: for each number you will report, the
+        check that would convince a skeptical referee;
+  \item the three largest risks to the project (a method that is not accurate enough, data that
+        do not measure what the model means, a calibration choice that drives the answer), and
+        what you will do if each one happens.
+\end{enumerate}
+You will revise the charter as you go; hand in the final version and say what changed.
+
+\solution{\keyAzero}
+
+%=============================================================================
+\section*{A1. The model and its equilibrium, on paper (25 points)}
+
+A representative household has preferences $\mathbb{E}_0\sum_{t\ge0}\beta^t\ln c_t$ and supplies
+one unit of labour inelastically. A competitive firm produces $y_t=z_tk_t^{\alpha}n_t^{1-\alpha}$,
+capital depreciates at rate $\delta$, and $\ln z_{t+1}=\rho\ln z_t+\sigma\varepsilon_{t+1}$ with
+$\varepsilon\sim N(0,1)$.
 
 \begin{enumerate}[label=(\alph*), leftmargin=*]
 
-\item \textbf{(5 pts)} Write the sequence problem and the corresponding Bellman equation.
-State the state variable, the control, and the feasible correspondence $\Gamma(k)$.
+\item \textbf{(6 pts)} Write the \textbf{social planner's} problem as a Bellman equation. State the
+state variables, the control and the feasible correspondence $\Gamma(k,z)$.
 
 \solution{\keyAone}
 
-\item \textbf{(8 pts)} Verify Blackwell's sufficient conditions --- monotonicity and
-discounting --- for the operator $T$. What do they, together with the contraction mapping
-theorem, allow you to conclude about existence, uniqueness and convergence?
+\item \textbf{(7 pts)} Define a \textbf{recursive competitive equilibrium} for the decentralized
+economy, in which households own capital and rent it and their labour to the firm. Say what the
+aggregate state is, which objects are \emph{functions} of it, and what consistency condition links
+the household's and the aggregate law of motion. Then explain in three sentences why the welfare
+theorems let you compute this equilibrium by solving the planner's problem of (a).
 
 \solution{\keyAtwo}
 
-\item \textbf{(10 pts)} Guess $v(k)=A+B\ln k$ and verify it. Solve for $A$ and $B$, and show
-that the optimal policy is $k'=g(k)=\alpha\beta Z k^{\alpha}$ and consumption is
-$c=(1-\alpha\beta)Zk^{\alpha}$. Report $A$ and $B$ numerically at the calibration above.
+\item \textbf{(6 pts)} For the deterministic version ($z_t\equiv Z$), verify Blackwell's sufficient
+conditions for the Bellman operator and say what, with the contraction mapping theorem, they let you
+conclude about existence, uniqueness and convergence.
 
 \solution{\keyAthree}
 
-\item \textbf{(7 pts)} The contraction theorem gives two different bounds. Using
-$\lVert v_n-v^{*}\rVert\le\frac{\beta}{1-\beta}\lVert v_n-v_{n-1}\rVert$, answer:
+\item \textbf{(6 pts) What the representative agent cannot say.} Now suppose each household also
+faces an uninsurable idiosyncratic income shock and can trade only a risk-free asset subject to
+$a'\ge-\underline a$ (the Aiyagari economy of Session 2). Without solving anything:
 \begin{enumerate}[label=(\roman*)]
-  \item If you stop when successive iterates differ by $\varepsilon=10^{-6}$, how far from
-        $v^{*}$ might you still be, at $\beta=0.95$? At $\beta=0.99$?
-  \item Using $n\gtrsim\ln\varepsilon/\ln\beta$, how many sweeps does $\varepsilon=10^{-6}$
-        require at each of those two discount factors?
+  \item define a stationary recursive competitive equilibrium for it;
+  \item say which step of the argument in (b) fails, and why the equilibrium interest rate
+        satisfies $r^*<\rho_\beta\equiv1/\beta-1$;
+  \item say which of your two questions this matters for, and in which direction you expect it to
+        move the answer.
 \end{enumerate}
-Comment on what this implies for reporting a ``converged'' solution.
 
 \solution{\keyAfour}
 
 \end{enumerate}
 
 %=============================================================================
-\section*{Question 2. The model on the computer, parts (a)--(c) (70 points)}
+\section*{A2. Validate the solver where the answer is known (30 points)}
 
-Solve the same model numerically. Use a capital grid on $[0.5k^{*},1.5k^{*}]$ where
-$k^{*}=(\alpha\beta Z)^{1/(1-\alpha)}$ is the deterministic steady state, and \textbf{float64}
-throughout.
+Before you trust a solver on a model with no closed form, test it on one that has one. Set
+$\delta=1$, $z_t\equiv Z=1$, $\alpha=0.36$ and $\beta=0.95$, so the problem is
+$\max\sum_t\beta^t\ln c_t$ subject to $c_t+k_{t+1}=Zk_t^{\alpha}$.
 
 \begin{enumerate}[label=(\alph*), leftmargin=*]
 
-\item \textbf{(25 pts) Grid value function iteration.} Implement VFI with the choice $k'$
-restricted to the grid (no interpolation, no continuous maximization). With $N=200$ and
-tolerance $10^{-6}$, report:
-\begin{enumerate}[label=(\roman*)]
-  \item the number of sweeps, and how it compares with your answer to 1(d)(ii);
-  \item $\max_k|v(k)-v^{*}(k)|$ and the maximum \emph{relative} policy error
-        $\max_k|g(k)/g^{*}(k)-1|$, against the closed form of 1(c);
-  \item a plot of the computed policy against $\alpha\beta Zk^{\alpha}$, zoomed into a window
-        of about 30 consecutive grid points.
-\end{enumerate}
-What does the zoomed plot show, and why does it not improve with more sweeps?
+\item \textbf{(8 pts) The answer you will test against.} Guess $v(k)=A+B\ln k$ and verify it. Show
+that $g(k)=\alpha\beta Zk^{\alpha}$ and report $A$, $B$ and the steady state $k^*$ numerically.
 
 \solution{\keyAfive}
 
-\item \textbf{(25 pts) Refinement, and the error budget.} Solve at $N\in\{50,100,200,400,800\}$
-and tabulate the value and policy errors against $h$. Fit the slopes of $\log(\text{error})$
-against $\log h$.
-\begin{enumerate}[label=(\roman*)]
-  \item What slopes do you get, and what do Santos \& Vigo-Aguiar (1998) predict?
-  \item Repeat with tolerance $10^{-11}$. One of the two slopes changes materially. Which,
-        and why? Relate your answer to 1(d)(i).
-\end{enumerate}
+\item \textbf{(7 pts) What ``converged'' means.} Using
+$\lVert v_n-v^*\rVert\le\frac{\beta}{1-\beta}\lVert v_n-v_{n-1}\rVert$: if you stop when successive
+iterates differ by $\varepsilon=10^{-6}$, how far from $v^*$ might you still be at $\beta=0.95$, and
+at $\beta=0.99$ (the quarterly value you will meet in Part B)? How many sweeps does each need? What
+must a paper therefore report alongside ``converged''?
 
 \solution{\keyAsix}
 
-\item \textbf{(20 pts) Acceleration.} \emph{(Techniques from Session 4, October 15.)} Starting
-from your (a) solver, add each of the following and report a table of policy updates, wall
-time and the maximum relative policy error:
-\begin{enumerate}[label=(\roman*)]
-  \item Howard's policy improvement with $n_H\in\{10,20,50\}$;
-  \item exploiting monotonicity of $g$ to restrict the search;
-  \item both together.
-\end{enumerate}
-Two things to comment on: which of these changes the \emph{answer} and which only changes the
-route to it; and whether your wall-clock times move in the same direction as your operation
-counts. Explain any disagreement.
+\item \textbf{(8 pts) The unit test.} Solve by grid VFI on $[0.5k^*,1.5k^*]$ with $N=200$, tolerance
+$10^{-6}$ and float64, the choice restricted to the grid. Report the sweeps, $\max_k|v-v^*|$ and
+$\max_k|g/g^*-1|$, and plot the computed policy against $g^*$ over about 30 consecutive grid points.
+What does the plot show, and why does it not improve with more sweeps?
 
 \solution{\keyAseven}
 
+\item \textbf{(7 pts) How the error scales.} Solve at $N\in\{50,100,200,400,800\}$, and fit the slopes of
+$\log$(value error) and $\log$(policy error) against $\log h$. Compare with Santos \&
+Vigo-Aguiar (1998). Then repeat at tolerance $10^{-11}$: which slope changes, and why? Relate your
+answer to (b). \emph{Write one sentence a referee would accept as your solver's error budget.}
+
+\solution{\keyAeight}
+
 \end{enumerate}
+
+%=============================================================================
+\section*{A3. Make the model relevant: data and calibration (30 points)}
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+
+\item \textbf{(12 pts) Structured data: the facts to be explained.} Download quarterly U.S.\ real
+GDP, real consumption, real investment and hours from FRED (Session 3, deck 3.B4, shows how).
+Record the \textbf{download date} (FRED revises data) and use 1954Q1--2019Q4 unless you argue for
+another sample. HP-filter the logs with $\lambda=1600$ and report $\sigma(Y)$,
+$\sigma(C)/\sigma(Y)$, $\sigma(I)/\sigma(Y)$, $\mathrm{corr}(C,Y)$, $\mathrm{corr}(I,Y)$ and the
+first-order autocorrelation of $Y$. \emph{This table is the target your model will be judged
+against in Part B; nobody hands it to you.}
+
+\solution{\keyAnine}
+
+\item \textbf{(10 pts) Calibrate.} Choose $\alpha$, $\delta$ and $\beta$ from long-run targets you can
+measure --- for example the labour share, the depreciation rate of the capital stock, and the
+capital--output ratio --- and state each target, its source series and its value. Then estimate
+$\rho$ and $\sigma$ for $\ln z$ from a Solow residual you construct (or from a published quarterly
+TFP series, such as Fernald's at the San Francisco Fed). Two choices will move your numbers: how you
+build capital, and how you detrend. \textbf{Make each choice, say why, and report how much the
+alternative would change $\rho$ and $\sigma$.}
+
+\solution{\keyAten}
+
+\item \textbf{(8 pts) Unstructured data, and an AI you must check.} Use an AI assistant to collect
+calibration values for $\alpha$, $\beta$, $\delta$, $\rho$ and $\sigma$ from at least three papers
+or official reports. Build a \textbf{calibration provenance table}: value, source, page or table,
+and whether \emph{you} verified it in the original. Compare it with your own numbers from (b). In
+\texttt{AI\_LOG.md}, record every value or citation the assistant got wrong and how you caught it.
+A table with an unverified entry marked as verified loses all 8 points.
+
+\solution{\keyAeleven}
+
+\end{enumerate}
+
+%=============================================================================
+\section*{A4. Red-team your AI assistant (5 points)}
+
+Ask an AI assistant for one derivation from this sheet --- the recursive competitive equilibrium of
+A1(b), the Blackwell argument of A1(c), or the guess-and-verify of A2(a). Find a genuine error,
+gap or unstated assumption in its answer (a missing condition, a wrong sign, a step that does not
+follow, a result stated more generally than it holds). Quote the passage, explain what is wrong,
+and show the check that caught it --- a counterexample, a numerical test, or the correct line of
+algebra. If you truly cannot find a flaw after pushing it with follow-up questions, document the
+three hardest challenges you posed and why its answers survived them.
+
+\solution{\keyAtwelve}
 
 \vfill
 \noindent\rule{\linewidth}{0.4pt}\par
 \small
-\textbf{Reminder.} Report the grid, the tolerance, the dtype and the hardware with every timing.
-An accuracy claim without a benchmark, and a speed claim without a timing, both count as
-unsupported.
+\textbf{Reporting standard, from here on.} With every computed number: the method, the grid, the
+tolerance, the dtype, the hardware and the wall time; with every data number: the series ID, the
+sample and the download date. A number without these is not yet a result.
 \normalsize
 
 \end{document}

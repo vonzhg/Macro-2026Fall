@@ -1,0 +1,250 @@
+%% ECON 282E -- Final project guidelines ("Assemble"), written 2026-09-26.
+%% Public. The final project assembles components each student built in HW1 and HW2.
+%% Adapted in part from AI-ECON-2026/source/Docs/Capstone_Projects_2026.md (shared rules,
+%% deliverables, rubric), without that course's tracks or any unpublished research.
+%% Build:  python3 tools/build_docs.py homeworks-exams/FinalProject/guidelines.tex
+
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,enumitem,xcolor,tabularx,array}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\title{\vspace{-2em}\textbf{ECON 282E --- Final Project Guidelines}\\[2mm]
+       \large Assemble: From Components to a Research Answer}
+\author{Foundations of Macroeconomics \\ University of California, Riverside}
+\date{Teams: Thursday, November 5 \quad\textbullet\quad Talks: Thursday, December 3
+      \quad\textbullet\quad Paper: Thursday, December 10, 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{The idea.} In this course you learn to be the \textbf{project manager} of a quantitative
+research project. You formalize the question, choose the model, define the equilibrium, pick the
+method, find the data, check quality, and communicate the answer. AI assistants write much of the
+code; the decisions and the validation are yours. The two homework assignments each build one
+\emph{component} of that skill set. The final project \textbf{assembles} them, in a team, to answer
+a question the team poses itself.
+
+\textbf{Weight.} 40\% of the course grade: proposal 5\%, talk and discussant role 15\%, paper and
+replication package 20\%.
+\normalsize\par
+\noindent\rule{\linewidth}{0.4pt}\par
+
+%=============================================================================
+\section{The ladder: HW1 \texorpdfstring{$\to$}{->} HW2 \texorpdfstring{$\to$}{->} project}
+
+Each rung removes scaffolding and adds ownership.
+
+\medskip
+{\small
+\renewcommand{\arraystretch}{1.25}
+\noindent\begin{tabularx}{\linewidth}{@{}p{2.6cm}LLL@{}}
+\toprule
+ & \textbf{HW1: the representative-agent engine} & \textbf{HW2: heterogeneity and learning} & \textbf{Final project: assembly} \\
+\midrule
+Sessions & 1--5 & 6--9 & all; Session 10's agentic workflow \\
+Dates & out Oct 8 and 15; due \textbf{Oct 29} & out Oct 29 and Nov 12; due \textbf{Mon Nov 23} & teams Nov 5; proposal Nov 16; talk Dec 3; paper Dec 10 \\
+Who sets the question & the instructor (common spine), plus \textbf{your own pitch} (B5) & a shared core, plus \textbf{a route question you choose} & \textbf{your team}, evolved from the pitches \\
+What you learn to manage & charter, unit test, data provenance, method choice, reproducibility & scoping a route, benchmarking an ML solver against a classical one, auditing someone else's work & integration, division of labour, internal quality control, discussing another team's work \\
+Quality control & AI red-team item; validation ledger & AI red-team item; \textbf{peer replication audit} of a classmate's HW1 & internal audit; discussant report \\
+What you carry forward & a calibrated RA model, a data pipeline, a method library, a pitch & an HA solver and one learning or measurement module & --- \\
+\bottomrule
+\end{tabularx}
+}
+
+%=============================================================================
+\section{The integration rule}
+
+The team's question must be answered by \textbf{combining at least one HW1 component and at least
+one HW2 component built by its members}, plus the piece the team adds: a new model feature, new
+data, or a new method. Examples of components:
+\begin{itemize}[leftmargin=*,itemsep=1pt]
+  \item \textbf{From HW1:} the FRED data and calibration pipeline (A3); a validated global,
+        perturbation or collocation solver (B2); an estimation routine (route R2); a capital-tax
+        extension (route R3); a second-order solution (route R1).
+  \item \textbf{From HW2:} the Aiyagari solver and stationary distribution (C1); the Euler-residual
+        network (C2); an RL agent (C3); a text-based index (C4); a Krusell--Smith solver (route H1);
+        a transition-path solver (route H2); a deep or RL solver for the HA household (route H3); a
+        text- or exposure-disciplined income process (route H4).
+\end{itemize}
+
+\textbf{Validate before you extend.} Each reused component must first reproduce its own homework
+benchmark inside the team's repository --- the same numbers, from the team's code, on the team's
+machine --- before it is extended. This is the course's version of ``replicate first, explore
+second'': the trusted benchmark comes before the new result. A project that assembles its
+components correctly and validates them rigorously, with a modest extension, earns a strong grade.
+
+%=============================================================================
+\section{Required elements}
+
+Every project, whatever its emphasis, must have:
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+  \item \textbf{A question the team formalized}, stated in one sentence, and labelled positive or
+        normative. Say what number or ranking answers it.
+  \item \textbf{A model} from the Session 2 and Session 6 family (Aiyagari, Krusell--Smith, OLG,
+        optimal policy), or a justified alternative. Say why a simpler model will not do, and define
+        the equilibrium.
+  \item \textbf{One classical and one AI/ML method, cross-validated on at least one object} (a policy
+        function, a price, a distribution, an index). Report where they disagree and why.
+  \item \textbf{Data with provenance}, structured (FRED, BLS, PSID, \dots) or text, acquired by
+        script, with series IDs or URLs and access dates. Public data only.
+  \item \textbf{An agentic workflow} (Session 10). The repository carries a \texttt{CLAUDE.md} (or the
+        equivalent file for your agent) that describes the project to the next agent and the next
+        human, and an \texttt{AI\_LOG.md} that records the prompts that mattered, the decisions you
+        made, where the AI was wrong and how you caught it, and an honest split of human and AI
+        contribution.
+  \item \textbf{An internal audit}: each member re-runs a component built by another member and
+        records the result with \texttt{templates/audit\_report.md}.
+  \item \textbf{One-command replication}: \texttt{python run\_all.py} (or equivalent) reproduces every
+        number and figure from raw inputs. Fixed seeds; pinned environment; a \texttt{README} with
+        run instructions. \textbf{No API keys in the repository} (use \texttt{.env} and
+        \texttt{.gitignore}).
+\end{enumerate}
+
+\textbf{Never submit code you have not read.} Every member must be able to explain every result in
+the paper.
+
+%=============================================================================
+\section{Emphases}
+
+The syllabus lists four tracks. They are not separate projects but \textbf{emphases}: they say
+where the team's added piece lies. Each connects to homework routes whose components it naturally
+reuses.
+
+\medskip
+{\small
+\renewcommand{\arraystretch}{1.2}
+\noindent\begin{tabularx}{\linewidth}{@{}p{4.4cm}Lp{3.6cm}@{}}
+\toprule
+\textbf{Emphasis} & \textbf{The added piece} & \textbf{Natural components} \\
+\midrule
+\textbf{A.} A quantitative model and a policy experiment & a new friction, policy or counterfactual in an HA or OLG model, with welfare by group & HW1 R3; HW2 C1, H1, H2 \\
+\textbf{B.} A hard model solved with deep learning or RL & a learning solver where grids strain, validated against a classical benchmark & HW1 R1; HW2 C2, C3, H3 \\
+\textbf{C.} The economics of AI & AI as a shock to tasks, wages or capital, in a model you can solve & HW1 R2 or R3; HW2 C1, H4 \\
+\textbf{D.} Text or LLM measurement feeding a model & a validated text-based measure that disciplines a parameter or a shock & HW1 R2; HW2 C4, H4 \\
+\bottomrule
+\end{tabularx}
+}
+
+\medskip
+Teams may mix emphases. A strong project usually crosses one line of this table: for example, a
+text-measured shock (D) fed into an Aiyagari policy experiment (A).
+
+%=============================================================================
+\section{Milestones}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}p{3.3cm}L@{}}
+\toprule
+\textbf{Date} & \textbf{Milestone} \\
+\midrule
+Thu Oct 29 & \textbf{HW1 due, including your one-page pitch (B5).} Post the pitch, under your name or
+anonymously, in the forum category \emph{Pitches and teams}, and read the others. \\
+Thu Nov 5 & \textbf{Teams (2--3) and topic}, posted in \emph{Pitches and teams}: members, the one-sentence
+question, and which members' pitches it grew from. \\
+Mon Nov 16 & \textbf{Two-page proposal} (5\%; \texttt{templates/proposal.md}): the question; the HW1 and HW2
+components you will reuse and their benchmarks; the gap your team fills; the division of
+labour; a risk register. Written feedback by Session 9 (Nov 19). \\
+Mon Nov 23 & \textbf{HW2 due.} Your HW2 components should now be ready to reuse. \\
+Thu Dec 3, Block B & \textbf{Talks and discussants} (15\%). Slots: with at most five teams, a 10-minute talk,
+3 minutes from the discussant and 2 of Q\&A; with six teams, 8 + 2 + 2. Each team discusses
+another team's project (\texttt{templates/discussant\_form.md}); the pairing and the other team's
+slides are sent by Monday, November 30. \\
+Thu Dec 10 & \textbf{Paper} of at most 10 pages, \textbf{replication package}, \texttt{AI\_LOG.md}, internal
+audit reports and the discussant form (20\%). \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+%=============================================================================
+\section{Deliverables}
+
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+  \item \textbf{Paper} (at most 10 pages, references included): question, model and equilibrium,
+        components reused and how each was validated, calibration and data provenance, method and
+        its accuracy, results, limitations. Written like a short working paper. Every number in it
+        must appear in the output of the replication command.
+  \item \textbf{Repository}: \texttt{CLAUDE.md}, \texttt{README}, pinned environment, fixed seeds,
+        data-acquisition scripts (no manual downloads), a short data dictionary, and one-command
+        reproduction.
+  \item \textbf{\texttt{AI\_LOG.md}}, with a validation ledger linking each headline claim to the check
+        that supports it, as in HW1.
+  \item \textbf{Internal audit reports}, one per member.
+  \item \textbf{Talk slides} and the \textbf{discussant form} for the team you discussed.
+\end{enumerate}
+
+%=============================================================================
+\section{Rubric}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}p{4.6cm}rL@{}}
+\toprule
+\textbf{Dimension} & \textbf{Points} & \textbf{What we look for} \\
+\midrule
+Framing and question & 15 & A precise, well-motivated question; the right model and equilibrium concept; why a simpler model will not do \\
+Integration and correctness & 20 & Reused components reproduce their benchmarks; they are combined correctly; the added piece is right \\
+Validation & 20 & Hand checks, benchmarks, a classical-vs-ML cross-validation, sanity checks; honest about what failed \\
+Reproducibility and provenance & 15 & One-command reproduction on a clean machine; scripted data with access dates; pinned environment \\
+AI-collaboration quality & 10 & An architect, not a consumer: an informative \texttt{AI\_LOG.md}, a useful \texttt{CLAUDE.md}, honest attribution \\
+Communication & 10 & A clear paper and talk; figures that tell the story \\
+Discussant and audit & 10 & A specific, fair, well-evidenced discussant report; internal audits that actually re-ran the code \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{How the rubric maps to the course grade.} The proposal (5\%) is graded on the framing
+dimension and on the quality of the component plan and risk register. The talk and discussant role
+(15\%) is graded on communication and on the discussant dimension. The paper and replication
+package (20\%) are graded on the remaining dimensions. All members of a team receive the same
+project grade unless the audit reports or the \texttt{AI\_LOG.md} show a clearly unequal
+contribution.
+
+%=============================================================================
+\section{Coverage: where each session's tools are used}
+
+The two homework assignments and the project together exercise every key model and technique of
+the course. \textbf{Core} items are required of everyone; \textbf{route} items deepen one area by
+choice; the project \textbf{integrates} them.
+
+\medskip
+{\small
+\renewcommand{\arraystretch}{1.2}
+\noindent\begin{tabularx}{\linewidth}{@{}p{0.95cm}Lp{2.3cm}p{2.3cm}p{2.6cm}@{}}
+\toprule
+\textbf{Sess.} & \textbf{Key models and techniques} & \textbf{HW1} & \textbf{HW2} & \textbf{Project} \\
+\midrule
+1 & growth model; planner and equilibrium; dynamic programming; why RL & A1, A2 (core) & C3 & model choice \\
+2 & Bewley--Huggett--Aiyagari; Krusell--Smith; OLG; Ramsey and time consistency & A1(d) (core); R3 & C1 (core); H1, H2 & emphasis A, C \\
+3 & VFI; Euler equations and time iteration; Python, PyTorch; data workflow & A2, A3 (core) & C2 & replication package \\
+4 & root-finding, optimization, interpolation, quadrature; Tauchen and Rouwenhorst & B1, B2 (core); R2 & C1 & calibration, estimation \\
+5 & perturbation, Blanchard--Kahn, pruning; Chebyshev collocation, Smolyak, finite elements & B2 (core); R1 & C2 benchmark & emphasis B \\
+6 & Aiyagari as a nested fixed point; Krusell--Smith; OLG transitions; Negishi & --- & C1 (core); H1, H2 & emphasis A \\
+7 & neural networks; training; Euler-residual and deep VFI solvers; validation & --- & C2 (core); H3 & classical-vs-ML check \\
+8 & Q-learning, policy gradients, actor--critic; HA at the frontier; taxation without commitment & --- & C3 (core); H1, H2, H3 & emphasis B \\
+9 & text as data; embeddings; LLMs as instruments; retrieval & A3(c) (AI audit) & C4 (core); H4 & emphasis C, D \\
+10 & agentic research workflows; verification; governance & AI red-team & AI red-team & \texttt{CLAUDE.md}, \texttt{AI\_LOG.md}, audit \\
+\bottomrule
+\end{tabularx}
+}
+
+\vfill
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{Ground rules.} AI assistance is encouraged as a partner, not a ghostwriter. Public data
+only; no personal, IRB- or HIPAA-protected data. Cite every source and separate your contribution
+from prior work. Templates: \texttt{homeworks-exams/FinalProject/templates/}.
+\normalsize
+
+\end{document}

@@ -45,7 +45,7 @@
 \textbf{Instructor} & Zhigang Feng \\
 \textbf{Email} & \tba{UCR email} \\
 \textbf{Office hours} & \tba{day, time, room}, and by appointment \\
-\textbf{Course website} & \tba{URL} --- slides, labs, homework, and announcements \\
+\textbf{Course website} & \url{https://vonzhg.github.io/Macro-2026Fall/} --- slides, labs, homework, announcements, and the discussion forum \\
 \end{tabularx}
 
 %-----------------------------------------------------------------------------
@@ -55,7 +55,21 @@ Modern macroeconomics asks questions about \emph{distributions} and \emph{policy
 
 This course builds the foundations in three steps. \textbf{On paper}, we start from the neoclassical growth model and extend it to the workhorse models of modern research: the Bewley--Huggett--Aiyagari incomplete-markets model, the Krusell--Smith model with aggregate risk, overlapping-generations models, and optimal fiscal policy with and without commitment. For each model we ask how it is built, what equilibrium means, what can be characterized, and which questions it can answer. \textbf{On the machine}, we learn to solve these models: numerical dynamic programming, programming in Python and PyTorch, function approximation, optimization, root-finding, quadrature, discretization of stochastic processes, perturbation, and projection methods --- culminating in the computation of heterogeneous-agent economies and the ``computational wall'' they run into. \textbf{At the frontier}, we study how machine learning, deep learning, and reinforcement learning break through that wall; how language models turn text into economic data; and how AI agents are changing the way research is done.
 
+\textbf{AI in two roles.} Artificial intelligence enters this course twice. As a \textbf{tool}, it is an extremely powerful instrument for macroeconomic research: neural networks and reinforcement learning solve models that grids cannot; language models turn text into data; and AI assistants and agents write code, search the literature and run analyses at a speed no research assistant can match. As an \textbf{object}, AI is a transformative economic force that deserves serious macroeconomic research: a new kind of capital and a new input into production, a shock to which tasks people do and what they earn, a source of market power and of new risks, and a question for fiscal policy. The same models and methods you learn here --- heterogeneous agents, incomplete markets, optimal policy, and their computation --- are the ones needed to study who gains and who loses from AI. The running thread on AI and inequality (Sessions 1, 9 and 10) and the economics-of-AI emphasis in the final project make this concrete.
+
 Throughout, the course insists on one discipline: \emph{every computed answer must be benchmarked and verified}. As AI makes generating answers cheap, verification becomes the scarce skill.
+
+%-----------------------------------------------------------------------------
+\section{How the Course Is Designed: Research in the Age of AI}
+
+When an AI assistant can write most of the code, the skills that matter move up a level: knowing which question is worth asking, which model can answer it, what the equilibrium is, which method is accurate enough, which data make the model relevant, and whether the answer is right. The course is built to train exactly these skills.
+\begin{itemize}
+  \item \textbf{You are the project manager.} AI executes; you decide, and you are accountable for every number. Assignments grade your decisions and the evidence behind them, not only the final answer.
+  \item \textbf{A ladder of increasing ownership.} Homework~1 gives you the question and asks you to make the modeling, method and data decisions; Homework~2 lets you choose a route and a question of your own within a shared core; the final project is yours from question to presentation. Each homework produces a \emph{component} that the final project reuses.
+  \item \textbf{Several tools for one question.} Every major result is obtained at least two ways --- a closed form and a grid, perturbation and projection, a classical solver and a neural network --- so you learn what each method buys and when to trust it.
+  \item \textbf{Quality control is part of the work.} You validate your own solvers against known answers, keep a validation ledger for every claim, audit a classmate's replication package, and ``red-team'' an AI assistant by finding and documenting its errors.
+  \item \textbf{Learning in the open.} A course forum (anonymous or named) is where questions are asked, pitches are posted and teams form; the final mini-conference, with discussants, is where results are defended.
+\end{itemize}
 
 %-----------------------------------------------------------------------------
 \section{Learning Objectives}
@@ -66,6 +80,8 @@ By the end of the quarter you should be able to:
   \item \textbf{Algorithms.} Design solution algorithms --- value function iteration, time iteration, the endogenous grid method, perturbation, projection, nested fixed-point methods for heterogeneous-agent models --- and explain their accuracy, speed, and failure modes.
   \item \textbf{Implementation.} Implement these algorithms in Python and PyTorch, including neural-network and reinforcement-learning solutions of dynamic models, using AI coding assistants responsibly.
   \item \textbf{Validation and research use.} Verify numerical solutions against benchmarks; use language models as measurement instruments with proper validation; and design an AI-assisted research workflow that you remain in control of.
+  \item \textbf{AI as an economic force.} Frame the economics of AI --- AI as capital, task-based automation and augmentation, measurement of AI exposure --- in quantitative macroeconomic models, and ask what it implies for inequality and policy.
+  \item \textbf{Research leadership.} Turn a question into a research design, choose and combine models, methods and data to answer it, check the quality of your own and others' work, and communicate the result as a paper, a talk and a reproducible package.
 \end{enumerate}
 
 %-----------------------------------------------------------------------------
@@ -119,20 +135,20 @@ Each session has two blocks (A: 9:00--10:15; B: 10:35--11:50). The schedule may 
 \textbf{Numerical methods I (cont.).} Function approximation and interpolation; quadrature; discretizing AR(1) processes (Tauchen, Rouwenhorst); a fast and accurate stochastic growth model. & HW\,1 Part B out \\
 \textbf{5}\newline Oct 22 &
 \textbf{Numerical methods II: perturbation.} First- and second-order perturbation; Blanchard--Kahn conditions and linear rational-expectations systems; pruning. &
-\textbf{Numerical methods II: projection.} Chebyshev polynomials, Smolyak grids, finite elements; collocation vs.\ Galerkin; the same model solved four ways, and choosing the right tool. & HW\,1 due \\
+\textbf{Numerical methods II: projection.} Chebyshev polynomials, Smolyak grids, finite elements; collocation vs.\ Galerkin; the same model solved four ways, and choosing the right tool. & \\
 \textbf{6}\newline Oct 29 &
 \textbf{Heterogeneous agents I: stationary equilibria and aggregate risk.} Solving the Aiyagari model as a nested fixed point; the stationary distribution; Krusell--Smith; OLG and transition dynamics; optimal policy with heterogeneous agents, and why grids and moments break down. &
-\textbf{Heterogeneous agents II: when heterogeneity aggregates.} Complete markets and Gorman aggregation; the Negishi method as the representative-agent construction; transitional dynamics by shooting, and what is lost when markets are incomplete. & HW\,2 out \\
+\textbf{Heterogeneous agents II: when heterogeneity aggregates.} Complete markets and Gorman aggregation; the Negishi method as the representative-agent construction; transitional dynamics by shooting, and what is lost when markets are incomplete. & HW\,1 due; HW\,2 Part A out \\
 \textbf{7}\newline Nov 5 &
 \textbf{Machine learning essentials.} Learning as function approximation; neural networks; training, backpropagation, and generalization. &
 \textbf{Deep learning for dynamic models.} Euler-residual minimization; deep value function iteration and actor--critic; structured networks and validation. & Project teams and topics \\
 \textbf{8}\newline Nov 12 &
 \textbf{Reinforcement learning.} RL as dynamic programming without the model; Monte Carlo, temporal-difference learning, Q-learning; policy gradients and actor--critic. &
-\textbf{Heterogeneous agents at the frontier.} The distribution as a network input; deep equilibrium nets and DeepHAM; optimal taxation without commitment with heterogeneous agents. & HW\,2 due \\
+\textbf{Heterogeneous agents at the frontier.} The distribution as a network input; deep equilibrium nets and DeepHAM; optimal taxation without commitment with heterogeneous agents. & HW\,2 Part B out \\
 \textbf{9}\newline Nov 19 &
 \textbf{Language models and text as data.} From models to data; text as measurement; from words to vectors; attention and the Transformer. &
-\textbf{LLMs as research instruments.} Limits and validation; measuring the economic footprint of AI; retrieval-augmented generation. & Proposal due Mon Nov 16; HW\,2 bonus due \\
-\multicolumn{4}{@{}l}{\emph{November 26: no class (Thanksgiving).}} \\
+\textbf{LLMs as research instruments.} Limits and validation; measuring the economic footprint of AI; retrieval-augmented generation. & Proposal due Mon Nov 16 \\
+\multicolumn{4}{@{}l}{\emph{Monday, November 23: HW\,2 due. November 26: no class (Thanksgiving).}} \\
 \textbf{10}\newline Dec 3 &
 \textbf{Agentic AI and the future of research.} How AI agents work; building a research workflow; verification, governance, and what remains human. &
 \textbf{Final project presentations} (mini-conference with discussants). & \\
@@ -151,8 +167,8 @@ Dec 10 & \multicolumn{3}{@{}l}{\textbf{Final paper and replication package due} 
 \toprule
 \textbf{Component} & \textbf{Weight} & \textbf{Dates} \\
 \midrule
-Homework 1: dynamic programming and numerical methods & 15\% & out Oct 8 and Oct 15; due Oct 22 \\
-Homework 2: heterogeneity and learning & 15\% & out Oct 29; due Nov 12 \\
+Homework 1: from a question to a quantitative answer & 15\% & out Oct 8 and Oct 15; due Oct 29 \\
+Homework 2: heterogeneity and learning & 15\% & out Oct 29 and Nov 12; due Mon Nov 23 \\
 Final project (teams of 2--3) & 40\% & see below \\
 \quad Proposal (two pages) & \quad 5\% & due Monday, Nov 16 \\
 \quad Presentation and discussion & \quad 15\% & Dec 3, Block B \\
@@ -162,31 +178,33 @@ Participation & 30\% & every session \\
 \end{tabularx}
 \end{center}
 
-\subsection{Homework}
-Two homework assignments combine short theory questions with computational work in Python. \textbf{Homework~1} covers the growth model, value function iteration and its accelerations, the endogenous grid method, discretization of AR(1) processes, and accuracy analysis. \textbf{Homework~2} covers the stationary equilibrium of the Aiyagari model, projection methods, and neural-network solutions of dynamic models (with an optional reinforcement-learning bonus). Submit a PDF write-up, your code, and an \texttt{AI\_LOG.md} (see Section~\ref{sec:ai}). You may discuss homework with classmates, but each student writes and submits their own solutions and code and lists the people they worked with. Late homework loses 10\% per day and is not accepted after solutions are posted.
+\subsection{Homework and the final project: one ladder}
+The two homework assignments and the final project form a single sequence that teaches you to run a quantitative research project: to formulate the question yourself, choose the model, define the equilibrium, pick and validate the numerical or AI method, discipline the model with data, check the quality of your own and others' work, and present the result. Each rung gives you less scaffolding and more ownership, and each homework builds a \emph{component} that the final project reuses. Each homework also lets you choose a \emph{route} --- a direction in which to go deeper --- and includes an AI red-team item, in which you find and document an error in an AI assistant's answer.
+
+\textbf{Homework~1 (Sessions 1--5; due October 29): the representative-agent engine.} You act as project manager for a common question pair --- how much of U.S.\ business-cycle volatility TFP shocks explain, and what aggregate fluctuations cost in welfare. You write a project charter, the model and its equilibrium, validate your solver against a closed form, build your own data targets and calibration from FRED and the literature, solve the model by grid, perturbation and projection methods, and answer both questions in a short paper, five slides and a one-command replication package. Routes: the numerical frontier, data and estimation, or fiscal policy. You finish by pitching a question of your own on the course forum.
+
+\textbf{Homework~2 (Sessions 6--9; due November 23): heterogeneity and learning.} A common core --- the Aiyagari economy solved as a nested fixed point, a neural-network solution validated against a classical one, a first reinforcement-learning exercise, and a first text-as-data measurement --- and a route of your choice: aggregate risk and the welfare cost of cycles with heterogeneity, fiscal policy and transitions, AI solution methods, or AI and inequality with text-disciplined shocks. You also audit a classmate's Homework~1 replication package.
+
+Each homework is submitted as a PDF, a repository that reproduces every number with one command, and an \texttt{AI\_LOG.md} with a validation ledger (see Section~\ref{sec:ai}). Templates are posted with each assignment. You may discuss homework with classmates, but each student writes and submits their own work and lists the people they worked with. Late homework loses 10\% per day and is not accepted after solutions are posted.
 
 \subsection{Final project}
-In teams of two or three, you will \emph{replicate a benchmark result and then extend it}. Projects follow one of four tracks:
-\begin{enumerate}[label=\textbf{\Alph*.}]
-  \item Replicate and extend a quantitative model (e.g.\ Aiyagari, Krusell--Smith, or a life-cycle OLG model) and run a policy experiment.
-  \item Solve a classically hard dynamic model with deep learning or reinforcement learning, validated against a benchmark.
-  \item The economics of AI: a task-based model of AI and the labor market, or a measure of AI exposure linked to economic outcomes.
-  \item Text or language-model measurement that feeds a macroeconomic model or its calibration.
-\end{enumerate}
-Milestones: teams and topics by November 5; a two-page proposal by November 16 (question, benchmark to replicate, data or model, division of labor); presentations at the December 3 mini-conference, where each team also serves as discussant for another team; and a paper of at most ten pages with a replication package (code that reproduces every number and figure with one command) by December 10. Projects are evaluated on the economic question, correctness of the replication, rigor of validation, reproducibility, quality of AI collaboration, and communication. Detailed guidelines and a rubric will be posted by Session~3.
+In teams of two or three, you \emph{assemble} your components to answer a question your team formulates, usually grown from the pitches. The project must combine at least one Homework~1 component and one Homework~2 component from its members --- each first validated against its homework benchmark --- and add what is missing: a model, a data source, or a method. It must use at least one classical and one AI/ML method cross-validated on the same object, document its AI-assisted (agentic) workflow, and include an internal audit in which one teammate re-runs another's component. Emphases include quantitative policy experiments, AI solution methods, the economics of AI, and text-based measurement.
+
+Milestones: pitches on the forum by October 29; teams and topics by November 5; a two-page proposal by Monday, November 16 (question, components reused, what is added, division of labor, risks); presentations at the December 3 mini-conference, where each team also serves as discussant for another team; and a paper of at most ten pages with a replication package by December 10. Projects are graded on framing, integration and correctness, validation, reproducibility and provenance, quality of AI collaboration, communication, and the discussant report. The guidelines, rubric and templates are posted on the course website.
 
 \subsection{Participation}
-There is no examination in this course. Participation carries 30\% and includes exit tickets at the end of each session, engagement in discussion and in the live demos, and your role as a discussant at the final-project conference.
+There is no examination in this course. Participation carries 30\% and includes exit tickets at the end of each session, engagement in discussion --- in class and on the course forum --- and in the live demos, and your role as a discussant at the final-project conference.
 
 %-----------------------------------------------------------------------------
 \section{Use of AI Tools}\label{sec:ai}
 
-This course teaches you to use AI as a research tool, so AI assistants are \textbf{encouraged} for homework and the final project, subject to three rules:
+This course teaches you to use AI as a research tool, so AI assistants and agents are \textbf{encouraged} for homework and the final project. Use them the way a good project manager uses a capable but fallible team: delegate execution, keep the decisions, and check the work. Three rules apply:
 \begin{enumerate}
   \item \textbf{Disclose.} Keep an \texttt{AI\_LOG.md} with each submission: the tools you used, the prompts that mattered, where the AI was wrong, and what you verified yourself.
   \item \textbf{Own it.} You must be able to explain and defend every line of code and every result you submit. ``The AI wrote it'' is never an explanation.
-  \item \textbf{Verify.} Every numerical result needs a benchmark or an accuracy check.
+  \item \textbf{Verify.} Every numerical result needs a benchmark or an accuracy check, and every citation must be checked against the original. Each homework includes an AI red-team item, and each submission includes a validation ledger linking every claim to the check that supports it.
 \end{enumerate}
+The final project additionally documents its agentic workflow: the repository's instructions to the AI (a \texttt{CLAUDE.md} or equivalent), what was delegated, and what was verified by hand. Never commit API keys or confidential data.
 
 %-----------------------------------------------------------------------------
 \section{Course Policies}
@@ -197,7 +215,7 @@ This course teaches you to use AI as a research tool, so AI assistants are \text
 
 \textbf{Well-being.} If personal circumstances affect your work in the course, please reach out early. UCR's Counseling and Psychological Services and other campus resources are available to support you.
 
-\textbf{Communication.} Announcements and materials are posted on the course website. Please allow up to two business days for replies to email.
+\textbf{Communication.} Announcements and materials are posted on the course website. Questions about the material, the labs and the homework go to the course \textbf{discussion forum} on the website (sign in with your UCR e-mail), where you may post under your name or anonymously; anonymous posts are anonymous to classmates, but instructors can see who wrote them, except in the separate anonymous-feedback category. Use e-mail for private matters, and please allow up to two business days for a reply.
 
 %-----------------------------------------------------------------------------
 \section{Readings by Session}\label{sec:readings}

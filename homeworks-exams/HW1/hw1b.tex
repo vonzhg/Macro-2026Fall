@@ -1,5 +1,5 @@
-%% ECON 282E -- Homework 1, Part B
-%% Reworked from PS2.lyx / PS2_IUBE.lyx (Quant Macro, HUST 2019).
+%% ECON 282E -- Homework 1, Part B: From a Question to a Quantitative Answer
+%% Redesigned 2026-09-26: algorithm choice (S4-S5), the answers, and the write-up.
 %% Build:  python3 tools/build_docs.py homeworks-exams/HW1/hw1b.tex
 %% With answers:  python3 tools/build_docs.py --solutions homeworks-exams/HW1/hw1b.tex
 %% Answers live in solutions/ (gitignored); solution PDFs are gitignored too.
@@ -25,9 +25,9 @@
     {\GenericWarning{}{Answer key solutions/hw1b_key.tex not found}}\fi}
 
 \title{\vspace{-2em}\textbf{ECON 282E --- Homework 1, Part B}\\[2mm]
-       \large Continuous Choice, Stochastic Shocks, and Accuracy}
+       \large From a Question to a Quantitative Answer: Method, Answer, Presentation}
 \author{Foundations of Macroeconomics \\ University of California, Riverside}
-\date{Out: Thursday, October 15, 2026 \quad\textbullet\quad Due: Thursday, October 22, 2026}
+\date{Out: Thursday, October 15, 2026 \quad\textbullet\quad Due (with Part A): Thursday, October 29, 2026}
 
 \begin{document}
 \maketitle
@@ -35,116 +35,199 @@
 
 \noindent\rule{\linewidth}{0.4pt}\par
 \small
-\textbf{What to hand in.} One PDF, your code, and \texttt{AI\_LOG.md} --- together with Part A,
-in a single submission. Question 3(d) feeds the anonymous accuracy leaderboard.
+\textbf{Where we are.} In Part A you scoped the project, wrote the model down, validated a solver
+where the answer is known, and built your own data targets and calibration. Part B uses
+\emph{your} calibration from A3(b) throughout. If you are not confident in it, you may use
+$\alpha=0.33$, $\beta=0.99$, $\delta=0.025$, $\rho=0.95$, $\sigma=0.007$ instead --- say so, and lose
+the A3(b) points only once.
 
-\textbf{Continuity with Part A.} Questions 2(d) and 2(e) extend the same deterministic model
-and the same solver. Question 3 changes the calibration to a standard quarterly one and adds a
-shock.
+\textbf{Timing.} B1 uses Session 4 (October 15). \textbf{B2(b)--(c) use Session 5 (October 22)};
+everything else can be done as soon as this sheet is out.
+
+\textbf{What to hand in, together with Part A.} The mini-paper (PDF), the five slides (PDF), the
+repository with \texttt{run\_all.py}, the final charter, and \texttt{AI\_LOG.md}. Question B2(d) feeds the
+anonymous class accuracy leaderboard.
 \normalsize\par
 \noindent\rule{\linewidth}{0.4pt}\par
 
 %=============================================================================
-\section*{Question 2, continued. Getting off the grid (40 points)}
+\section*{B1. Choose the algorithm (15 points)}
 
-Same model and calibration as Part A: $u=\ln c$, $c+k'=Zk^{\alpha}$, $\delta=1$,
-$\alpha=0.36$, $\beta=0.95$, $Z=1$.
+\begin{enumerate}[label=(\alph*), leftmargin=*]
 
-\begin{enumerate}[label=(\alph*), leftmargin=*, start=4]
-
-\item \textbf{(20 pts) Continuous choice.} Replace the grid search with a maximization over the
-\emph{interval}, using golden section (or Brent) and evaluating the interpolated value function
-off the grid. Keep $N=200$.
-\begin{enumerate}[label=(\roman*)]
-  \item Report the maximum relative policy error and the maximum unit-free Euler residual,
-        evaluated at 500 capital levels that are \emph{not} grid points, against your Part A
-        2(a) results.
-  \item Report the number of objective evaluations and the wall time. How do they compare?
-  \item Which interpolation scheme did you use for $\hat v$, and why does the choice matter for
-        whether golden section is licensed at all?
-\end{enumerate}
+\item \textbf{(9 pts) What each tool buys, measured.} On the $\delta=1$ model of A2 ($N=200$), add
+to your grid VFI: Howard's policy improvement; monotonicity of $g$ to restrict the search;
+continuous choice by golden section (or Brent) on an interpolated value function; and
+\emph{either} the endogenous grid method \emph{or} time iteration on the Euler equation. Make one
+table: policy updates, wall time, $\max|g/g^*-1|$, and the maximum unit-free Euler residual at 500
+capital levels that are \emph{not} grid points. Which of these changes the \emph{answer}, and which
+only the \emph{route} to it? Do your wall-clock times rank the way your operation counts do?
 
 \solution{\keyBone}
 
-\item \textbf{(20 pts) A second road.} Solve the same model again by \emph{either} time
-iteration on the Euler equation \emph{or} the endogenous grid method. Then produce one table
-comparing all four solvers --- Part A 2(a), Part A 2(c), and 2(d) and 2(e) here --- on
-iterations, wall time, maximum relative policy error and maximum off-grid Euler residual.
-Which solver would you use in practice, and for what reason?
+\item \textbf{(6 pts) Discretize the shock you estimated.} Implement Tauchen (1986) and
+Rouwenhorst (1995). At \textbf{your} $\rho$ and $\sigma$ from A3(b) and $n\in\{5,7,9,15\}$, report
+each chain's implied persistence and unconditional standard deviation against the targets. Which
+will you use, and why does your estimated $\rho$ make the choice matter?
 
 \solution{\keyBtwo}
 
 \end{enumerate}
 
 %=============================================================================
-\section*{Question 3. A stochastic, quarterly model (60 points)}
+\section*{B2. Solve the calibrated model three ways (25 points)}
 
-Now the standard quarterly calibration:
-\[
-  \alpha=0.33,\qquad \beta=0.99,\qquad \delta=0.025,\qquad
-  \ln z'=\rho\ln z+\sigma\varepsilon',\quad \rho=0.95,\ \sigma=0.007 ,
-\]
-with $c+k'=zk^{\alpha}+(1-\delta)k$ and $u=\ln c$. There is \textbf{no closed-form policy} for
-this model --- only a closed-form steady state,
-$k^{*}=\big(\alpha\beta/(1-\beta(1-\delta))\big)^{1/(1-\alpha)}$.
+Use the stochastic model of A1 at your calibration, a 7-state chain from B1(b), and capital on
+$[0.5k^*,1.5k^*]$.
 
 \begin{enumerate}[label=(\alph*), leftmargin=*]
 
-\item \textbf{(15 pts) Where $\Pi$ comes from.} Implement \emph{both} Tauchen (1986) and
-Rouwenhorst (1995). For $n\in\{5,9,15\}$, report each chain's implied persistence and
-unconditional standard deviation against the targets $\rho$ and $\sigma/\sqrt{1-\rho^{2}}$.
-Then repeat the table at $\rho=0.99$. Which method would you use, and why?
+\item \textbf{(7 pts) A global solution.} Solve with your best solver from B1(a). Report the grid,
+tolerance, iterations and wall time, and check that the policy crosses the 45-degree line near the
+analytical $k^*$ in the middle productivity state.
 
 \solution{\keyBthree}
 
-\item \textbf{(15 pts) Solve it.} Using the Rouwenhorst chain with $n=7$, solve the model with
-your best solver from Question 2. Report the grid, tolerance, sweeps and wall time, and verify
-that your policy crosses the 45-degree line near the analytical $k^{*}$ in the middle
-productivity state. How close is the crossing? If it is further off than one grid spacing,
-diagnose why --- the answer is not that your solver is broken.
+\item \textbf{(6 pts) First-order perturbation.} \emph{(Session 5, Block A.)} Log-linearize, solve by
+QZ (or any method from 5.A4), and state the Blanchard--Kahn count you verified.
 
 \solution{\keyBfour}
 
-\item \textbf{(15 pts) Simulate and match moments.} Simulate 2,000 quarters (discard the first
-500), HP-filter $\ln Y$, $\ln C$ and $\ln I$ with $\lambda=1600$, and report
-$\sigma(Y)$, $\sigma(C)/\sigma(Y)$, $\sigma(I)/\sigma(Y)$, $\mathrm{corr}(C,Y)$,
-$\mathrm{corr}(I,Y)$ and the first-order autocorrelation of $Y$. Compare with the US
-post-war targets $\sigma(Y)\approx1.5$--$2.0\%$, $\sigma(C)/\sigma(Y)\approx0.5$--$0.8$,
-$\sigma(I)/\sigma(Y)\approx3$--$4$, both correlations $\approx0.8$--$0.9$.
-\emph{An HP filter is provided in Lab 3, Part 7; you may use it or your own.}
-Then re-run with the \emph{Tauchen} chain and report how much the moments move.
+\item \textbf{(7 pts) Chebyshev collocation.} \emph{(Session 5, Block B.)} Approximate consumption with
+a degree-7 Chebyshev polynomial in $k$ for each productivity state, collocate the Euler residual at
+the Chebyshev nodes, and warm-start from (b).
 
 \solution{\keyBfive}
 
-\item \textbf{(15 pts) Accuracy, and the leaderboard.} Compute unit-free Euler residuals
-$\mathcal{E}=|1-\tilde c/c|$ at 1,000 capital levels drawn uniformly, \emph{off} the solution
-grid, across all productivity states. Report $\log_{10}$ of the mean and the maximum, and plot
-the residual against $k$. Where are the errors largest, and why?
-
-Submit your maximum $\log_{10}\mathcal{E}$, together with your grid size, tolerance and wall
-time, for the anonymous class leaderboard.
+\item \textbf{(5 pts) Accuracy against cost, and a decision.} One table for the three methods: numbers
+stored, solve time, and $\log_{10}$ of the maximum and mean unit-free Euler residual at 1,000 random
+off-grid points over the whole grid, and over $[0.95k^*,1.05k^*]$. Submit your best maximum
+$\log_{10}$ residual, with its grid, tolerance and wall time, to the leaderboard. Then decide:
+\textbf{which method is fit for the positive question, and which for the normative one?} Be precise
+about the normative question: what does a first-order solution give if you also approximate
+\emph{welfare} to first order (certainty equivalence, Session 5), and what if instead you evaluate
+exact utility along the first-order \emph{policy}? Which is the right way to use it, and why?
 
 \solution{\keyBsix}
 
 \end{enumerate}
 
 %=============================================================================
-\section*{Bonus (up to 10 points). Endogenous labour}
+\section*{B3. The answers (20 points)}
 
-Add a labour choice with $u(c,n)=\ln c-\psi\frac{n^{1+1/\nu}}{1+1/\nu}$ and
-$y=zk^{\alpha}n^{1-\alpha}$. Calibrate $\psi$ so that average hours in the simulation are
-$\bar n=0.3$. Report how $\sigma(Y)$ and $\sigma(I)/\sigma(Y)$ change relative to Question 3,
-and say which of the target moments the model now gets closer to.
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+
+\item \textbf{(10 pts) The positive answer.} Simulate the model, HP-filter the logs of $Y$, $C$ and
+$I$, and put the six moments next to \textbf{your} data table from A3(a). Report them twice: from
+one long simulation, and as the mean and standard deviation across 200 simulated samples of the
+\emph{same length as your data}. Which comparison is the right one, and why? Then answer the
+question: what fraction of the U.S.\ standard deviation of output (and of its variance) do TFP
+shocks account for in this model? Name the moment the model gets most wrong and the model feature
+most likely responsible. How much does switching to the Tauchen chain move your answer?
 
 \solution{\keyBseven}
+
+\item \textbf{(10 pts) The normative answer.} Define the welfare cost of fluctuations as the
+percentage $\lambda$ by which consumption in every date and state of the stochastic economy must be
+raised to make the household as well off as in a deterministic economy where $z$ is fixed at
+$\bar z$, both starting at the deterministic steady state $\bar k^*$:
+\[
+  \mathbb{E}\Big[\sum_t\beta^t\ln\big((1+\lambda)c_t\big)\Big]=\frac{\ln \bar c^*}{1-\beta}.
+\]
+Compute $\lambda$ from a global solution, averaging over the ergodic distribution of $z$, for two
+comparison economies: $\bar z=1$, which preserves the mean of $\ln z$, and
+$\bar z=\mathbb{E}[z]$, which preserves the mean of $z$. Which comparison is fair, and why do the
+two differ? Compare your answer with Lucas's benchmark $\tfrac12\mathrm{var}(\ln c)$. Interpret the \emph{size}: is it large or
+small, and what does that imply for stabilization policy in this model? Interpret the \emph{sign}:
+could it be negative here, and what property of the technology would make it so? Finally, using
+your answer to A1(d), explain in one paragraph why an economy with uninsurable idiosyncratic risk can
+give a much larger number --- the question Homework 2 takes up.
+
+\solution{\keyBeight}
+
+\end{enumerate}
+
+%=============================================================================
+\section*{B4. Put it together (10 points)}
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+  \item \textbf{A mini-paper of at most six pages} (\texttt{templates/paper.tex}): question,
+        model and equilibrium, calibration with its provenance, method and its accuracy, the two
+        answers, and what the model cannot say. Every number in it must appear in the output of
+        \texttt{run\_all.py}.
+  \item \textbf{Five slides} (\texttt{templates/slides.tex}): the question, the model, the evidence
+        that the solution is right, the answer, the caveat. Write them as if you had eight minutes.
+  \item \textbf{A replication package.} \texttt{python run\_all.py} downloads or reads the data,
+        solves, simulates and writes every table and figure. Pin your package versions.
+  \item \textbf{\texttt{AI\_LOG.md} with a validation ledger}: for each claim in the paper, the check
+        that supports it (a closed form, a refinement, an Euler residual, a second method, a
+        verified source). Add a half-page retrospective: what broke, what you would do differently,
+        and which charter risk actually happened.
+\end{enumerate}
+Graded on correctness, clarity and reproducibility --- not on length.
+
+\solution{\keyBnine}
+
+%=============================================================================
+\section*{B5. Your own question (10 points)}
+
+On one page, pitch a question \emph{you} would like to answer, as a project manager would. State the
+question and whether it is positive or normative; the model you would build on and why a simpler one
+will not do; the equilibrium concept; the solution method you would choose from Sessions 3--5 and the
+accuracy check you would run; and the data (structured or not) that would discipline it. It may
+become your final project (teams are due November 5). Name the component of \emph{this} homework ---
+your calibration and data pipeline, a solver, your route --- that the project would reuse, and what
+it would still need from Homework~2. Post the pitch to the \emph{Pitches and teams} category of the
+course forum (under your name or anonymously) so that teams can form around it.
+
+\solution{\keyBten}
+
+%=============================================================================
+\section*{B6. Choose your route (20 points)}
+
+Research projects differ in where their risk lies. Pick \textbf{one} route and go deeper; the route
+you choose is a component your final project can reuse. Say in your charter which route you chose
+and why.
+
+\begin{description}[leftmargin=*, style=nextline]
+\item[R1. The numerical frontier (Sessions 4--5).] Solve the calibrated model by
+\textbf{second-order perturbation} and recompute the welfare cost of B3(b) with it. How close is it
+to the welfare cost from the first-order and the global \emph{policies}, each evaluated by exact
+utility? Explain the size of the differences you find (think envelope theorem). Simulate the second-order
+solution with and without \textbf{pruning} and report whether it matters at your calibration. Then
+either raise risk (triple $\sigma$) until perturbation visibly fails, or solve the endogenous-labour
+model of the bonus on a two-dimensional \textbf{Smolyak} grid or with finite elements.
+\item[R2. Data and estimation (Sessions 3--4).] Replace the calibration of $\rho$ and $\sigma$ by
+\textbf{simulated method of moments}: choose at least three moments from your A3(a) table, a
+weighting matrix, and a simulation size, and \emph{first} show that your estimator recovers known
+parameters from data simulated by the model. Then estimate on the U.S.\ moments, report standard
+errors, and test the overidentifying restriction. Does the model fit what you asked it to fit?
+\item[R3. Policy (Session 2).] Add a proportional tax $\tau_k$ on capital income, rebated lump
+sum. Derive the steady-state effect of $\tau_k$ on $k^*$ and $c^*$, and state the Ramsey
+steady-state tax in this model (Chamley--Judd). Compute the welfare effect, \emph{including the
+transition}, of a permanent surprise move from $\tau_k=0$ to $\tau_k=0.25$ starting at the old
+steady state. Explain why the steady-state comparison and the transition-inclusive answer differ,
+and what a government without commitment (Session 2, deck 2.B3) would be tempted to do.
+\end{description}
+
+\solution{\keyBtwelve}
+
+%=============================================================================
+\section*{Bonus (up to 10 points). Endogenous labour}
+
+Add a labour choice with $u(c,n)=\ln c-\psi\frac{n^{1+1/\nu}}{1+1/\nu}$ and calibrate $\psi$ so that
+average hours are $\bar n=0.3$. How do $\sigma(Y)$, $\sigma(I)/\sigma(Y)$ and $\sigma(H)/\sigma(Y)$
+change, and does your answer to B3(a) go up or down?
+
+\solution{\keyBeleven}
 
 \vfill
 \noindent\rule{\linewidth}{0.4pt}\par
 \small
-\textbf{Reporting standard.} With every result: the method, the grid (points, spacing, bounds),
-the chain and its \emph{implied} $\rho$ and $\sigma_z$, the tolerance, the dtype, maximum and
-mean Euler residuals on points not used to solve, and the wall time with the hardware. A number
-without these is not yet a result.
+\textbf{Grading at a glance.} Part A 100 points, Part B 100 points (B1 15, B2 25, B3 20, B4 10,
+B5 10, B6 20), bonus 10. What earns the points
+is a decision you can defend and a number you can reproduce and have checked. A correct number with
+no evidence that it is correct earns little; a well-diagnosed failure earns a lot.
 \normalsize
 
 \end{document}

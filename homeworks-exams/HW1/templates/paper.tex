@@ -1,0 +1,44 @@
+%% ECON 282E -- Homework 1 mini-paper template. At most six pages, references included.
+%% Every number must be \input from output/, written by run_all.py -- never typed by hand.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
+
+\title{Title: A Question, Stated as a Claim}
+\author{Your Name\thanks{ECON 282E, UC Riverside, Fall 2026. Code and data: \texttt{run\_all.py} reproduces every number.}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Three sentences: the question, what you did, and the answer --- with the number.
+\end{abstract}
+
+\section{Question}
+Why the question matters, whether it is positive or normative, and the one number that answers it.
+
+\section{Model and Equilibrium}
+The environment, the equilibrium definition, and what the model assumes away.
+
+\section{Calibration}
+% \input{output/table_calibration.tex}
+Targets, sources (series ID, sample, download date), and the choices that move the results.
+
+\section{Solution Method and Its Accuracy}
+% \input{output/table_methods.tex}
+Which method, why it is fit for each question, and the evidence that the solution is right.
+
+\section{Results}
+% \input{output/table_answers.tex}
+The positive answer, the normative answer, and how sensitive each is to the choices above.
+
+\section{What the Model Cannot Say}
+The limits of the representative-agent answer, and what model you would need next.
+
+\bibliographystyle{apalike}
+% \bibliography{references}
+\end{document}

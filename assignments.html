@@ -15,6 +15,7 @@
 			<span class="sep">·</span><a href="slides/index.html">Slides</a>
 			<span class="sep">·</span><a href="labs/index.html">Labs</a>
 			<span class="sep">·</span><a href="assignments.html">Assignments</a>
+			<span class="sep">·</span><a href="forum/index.html">Discussion</a>
 		</nav>
 
 		<h1>Assignments</h1>
@@ -25,28 +26,44 @@
 			assistance. Every number you report must come from code you ran.
 		</div>
 
-		<h2>Homework 1 &mdash; Dynamic programming and numerical methods <span class="badge badge-ready">Available</span></h2>
+		<h2>Homework 1 &mdash; From a question to a quantitative answer <span class="badge badge-ready">Available</span> <a class="forum-discuss" href="forum/index.html?cat=hw1">Discuss</a></h2>
 		<p><strong>15% of the grade.</strong> Part A out October 8, Part B out October 15;
-		<strong>both due Thursday, October 22.</strong></p>
+		<strong>both due Thursday, October 29.</strong> A small research project on Sessions 1&ndash;5,
+		in which you are the project manager: one model, a positive question (how much of U.S.
+		business-cycle volatility do TFP shocks explain?) and a normative one (what do aggregate
+		fluctuations cost in welfare?), taken from the charter to the paper.</p>
 
 		<div class="res-row">
-			<span class="res-name">Part A &mdash; Dynamic Programming on the Computer</span>
+			<span class="res-name">Part A &mdash; Scope, Model, Validation, Data</span>
 			<a class="btn" href="homeworks-exams/HW1/hw1a.pdf" download>Download PDF</a>
 		</div>
-		<p style="margin-top:-6px; color:#555;">The growth model on paper &mdash; Blackwell's
-		conditions, guess-and-verify, and the stopping-rule bound &mdash; then the same model on the
-		computer: grid VFI against the closed form, a grid-refinement study at two tolerances fitted
-		against Santos &amp; Vigo-Aguiar, and Howard plus monotonicity. Questions 2(a) and 2(b) can be
-		done as soon as the sheet is out; 2(c) uses techniques taught on October 15.</p>
+		<p style="margin-top:-6px; color:#555;">A one-page project charter; the planner problem, the
+		recursive competitive equilibrium and what a representative agent cannot say; a unit test of
+		your solver against the closed-form growth model; and your own data targets and calibration
+		from FRED, with an AI-assisted provenance table you verify by hand.</p>
 
 		<div class="res-row">
-			<span class="res-name">Part B &mdash; Continuous Choice, Stochastic Shocks, and Accuracy</span>
+			<span class="res-name">Part B &mdash; Method, Answer, Presentation</span>
 			<a class="btn" href="homeworks-exams/HW1/hw1b.pdf" download>Download PDF</a>
 		</div>
-		<p style="margin-top:-6px; color:#555;">Continuous choice by golden section or Brent; a second
-		solver (time iteration or EGM) and a four-way comparison table; then a stochastic quarterly
-		model &mdash; build the Markov chain both ways, solve, simulate, HP-filter, match moments, and
-		report off-grid Euler residuals. Question 3(d) feeds the anonymous class accuracy leaderboard.</p>
+		<p style="margin-top:-6px; color:#555;">Choose the algorithm on the evidence; solve the
+		calibrated model by a global method, first-order perturbation and Chebyshev collocation
+		(Session 5 parts after October 22); answer both questions; and deliver a six-page paper, five
+		slides, a one-command replication package, and an <code>AI_LOG.md</code> with a validation
+		ledger. Question B2(d) feeds the anonymous class accuracy leaderboard. You also choose
+		<strong>one route</strong> to go deeper &mdash; R1 the numerical frontier, R2 data and
+		estimation, or R3 capital-income taxation &mdash; and end by pitching your own question on the
+		forum's <a href="forum/index.html?cat=pitches">Pitches and teams</a> board. Part A includes an
+		<strong>AI red-team</strong> item: find and document an error in an AI assistant's derivation.</p>
+
+		<div class="res-row">
+			<span class="res-name">Templates &mdash; charter, AI log, run_all.py, paper, slides</span>
+			<a class="btn" href="homeworks-exams/HW1/templates/charter.md" download>charter.md</a>
+			<a class="btn" href="homeworks-exams/HW1/templates/AI_LOG.md" download>AI_LOG.md</a>
+			<a class="btn" href="homeworks-exams/HW1/templates/run_all.py" download>run_all.py</a>
+			<a class="btn" href="homeworks-exams/HW1/templates/paper.tex" download>paper.tex</a>
+			<a class="btn" href="homeworks-exams/HW1/templates/slides.tex" download>slides.tex</a>
+		</div>
 
 		<div class="notice info">
 			<strong>The leaderboard ranks accuracy reported <em>with</em> its cost</strong>, not accuracy
@@ -54,29 +71,51 @@
 			tolerance, and the wall time.
 		</div>
 
-		<h2>Homework 2 &mdash; Heterogeneity and learning <span class="badge badge-soon">In preparation</span></h2>
-		<p><strong>15%.</strong> Out October 29, due November 12, with a bonus part due November 19.</p>
+		<h2>Homework 2 &mdash; Heterogeneity and learning <span class="badge badge-soon">In preparation</span> <a class="forum-discuss" href="forum/index.html?cat=hw2">Discuss</a></h2>
+		<p><strong>15%.</strong> Part A out October 29, Part B out November 12; <strong>due Monday,
+		November 23.</strong> Sessions 6&ndash;9. A common core &mdash; the Aiyagari economy as a nested
+		fixed point, a neural-network solution validated against a classical one, a first
+		reinforcement-learning exercise, and a first text-as-data measurement &mdash; plus one route of
+		your choice: aggregate risk and the welfare cost of cycles with heterogeneity, fiscal policy and
+		transitions, AI solution methods, or AI and inequality. You also audit a classmate's Homework 1
+		replication package, and red-team an AI assistant once more.</p>
 
-		<h2>Final project <span class="badge badge-soon">Guidelines in preparation</span></h2>
-		<p><strong>40%</strong>, in teams of 2&ndash;3: a small replication and extension, carried out
-		end to end.</p>
-
-		<h2>Participation</h2>
-		<p><strong>30%.</strong> There is no examination. Exit tickets at the end of each session, engagement
-		in discussion and the live demos, and your role as discussant at the final-project conference.</p>
+		<h2>Final project <span class="badge badge-ready">Guidelines posted</span> <a class="forum-discuss" href="forum/index.html?cat=project">Discuss</a></h2>
+		<p><strong>40%</strong>, in teams of 2&ndash;3. The project <strong>assembles</strong> what the
+		homework built: combine at least one Homework 1 component and one Homework 2 component from your
+		team, validate each against its homework benchmark, and add what your team's question still
+		needs &mdash; a model, a data source, or a method &mdash; with one classical and one AI/ML method
+		cross-validated on the same object.</p>
+		<div class="res-row">
+			<span class="res-name">Guidelines, rubric and coverage map</span>
+			<a class="btn" href="homeworks-exams/FinalProject/guidelines.pdf" download>Download PDF</a>
+		</div>
+		<div class="res-row">
+			<span class="res-name">Templates &mdash; proposal, audit report, discussant form</span>
+			<a class="btn" href="homeworks-exams/FinalProject/templates/proposal.md" download>proposal.md</a>
+			<a class="btn" href="homeworks-exams/FinalProject/templates/audit_report.md" download>audit_report.md</a>
+			<a class="btn" href="homeworks-exams/FinalProject/templates/discussant_form.md" download>discussant_form.md</a>
+		</div>
 		<table>
 			<thead><tr><th>Milestone</th><th>Weight</th><th>Due</th></tr></thead>
 			<tbody>
-				<tr><td>Teams and topics</td><td>&mdash;</td><td>November 5</td></tr>
-				<tr><td>Two-page proposal &mdash; question, benchmark, data or model, division of labor</td><td>5%</td><td>Monday, November 16</td></tr>
+				<tr><td>Pitch posted on the forum (Homework 1, B5)</td><td>&mdash;</td><td>October 29</td></tr>
+				<tr><td>Teams and topics, on the <a href="forum/index.html?cat=pitches">Pitches and teams</a> board</td><td>&mdash;</td><td>November 5</td></tr>
+				<tr><td>Two-page proposal &mdash; question, components reused, what you add, division of labor, risks</td><td>5%</td><td>Monday, November 16</td></tr>
+				<tr><td>Homework 2 components ready</td><td>&mdash;</td><td>Monday, November 23</td></tr>
 				<tr><td>Presentation, and serving as discussant for another team</td><td>15%</td><td>December 3, Block B</td></tr>
-				<tr><td>Paper (≤ 10 pp.) and replication package</td><td>20%</td><td>December 10</td></tr>
+				<tr><td>Paper (&le; 10 pp.) and replication package</td><td>20%</td><td>December 10</td></tr>
 			</tbody>
 		</table>
 		<p>The replication package must reproduce <strong>every number and figure with one
-		command</strong>. Projects are evaluated on the economic question, correctness of the
-		replication, rigor of validation, reproducibility, quality of AI collaboration, and
-		communication.</p>
+		command</strong>. Projects are graded on framing, integration and correctness, validation,
+		reproducibility and provenance, quality of AI collaboration, communication, and the discussant
+		report.</p>
+
+		<h2>Participation</h2>
+		<p><strong>30%.</strong> There is no examination. Exit tickets at the end of each session, engagement
+		in discussion in class and on the forum, the live demos, and your role as discussant at the
+		final-project conference.</p>
 
 		<div class="notice">
 			<strong>Solutions are not posted here.</strong> Answer keys stay out of this repository. Ask in class or in office hours.
