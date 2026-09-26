@@ -1,0 +1,149 @@
+%% ECON 282E -- Homework 2, Part B: Heterogeneity and Learning (S8-S9, route, audit)
+%% RE-CHECK WHEN THE S8-S9 DECKS ARE BUILT.  This part was drafted on 2026-09-26
+%% against the AI-ECON-2026 source decks that S8-S9 will draw on -- Session03 (RL:
+%% TD error, deadly triad, actor-critic), Session04 (HA: Krusell-Smith, OLG
+%% transitions, DEQN/DeepHAM) and Session05 (text: the validation ladder,
+%% non-classical measurement error, generated regressors).  Deck numbers cited
+%% below (8.A, 8.B, 9.A, 9.B) are block-level only until the decks exist.
+%% Build:  python3 tools/build_docs.py homeworks-exams/HW2/hw2b.tex
+%% With answers:  python3 tools/build_docs.py --solutions homeworks-exams/HW2/hw2b.tex
+%% Answers live in solutions/ (gitignored); solution PDFs are gitignored too.
+
+\documentclass[11pt]{article}
+
+\newif\ifsolutions \solutionsfalse
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,enumitem,xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\newcommand{\solution}[1]{\ifsolutions\medskip
+  {\color{blue!45!black}\textbf{Solution.} #1}\medskip\fi}
+
+\AtBeginDocument{\ifsolutions
+  \IfFileExists{solutions/hw2b_key.tex}{\input{solutions/hw2b_key.tex}}
+    {\GenericWarning{}{Answer key solutions/hw2b_key.tex not found}}\fi}
+
+\title{\vspace{-2em}\textbf{ECON 282E --- Homework 2, Part B}\\[2mm]
+       \large Heterogeneity and Learning: Two New Tools, Your Route, and an Audit}
+\author{Foundations of Macroeconomics \\ University of California, Riverside}
+\date{Out: Thursday, November 12, 2026 \quad\textbullet\quad Due (with Part A): Monday, November 23, 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{What Part B adds.} Two short core items put the last two families of tools in your hands ---
+reinforcement learning (Session 8) and text as data (Session 9). Then the \textbf{route}: one of four
+directions, in which \emph{you} pose the question and choose the combination of models and methods.
+Finally, the \textbf{audit}: you check a classmate's HW1 the way a referee or a co-author would.
+
+\textbf{Timing.} C3 uses Session 8 (November 12); C4 and route H4 use Session 9 (November 19). Plan
+your route in the charter now; the peer audit can be done as soon as it is assigned.
+
+\textbf{Your final project.} Your team (formed November 5; proposal November 16) will assemble at
+least one HW1 component and one HW2 component. Choose your route with that in mind, and say in the
+charter which piece of the project it is meant to become.
+\normalsize\par
+\noindent\rule{\linewidth}{0.4pt}\par
+
+%=============================================================================
+\section*{C3. Reinforcement learning, minimal (8 points)}
+\emph{Session 8, Block A: dynamic programming without the model.}
+
+Take the $\delta=1$ growth model of HW1 A2 on a 40-point capital grid, where the choice $k'$ is also a
+grid point. VFI on this grid is your benchmark, and $g^*=\alpha\beta k^\alpha$ your truth.
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+  \item \textbf{(5 pts)} Implement tabular Q-learning: the agent never sees the transition or reward
+        functions, only sampled $(s,a,r,s')$. State your exploration rule and learning-rate schedule.
+        For sample budgets $10^4,10^5,10^6$ (and more if you can), report the share of states where
+        the greedy policy equals VFI's, $\max|g/g^*-1|$, $\max_s|\max_aQ(s,a)-V(s)|$, and how many
+        state--action pairs were never visited.
+  \item \textbf{(3 pts)} Count the cost: how many \emph{samples} did Q-learning need, against how many
+        \emph{Bellman evaluations} VFI needed, to reach the same policy? When is that trade worth
+        making in economics --- what does RL buy that VFI cannot?
+\end{enumerate}
+
+\solution{\keyDone}
+
+%=============================================================================
+\section*{C4. Text as measurement, minimal (8 points)}
+\emph{Session 9.}
+
+The folder \texttt{homeworks-exams/HW2/data/fomc/} holds every FOMC post-meeting statement,
+1994--2026 (public domain; loader \texttt{fomc\_data.py}).
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+  \item \textbf{(4 pts) Build an index.} Construct one index per statement --- an uncertainty index,
+        a hawk--dove stance score, or one of your own design --- by a dictionary, embeddings, or a
+        language model. Document every choice so that someone else gets the same number.
+  \item \textbf{(4 pts) Climb the validation ladder.} Validate it against a public series you download
+        yourself (e.g.\ \texttt{VIXCLS} or the change in \texttt{DFF} after the meeting, from FRED):
+        correlation, a placebo (the index shuffled in time), stability across sub-samples, and five
+        statements read by hand. Then say how the index could discipline one parameter of your C1
+        economy, and why its measurement error is \emph{not} the classical kind (9.A).
+\end{enumerate}
+
+\solution{\keyDtwo}
+
+%=============================================================================
+\section*{Your route (24 points)}
+
+Choose \textbf{one}. Each route asks \emph{you} to pose a question, and each one grades the same
+four things: \textbf{(6)} the question, stated as a project manager would (positive or normative,
+and what number answers it); \textbf{(8)} the model and method, and why this combination; \textbf{(6)}
+validation against something you already trust --- your C1 solution, your HW1 engine, or a
+published number; \textbf{(4)} what you would do next, and which piece of your final project this
+becomes.
+
+\begin{description}[leftmargin=0pt, itemsep=4pt]
+\item[H1. Aggregate risk and who bears it] \emph{(Sessions 6, 8.)} Add aggregate TFP risk to C1 and
+  solve Krusell--Smith: a perceived law of motion $H$, simulate, regress, update. Report the
+  forecast rule, its $R^2$ \emph{and} the Den Haan statistic. Then return to HW1's normative question
+  with heterogeneity: who --- by wealth or earnings --- bears the cost of business cycles?
+  Optionally check one object with a deep method (DEQN or DeepHAM, 8.B).
+\item[H2. Fiscal policy and the transition] \emph{(Sessions 2, 6, 8.)} A tax or debt reform in your
+  C1 economy or in an OLG economy: compare the two steady states, compute the transition between
+  them by shooting on the capital path, and report welfare in consumption-equivalent terms by wealth
+  decile (or by cohort). Does the steady-state comparison get the sign right for everyone?
+\item[H3. A learning method, pushed] \emph{(Sessions 7, 8.)} Take one AI solver further than C2:
+  deep VFI or actor--critic on the C1 household, RL on a problem where the transition is unknown to
+  the agent, or a network that takes the distribution as input. Validate against C1. Name its
+  failure modes, and demonstrate at least one (for example the deadly triad, or a residual that is
+  small where the data are and large where the policy matters).
+\item[H4. Text-disciplined heterogeneity] \emph{(Sessions 1, 9.)} Measure a shock from text or other
+  public data --- AI exposure of occupations, an uncertainty index, a policy stance --- and feed it into
+  the C1 economy, for instance as a change in the earnings process. What does the measurement imply for
+  inequality or for $r^*$, and how much of that answer is measurement error?
+\end{description}
+
+\solution{\keyDthree}
+
+%=============================================================================
+\section*{Peer replication audit (10 points)}
+
+You will be sent, privately, a classmate's anonymized HW1 package. Audit it as a referee would, in at
+most one page (template \texttt{audit.md} beside this sheet):
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+  \item Does \texttt{run\_all.py} run on a clean environment? What did you have to fix?
+  \item Reproduce \textbf{three} numbers from the paper. Which match, to how many digits?
+  \item Is the validation convincing? Name the single check you would ask the author to add.
+  \item One thing the author did better than you did.
+\end{enumerate}
+The audit is graded for \emph{you}, the reviewer: on accuracy, specificity and tone. The author
+receives it as feedback only; it does not change their HW1 grade. Do not identify the author, or
+yourself, in the report.
+
+\solution{\keyDfour}
+
+\vfill
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{Hand in, with Part A:} the PDF, the repository with \texttt{run\_all.py}, the updated charter,
+\texttt{AI\_LOG.md} with its validation ledger, and the audit. \textbf{Part B: 50 points.}
+\normalsize
+
+\end{document}

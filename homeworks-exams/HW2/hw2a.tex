@@ -1,0 +1,151 @@
+%% ECON 282E -- Homework 2, Part A: Heterogeneity and Learning (core, S6-S7)
+%% Component 2 of the project-manager ladder (HW1 -> HW2 -> final project).
+%% Part B (hw2b.tex) adds S8-S9, the student's route, and the peer audit.
+%% Build:  python3 tools/build_docs.py homeworks-exams/HW2/hw2a.tex
+%% With answers:  python3 tools/build_docs.py --solutions homeworks-exams/HW2/hw2a.tex
+%% Answers live in solutions/ (gitignored); solution PDFs are gitignored too.
+%% Neither must ever be committed.
+
+\documentclass[11pt]{article}
+
+\newif\ifsolutions \solutionsfalse
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,enumitem,xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\newcommand{\solution}[1]{\ifsolutions\medskip
+  {\color{blue!45!black}\textbf{Solution.} #1}\medskip\fi}
+
+%% The answer key lives in solutions/ (gitignored, never published), so this
+%% source carries no answers. --solutions pulls it in; a plain build ignores it.
+\AtBeginDocument{\ifsolutions
+  \IfFileExists{solutions/hw2a_key.tex}{\input{solutions/hw2a_key.tex}}
+    {\GenericWarning{}{Answer key solutions/hw2a_key.tex not found}}\fi}
+
+\title{\vspace{-2em}\textbf{ECON 282E --- Homework 2, Part A}\\[2mm]
+       \large Heterogeneity and Learning: the Distribution, and a Network You Can Trust}
+\author{Foundations of Macroeconomics \\ University of California, Riverside}
+\date{Out: Thursday, October 29, 2026 \quad\textbullet\quad Due (with Part B): Monday, November 23, 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{Where this sits.} Homework 1 built \textbf{component 1}: a calibrated representative-agent
+engine, a data pipeline, and a library of solvers you have tested. Homework 2 builds
+\textbf{component 2}: a heterogeneous-agent economy and one learning or measurement module. The final
+project \textbf{assembles} them to answer your team's question. So reuse your own HW1 code wherever
+you can --- and when you do, say what you reused and how you re-checked it.
+
+\textbf{More of the lead is yours.} In HW1 the questions were set for you. Here a \textbf{common core}
+(Part A, and C3--C4 in Part B) makes sure everyone can use every method of Sessions 6--9. Then you
+choose a \textbf{route} (Part B) and pose your own question inside it. Keep your HW1 charter going:
+update it for this homework, and hand in the new version.
+
+\textbf{Calibration.} Use \textbf{your} HW1 values of $\alpha$, $\beta$ and $\delta$ (quarterly). If
+you replaced them in HW1, use the replacement and say so. Add CRRA utility with $\sigma=2$, a borrowing
+limit $a'\ge0$, and an earnings process $\ln z'=\rho_z\ln z+\varepsilon'$ with $\rho_z=0.95$ and an
+unconditional standard deviation of $\ln z$ of $0.30$, discretized by Rouwenhorst with 7 states. You
+may argue for another process --- then show the numbers both ways.
+
+\textbf{What to hand in (with Part B).} One PDF; a repository whose \texttt{run\_all.py} reproduces
+every number and figure; the updated charter; and \texttt{AI\_LOG.md} with its validation ledger.
+The HW1 templates still apply (\texttt{homeworks-exams/HW1/templates/}).
+\normalsize\par
+\noindent\rule{\linewidth}{0.4pt}\par
+
+%=============================================================================
+\section*{C1. The Aiyagari economy, end to end (25 points)}
+\emph{Session 6, Block A.}
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+
+\item \textbf{(5 pts) The equilibrium, on paper.} Define the stationary recursive competitive
+equilibrium (you did this in words in HW1 A1(d); now write it formally, with the Markov operator $Q$
+and the invariant measure $\lambda$). Say which objects are functions, which are numbers, and which
+is a measure.
+
+\solution{\keyCone}
+
+\item \textbf{(10 pts) Solve it as a nested fixed point.} Inner loop: the household's policy at a
+given $r$ (EGM, or your best HW1 solver). Middle loop: the invariant distribution. Outer loop: the
+interest rate that clears the capital market. Report $r^*$ (quarterly and annual), $K$, $K/Y$, the
+wealth Gini, the top-10\% wealth share, the fraction at the borrowing limit, and the number of
+iterations in each loop. Plot capital supply and demand against $r$, with $1/\beta-1$ marked.
+
+\solution{\keyCtwo}
+
+\item \textbf{(10 pts) Quality control.} Before anyone else trusts these numbers, show that:
+(i) the market clears to a stated tolerance; (ii) $\lambda$ sums to one and puts negligible mass at
+the top of the asset grid; (iii) the headline numbers are stable when you double the number of asset
+grid points --- tabulate $N_a\in\{200,400,800\}$. Which number is the \emph{least} stable, and why?
+Finally, compare $r^*$ and $K/Y$ with your HW1 representative-agent economy at the same
+$\alpha,\beta,\delta$, and relate the difference to Session~2.
+
+\solution{\keyCthree}
+
+\end{enumerate}
+
+%=============================================================================
+\section*{C2. Learn it, then prove the network right (20 points)}
+\emph{Session 7.}
+
+Train a PyTorch network on the Euler residual (7.B1) for \textbf{one} of two targets --- your choice,
+stated in the charter:
+\begin{itemize}[leftmargin=*,itemsep=0pt]
+  \item[(A)] \textbf{Your HW1 stochastic growth model.} Your HW1 Chebyshev collocation solution is the
+        benchmark.
+  \item[(B)] \textbf{The Aiyagari household at your $r^*$ from C1.} Your C1 EGM policy is the
+        benchmark. The borrowing limit makes this harder: handle it with a Fischer--Burmeister penalty
+        (2.A1, 4.A2) or by building the constraint into the architecture (7.B3), and say which.
+\end{itemize}
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+
+\item \textbf{(8 pts) Train to a plateau, not to a budget.} Report the architecture, the parameter
+count, how you enforce feasibility, how the expectation is computed, the optimizer and its schedule,
+and the loss curve. How do you know training has stopped improving?
+
+\solution{\keyCfour}
+
+\item \textbf{(8 pts) Grade it against the benchmark.} Unit-free Euler residuals at 2{,}000 off-grid
+points over the whole domain and over its interior 90\%, and the maximum policy gap to the benchmark.
+\emph{Where} is the network's worst residual --- at the boundary of the training region, near the
+constraint, or spread out? Plot the residual against the state.
+
+\solution{\keyCfive}
+
+\item \textbf{(4 pts) The decision.} For this model, is the network worth it? Name one model in this
+course where you would \emph{not} use the classical method you just beat or lost to, and say why.
+
+\solution{\keyCsix}
+
+\end{enumerate}
+
+%=============================================================================
+\section*{C0. Red-team your AI assistant (5 points)}
+
+Ask an AI assistant for \textbf{one} of: the SRCE definition of C1(a); the Young (2010) lottery that
+moves mass between grid points; or the loss function of C2. Find and document a real error, an
+unstated assumption, or a silent change of notation in what it gives you, and show the check that
+caught it (a derivation, a unit test, a counterexample). Put the exchange and the check in
+\texttt{AI\_LOG.md}. \emph{If you find nothing wrong, show the test you ran that would have caught
+an error --- and then try a harder request.}
+
+\solution{\keyCseven}
+
+\vfill
+\noindent\rule{\linewidth}{0.4pt}\par
+\small
+\textbf{Reporting standard.} With every computed number: the method, the grid, the tolerance of
+\emph{each} loop, the dtype, the hardware and the wall time; with every network: the seed, the
+architecture, the training budget and the validation points. A number without these is not yet a
+result. \textbf{Part A: 50 points.}
+\normalsize
+
+\end{document}
