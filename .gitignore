@@ -44,6 +44,7 @@ __pycache__/
 # sources until it is released.
 slides/S01/
 slides/S02/
+slides/S03/
 
 # Instructor-facing working notes: absolute paths into private folders,
 # unpublished numbers, and provenance for material that is not cleared.
@@ -70,8 +71,6 @@ slides/pdf/ECON282E_*.pdf
 # and tracked locally but held back until the course reaches them.  To release
 # a session, delete its line below and put its rows back into slides/index.html.
 # ---------------------------------------------------------------------------
-slides/pdf/S03_*.pdf
-slides/S03/
 slides/pdf/S04_*.pdf
 slides/S04/
 slides/pdf/S05_*.pdf
