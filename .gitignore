@@ -71,8 +71,11 @@ slides/pdf/ECON282E_*.pdf
 # and tracked locally but held back until the course reaches them.  To release
 # a session, delete its line below and put its rows back into slides/index.html.
 # ---------------------------------------------------------------------------
-# 3.B5 (the hands-on) is a placeholder on slides/index.html until the instructor
-# releases it (2026-10-04); the rest of Session 3 is public.
+# 3.B5 (the hands-on): only the steps-only copy is public (slides/pdf/handson/,
+# posted 2026-10-07).  The full deck ends with the reference solution, so it stays
+# held back until the instructor releases it.  The rest of Session 3 is public.
+# NOTE: main tracks the full PDF, so never re-release S3 with the glob
+# 'slides/pdf/S03_*.pdf' -- list the files, or the solution goes out with them.
 slides/pdf/S03_B5_*.pdf
 slides/pdf/S04_*.pdf
 slides/S04/
