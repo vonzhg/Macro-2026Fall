@@ -77,7 +77,6 @@ slides/pdf/ECON282E_*.pdf
 # NOTE: main tracks the full PDF, so never re-release S3 with the glob
 # 'slides/pdf/S03_*.pdf' -- list the files, or the solution goes out with them.
 slides/pdf/S03_B5_*.pdf
-slides/pdf/S04_*.pdf
 slides/S04/
 slides/pdf/S05_*.pdf
 slides/S05/
