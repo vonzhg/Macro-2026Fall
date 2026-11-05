@@ -7,7 +7,7 @@
 | `L04_Numerical_Methods.ipynb` | S4 (Oct 15) | Root-finding with measured convergence orders; golden section; interpolation shape tests and **Smolyak sparse grids**; quadrature; **Tauchen against Rouwenhorst**; Howard and EGM on a quarterly RBC model; and the **4.B4 worked example end to end** — Rouwenhorst + interpolation + golden section + Howard, against the crude Session 3 solver. |
 | `L05_Perturbation_and_Projection.ipynb` | S5 (Oct 22) | Linearization and the **Blanchard--Kahn solve in 5.A3's five steps** (roots of $M$, policy $C$, law of motion $K$); the impulse response, explained before the code; why monomials are unusable (the Hilbert matrix); Chebyshev nodes and convergence; a **Chebyshev collocation solve of the same quarterly RBC model**; and the closing table of one model solved four ways. |
 | `L06_Aiyagari_End_To_End.ipynb` | S6 (Oct 29) | Session 6 in deck order: the Aiyagari household by **EGM**, by **value function iteration** (on the nodes, interpolated with golden section, Howard steps) and by **time iteration**, graded side by side; by **projection** (Chebyshev collocation; the 16,000-node reference is optional); **Young's lottery** and the invariant distribution two ways, then by **simulating a panel** (how it works, what it costs); a careless bisection, the price by **steps along the excess demand**, the equilibrium and five checks; **Krusell–Smith** with Den Haan's test, and its household by VFI; capital differentiated through the lottery (PyTorch, optional); an **MIT shock** in the growth model three ways, then with a distribution, and who gains; the **life-cycle economy**. Part 0 inlines `slides/S06/code/`, the code the decks print. |
-| `L07_ML_and_Deep_Growth.ipynb` | S7 (Nov 5) | A sum of shifted ReLUs fitted to $\sin x$ by least squares, then with **the kinks trained too** — on a kinked target the learned knot lands on the constraint at $1.0000$; the five-line training loop; **backpropagation by hand, checked against `autograd` to machine precision**; the growth model written as a loss and graded against its **closed form**; the quarterly RBC graded on **off-sample Euler residuals** against Judd's scale; and an **input-convex network** against a plain one on an exactly convex target. |
+| `L07_ML_and_Deep_Growth.ipynb` | S7 (Nov 5) | **Block A:** tensors and autograd; **backpropagation by hand, checked against `autograd`**; the five-line loop landing on OLS. **Block B:** a curve whose law you wrote; kinks fixed by least squares and learned by training ($396\times$ better where the curvature is concentrated); the minimum-norm fit gradient descent picks, and why that is not overfitting. **Block C:** next month's 10-year Treasury yield from five frozen FRED series, split by date --- and it does not beat a random walk. **Block D:** the growth model solved on its Euler residual, three rungs, graded on held-out and off-domain states. Appendices: leakage in a text classifier; one input through four architectures; what a gradient costs. Reads the frozen data in `tools/figures/data/s07/`. |
 
 ## Running them
 
@@ -19,7 +19,7 @@ jupyter lab
 ```
 
 Labs 0&ndash;5 are **CPU-only** and run in well under a minute on a laptop; Lab 6 takes about two minutes. **Lab 7 is the
-first that trains neural networks**: it still runs on a CPU, in a few minutes, and a GPU only
+first that trains neural networks**: it still runs on a CPU, in about a minute, and a GPU only
 makes it faster.
 
 ## Notes
