@@ -2,10 +2,11 @@
 # CPU-only; no GPU is required for any lab.
 numpy>=1.24
 scipy>=1.10
-pandas>=2.0
+pandas>=2.2         # Lab 9 uses the "ME" month-end alias
 matplotlib>=3.7
 torch>=2.0
 jupyter
 tqdm
 statsmodels
+scikit-learn>=1.3   # TF-IDF, truncated SVD, ridge (Lab 9)
 pandas-datareader   # FRED access (3.B4); needs an internet connection

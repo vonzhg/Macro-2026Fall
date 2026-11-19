@@ -1,0 +1,2830 @@
+{
+ "_meta": {
+  "module": "record_deck12_examples.py",
+  "run_date": "2026-09-30",
+  "python": "3.9.21",
+  "machine": "x86_64",
+  "offline": {
+   "HF_HUB_OFFLINE": "1",
+   "TRANSFORMERS_OFFLINE": "1"
+  },
+  "numpy": "2.0.2",
+  "tiktoken": "0.14.0",
+  "cache_dir": "TIKTOKEN_CACHE_DIR",
+  "cl100k_base_file_sha256": "223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7",
+  "o200k_base_file_sha256": "446a9538cb6c348e3516120d7c08b09f57c36495e2acfffe59a5bf8b0cfb1a2d",
+  "transformers": "4.57.6",
+  "bert-base-uncased_snapshot": "86b5e0934494bd15c9632b12f734a8a67f723594",
+  "bert-base-chinese_snapshot": "8f23c25b06e129b6c986331a13d8d025a92cf0ea",
+  "bert-base-multilingual-cased_snapshot": "3f076fdb1ab68d5b2880cb87a0886f315b8146f8",
+  "torch": "2.8.0+cu128",
+  "scheme_sp_model_sha256": "cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865",
+  "scheme_sp_model_type": "Unigram",
+  "schemes_run_date": "2026-10-03"
+ },
+ "strings": {
+  "running_en": {
+   "text": "The central bank raised interest rates amid rising inflation.",
+   "source": "book, final full stop added"
+  },
+  "running_zh": {
+   "text": "央行上调利率以遏制通胀。",
+   "source": "book, final 。 added"
+  },
+  "tsf": {
+   "text": "社会融资规模",
+   "source": "book"
+  },
+  "gdp": {
+   "text": "GDP rose by 2%",
+   "source": "book"
+  },
+  "cpi": {
+   "text": "CPI同比上涨2.3%",
+   "source": "book"
+  },
+  "oov_en": {
+   "text": "unemployment joblessness disinflationary",
+   "source": "constructed"
+  },
+  "hic_en": {
+   "text": "health insurance coverage",
+   "source": "constructed"
+  },
+  "hic_zh": {
+   "text": "医疗保险覆盖率",
+   "source": "constructed"
+  },
+  "debt_en": {
+   "text": "national debt",
+   "source": "constructed"
+  },
+  "debt_zh": {
+   "text": "国债规模",
+   "source": "constructed"
+  }
+ },
+ "tokenizers": {
+  "cl100k_base": {
+   "running_en": {
+    "n": 10,
+    "ids": [
+     791,
+     8792,
+     6201,
+     9408,
+     2802,
+     7969,
+     23442,
+     16448,
+     25544,
+     13
+    ],
+    "pieces": [
+     {
+      "text": "The"
+     },
+     {
+      "text": " central"
+     },
+     {
+      "text": " bank"
+     },
+     {
+      "text": " raised"
+     },
+     {
+      "text": " interest"
+     },
+     {
+      "text": " rates"
+     },
+     {
+      "text": " amid"
+     },
+     {
+      "text": " rising"
+     },
+     {
+      "text": " inflation"
+     },
+     {
+      "text": "."
+     }
+    ]
+   },
+   "running_zh": {
+    "n": 15,
+    "ids": [
+     8192,
+     106,
+     23039,
+     17905,
+     48972,
+     60632,
+     96455,
+     23897,
+     30250,
+     237,
+     44416,
+     33035,
+     91939,
+     222,
+     1811
+    ],
+    "pieces": [
+     {
+      "hex": "E5A4"
+     },
+     {
+      "hex": "AE"
+     },
+     {
+      "text": "行"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "text": "调"
+     },
+     {
+      "text": "利"
+     },
+     {
+      "text": "率"
+     },
+     {
+      "text": "以"
+     },
+     {
+      "hex": "E981"
+     },
+     {
+      "hex": "8F"
+     },
+     {
+      "text": "制"
+     },
+     {
+      "text": "通"
+     },
+     {
+      "hex": "E883"
+     },
+     {
+      "hex": "80"
+     },
+     {
+      "text": "。"
+     }
+    ]
+   },
+   "tsf": {
+    "n": 8,
+    "ids": [
+     61337,
+     38093,
+     164,
+     252,
+     235,
+     52225,
+     75486,
+     54872
+    ],
+    "pieces": [
+     {
+      "text": "社"
+     },
+     {
+      "text": "会"
+     },
+     {
+      "hex": "E8"
+     },
+     {
+      "hex": "9E"
+     },
+     {
+      "hex": "8D"
+     },
+     {
+      "text": "资"
+     },
+     {
+      "text": "规"
+     },
+     {
+      "text": "模"
+     }
+    ]
+   },
+   "gdp": {
+    "n": 7,
+    "ids": [
+     38,
+     10510,
+     16392,
+     555,
+     220,
+     17,
+     4
+    ],
+    "pieces": [
+     {
+      "text": "G"
+     },
+     {
+      "text": "DP"
+     },
+     {
+      "text": " rose"
+     },
+     {
+      "text": " by"
+     },
+     {
+      "text": " "
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "%"
+     }
+    ]
+   },
+   "cpi": {
+    "n": 11,
+    "ids": [
+     34,
+     1932,
+     42016,
+     57106,
+     17905,
+     96311,
+     101,
+     17,
+     13,
+     18,
+     4
+    ],
+    "pieces": [
+     {
+      "text": "C"
+     },
+     {
+      "text": "PI"
+     },
+     {
+      "text": "同"
+     },
+     {
+      "text": "比"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "hex": "E6B6"
+     },
+     {
+      "hex": "A8"
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "."
+     },
+     {
+      "text": "3"
+     },
+     {
+      "text": "%"
+     }
+    ]
+   },
+   "oov_en": {
+    "n": 7,
+    "ids": [
+     359,
+     21093,
+     2683,
+     33028,
+     64842,
+     65249,
+     661
+    ],
+    "pieces": [
+     {
+      "text": "un"
+     },
+     {
+      "text": "employment"
+     },
+     {
+      "text": " job"
+     },
+     {
+      "text": "lessness"
+     },
+     {
+      "text": " disin"
+     },
+     {
+      "text": "flation"
+     },
+     {
+      "text": "ary"
+     }
+    ]
+   },
+   "hic_en": {
+    "n": 3,
+    "ids": [
+     12393,
+     8276,
+     10401
+    ],
+    "pieces": [
+     {
+      "text": "health"
+     },
+     {
+      "text": " insurance"
+     },
+     {
+      "text": " coverage"
+     }
+    ]
+   },
+   "hic_zh": {
+    "n": 13,
+    "ids": [
+     13773,
+     119,
+     163,
+     244,
+     245,
+     33563,
+     14309,
+     102,
+     25038,
+     228,
+     16555,
+     244,
+     96455
+    ],
+    "pieces": [
+     {
+      "hex": "E58C"
+     },
+     {
+      "hex": "BB"
+     },
+     {
+      "hex": "E7"
+     },
+     {
+      "hex": "96"
+     },
+     {
+      "hex": "97"
+     },
+     {
+      "text": "保"
+     },
+     {
+      "hex": "E999"
+     },
+     {
+      "hex": "A9"
+     },
+     {
+      "hex": "E8A6"
+     },
+     {
+      "hex": "86"
+     },
+     {
+      "hex": "E79B"
+     },
+     {
+      "hex": "96"
+     },
+     {
+      "text": "率"
+     }
+    ]
+   },
+   "debt_en": {
+    "n": 2,
+    "ids": [
+     42240,
+     11897
+    ],
+    "pieces": [
+     {
+      "text": "national"
+     },
+     {
+      "text": " debt"
+     }
+    ]
+   },
+   "debt_zh": {
+    "n": 5,
+    "ids": [
+     29504,
+     20022,
+     118,
+     75486,
+     54872
+    ],
+    "pieces": [
+     {
+      "text": "国"
+     },
+     {
+      "hex": "E580"
+     },
+     {
+      "hex": "BA"
+     },
+     {
+      "text": "规"
+     },
+     {
+      "text": "模"
+     }
+    ]
+   }
+  },
+  "o200k_base": {
+   "running_en": {
+    "n": 10,
+    "ids": [
+     976,
+     11082,
+     6922,
+     15478,
+     3425,
+     9837,
+     41762,
+     26555,
+     39362,
+     13
+    ],
+    "pieces": [
+     {
+      "text": "The"
+     },
+     {
+      "text": " central"
+     },
+     {
+      "text": " bank"
+     },
+     {
+      "text": " raised"
+     },
+     {
+      "text": " interest"
+     },
+     {
+      "text": " rates"
+     },
+     {
+      "text": " amid"
+     },
+     {
+      "text": " rising"
+     },
+     {
+      "text": " inflation"
+     },
+     {
+      "text": "."
+     }
+    ]
+   },
+   "running_zh": {
+    "n": 14,
+    "ids": [
+     27505,
+     6550,
+     4286,
+     20989,
+     7436,
+     19493,
+     5924,
+     4978,
+     237,
+     12927,
+     9034,
+     12390,
+     222,
+     788
+    ],
+    "pieces": [
+     {
+      "text": "央"
+     },
+     {
+      "text": "行"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "text": "调"
+     },
+     {
+      "text": "利"
+     },
+     {
+      "text": "率"
+     },
+     {
+      "text": "以"
+     },
+     {
+      "hex": "E981"
+     },
+     {
+      "hex": "8F"
+     },
+     {
+      "text": "制"
+     },
+     {
+      "text": "通"
+     },
+     {
+      "hex": "E883"
+     },
+     {
+      "hex": "80"
+     },
+     {
+      "text": "。"
+     }
+    ]
+   },
+   "tsf": {
+    "n": 3,
+    "ids": [
+     36798,
+     166187,
+     108479
+    ],
+    "pieces": [
+     {
+      "text": "社会"
+     },
+     {
+      "text": "融资"
+     },
+     {
+      "text": "规模"
+     }
+    ]
+   },
+   "gdp": {
+    "n": 6,
+    "ids": [
+     178008,
+     23103,
+     656,
+     220,
+     17,
+     4
+    ],
+    "pieces": [
+     {
+      "text": "GDP"
+     },
+     {
+      "text": " rose"
+     },
+     {
+      "text": " by"
+     },
+     {
+      "text": " "
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "%"
+     }
+    ]
+   },
+   "cpi": {
+    "n": 8,
+    "ids": [
+     34,
+     5479,
+     66343,
+     179605,
+     17,
+     13,
+     18,
+     4
+    ],
+    "pieces": [
+     {
+      "text": "C"
+     },
+     {
+      "text": "PI"
+     },
+     {
+      "text": "同比"
+     },
+     {
+      "text": "上涨"
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "."
+     },
+     {
+      "text": "3"
+     },
+     {
+      "text": "%"
+     }
+    ]
+   },
+   "oov_en": {
+    "n": 8,
+    "ids": [
+     373,
+     130032,
+     3349,
+     80920,
+     829,
+     127416,
+     387,
+     815
+    ],
+    "pieces": [
+     {
+      "text": "un"
+     },
+     {
+      "text": "employment"
+     },
+     {
+      "text": " job"
+     },
+     {
+      "text": "lessness"
+     },
+     {
+      "text": " dis"
+     },
+     {
+      "text": "infl"
+     },
+     {
+      "text": "ation"
+     },
+     {
+      "text": "ary"
+     }
+    ]
+   },
+   "hic_en": {
+    "n": 3,
+    "ids": [
+     20281,
+     8112,
+     13422
+    ],
+    "pieces": [
+     {
+      "text": "health"
+     },
+     {
+      "text": " insurance"
+     },
+     {
+      "text": " coverage"
+     }
+    ]
+   },
+   "hic_zh": {
+    "n": 4,
+    "ids": [
+     88117,
+     81117,
+     161376,
+     19493
+    ],
+    "pieces": [
+     {
+      "text": "医疗"
+     },
+     {
+      "text": "保险"
+     },
+     {
+      "text": "覆盖"
+     },
+     {
+      "text": "率"
+     }
+    ]
+   },
+   "debt_en": {
+    "n": 2,
+    "ids": [
+     79438,
+     17451
+    ],
+    "pieces": [
+     {
+      "text": "national"
+     },
+     {
+      "text": " debt"
+     }
+    ]
+   },
+   "debt_zh": {
+    "n": 3,
+    "ids": [
+     3052,
+     121437,
+     108479
+    ],
+    "pieces": [
+     {
+      "text": "国"
+     },
+     {
+      "text": "债"
+     },
+     {
+      "text": "规模"
+     }
+    ]
+   }
+  },
+  "bert-base-uncased": {
+   "running_en": {
+    "n": 10,
+    "pieces": [
+     {
+      "text": "the"
+     },
+     {
+      "text": "central"
+     },
+     {
+      "text": "bank"
+     },
+     {
+      "text": "raised"
+     },
+     {
+      "text": "interest"
+     },
+     {
+      "text": "rates"
+     },
+     {
+      "text": "amid"
+     },
+     {
+      "text": "rising"
+     },
+     {
+      "text": "inflation"
+     },
+     {
+      "text": "."
+     }
+    ],
+    "unk": 0
+   },
+   "running_zh": {
+    "n": 12,
+    "pieces": [
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "行"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "unk": 9
+   },
+   "tsf": {
+    "n": 6,
+    "pieces": [
+     {
+      "text": "社"
+     },
+     {
+      "text": "会"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     }
+    ],
+    "unk": 4
+   },
+   "gdp": {
+    "n": 5,
+    "pieces": [
+     {
+      "text": "gdp"
+     },
+     {
+      "text": "rose"
+     },
+     {
+      "text": "by"
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "%"
+     }
+    ],
+    "unk": 0
+   },
+   "cpi": {
+    "n": 9,
+    "pieces": [
+     {
+      "text": "cpi"
+     },
+     {
+      "text": "同"
+     },
+     {
+      "text": "比"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "."
+     },
+     {
+      "text": "3"
+     },
+     {
+      "text": "%"
+     }
+    ],
+    "unk": 1
+   },
+   "oov_en": {
+    "n": 8,
+    "pieces": [
+     {
+      "text": "unemployment"
+     },
+     {
+      "text": "job"
+     },
+     {
+      "text": "##lessness"
+     },
+     {
+      "text": "di"
+     },
+     {
+      "text": "##sin"
+     },
+     {
+      "text": "##fl"
+     },
+     {
+      "text": "##ation"
+     },
+     {
+      "text": "##ary"
+     }
+    ],
+    "unk": 0
+   },
+   "hic_en": {
+    "n": 3,
+    "pieces": [
+     {
+      "text": "health"
+     },
+     {
+      "text": "insurance"
+     },
+     {
+      "text": "coverage"
+     }
+    ],
+    "unk": 0
+   },
+   "hic_zh": {
+    "n": 7,
+    "pieces": [
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "保"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     }
+    ],
+    "unk": 6
+   },
+   "debt_en": {
+    "n": 2,
+    "pieces": [
+     {
+      "text": "national"
+     },
+     {
+      "text": "debt"
+     }
+    ],
+    "unk": 0
+   },
+   "debt_zh": {
+    "n": 4,
+    "pieces": [
+     {
+      "text": "国"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "[UNK]"
+     }
+    ],
+    "unk": 3
+   }
+  },
+  "bert-base-chinese": {
+   "running_en": {
+    "n": 20,
+    "pieces": [
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "central"
+     },
+     {
+      "text": "bank"
+     },
+     {
+      "text": "ra"
+     },
+     {
+      "text": "##ise"
+     },
+     {
+      "text": "##d"
+     },
+     {
+      "text": "int"
+     },
+     {
+      "text": "##ere"
+     },
+     {
+      "text": "##st"
+     },
+     {
+      "text": "rate"
+     },
+     {
+      "text": "##s"
+     },
+     {
+      "text": "am"
+     },
+     {
+      "text": "##id"
+     },
+     {
+      "text": "r"
+     },
+     {
+      "text": "##is"
+     },
+     {
+      "text": "##ing"
+     },
+     {
+      "text": "in"
+     },
+     {
+      "text": "##fl"
+     },
+     {
+      "text": "##ation"
+     },
+     {
+      "text": "."
+     }
+    ],
+    "unk": 1
+   },
+   "running_zh": {
+    "n": 12,
+    "pieces": [
+     {
+      "text": "央"
+     },
+     {
+      "text": "行"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "text": "调"
+     },
+     {
+      "text": "利"
+     },
+     {
+      "text": "率"
+     },
+     {
+      "text": "以"
+     },
+     {
+      "text": "遏"
+     },
+     {
+      "text": "制"
+     },
+     {
+      "text": "通"
+     },
+     {
+      "text": "胀"
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "unk": 0
+   },
+   "tsf": {
+    "n": 6,
+    "pieces": [
+     {
+      "text": "社"
+     },
+     {
+      "text": "会"
+     },
+     {
+      "text": "融"
+     },
+     {
+      "text": "资"
+     },
+     {
+      "text": "规"
+     },
+     {
+      "text": "模"
+     }
+    ],
+    "unk": 0
+   },
+   "gdp": {
+    "n": 5,
+    "pieces": [
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "rose"
+     },
+     {
+      "text": "by"
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "%"
+     }
+    ],
+    "unk": 1
+   },
+   "cpi": {
+    "n": 9,
+    "pieces": [
+     {
+      "text": "[UNK]"
+     },
+     {
+      "text": "同"
+     },
+     {
+      "text": "比"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "text": "涨"
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "."
+     },
+     {
+      "text": "3"
+     },
+     {
+      "text": "%"
+     }
+    ],
+    "unk": 1
+   },
+   "oov_en": {
+    "n": 15,
+    "pieces": [
+     {
+      "text": "u"
+     },
+     {
+      "text": "##ne"
+     },
+     {
+      "text": "##mp"
+     },
+     {
+      "text": "##lo"
+     },
+     {
+      "text": "##ym"
+     },
+     {
+      "text": "##ent"
+     },
+     {
+      "text": "job"
+     },
+     {
+      "text": "##less"
+     },
+     {
+      "text": "##ness"
+     },
+     {
+      "text": "di"
+     },
+     {
+      "text": "##si"
+     },
+     {
+      "text": "##n"
+     },
+     {
+      "text": "##fl"
+     },
+     {
+      "text": "##ation"
+     },
+     {
+      "text": "##ary"
+     }
+    ],
+    "unk": 0
+   },
+   "hic_en": {
+    "n": 6,
+    "pieces": [
+     {
+      "text": "health"
+     },
+     {
+      "text": "ins"
+     },
+     {
+      "text": "##ura"
+     },
+     {
+      "text": "##nce"
+     },
+     {
+      "text": "cover"
+     },
+     {
+      "text": "##age"
+     }
+    ],
+    "unk": 0
+   },
+   "hic_zh": {
+    "n": 7,
+    "pieces": [
+     {
+      "text": "医"
+     },
+     {
+      "text": "疗"
+     },
+     {
+      "text": "保"
+     },
+     {
+      "text": "险"
+     },
+     {
+      "text": "覆"
+     },
+     {
+      "text": "盖"
+     },
+     {
+      "text": "率"
+     }
+    ],
+    "unk": 0
+   },
+   "debt_en": {
+    "n": 3,
+    "pieces": [
+     {
+      "text": "national"
+     },
+     {
+      "text": "de"
+     },
+     {
+      "text": "##bt"
+     }
+    ],
+    "unk": 0
+   },
+   "debt_zh": {
+    "n": 4,
+    "pieces": [
+     {
+      "text": "国"
+     },
+     {
+      "text": "债"
+     },
+     {
+      "text": "规"
+     },
+     {
+      "text": "模"
+     }
+    ],
+    "unk": 0
+   }
+  },
+  "bert-base-multilingual-cased": {
+   "running_en": {
+    "n": 11,
+    "pieces": [
+     {
+      "text": "The"
+     },
+     {
+      "text": "central"
+     },
+     {
+      "text": "bank"
+     },
+     {
+      "text": "raised"
+     },
+     {
+      "text": "interest"
+     },
+     {
+      "text": "rates"
+     },
+     {
+      "text": "ami"
+     },
+     {
+      "text": "##d"
+     },
+     {
+      "text": "rising"
+     },
+     {
+      "text": "inflation"
+     },
+     {
+      "text": "."
+     }
+    ],
+    "unk": 0
+   },
+   "running_zh": {
+    "n": 12,
+    "pieces": [
+     {
+      "text": "央"
+     },
+     {
+      "text": "行"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "text": "调"
+     },
+     {
+      "text": "利"
+     },
+     {
+      "text": "率"
+     },
+     {
+      "text": "以"
+     },
+     {
+      "text": "遏"
+     },
+     {
+      "text": "制"
+     },
+     {
+      "text": "通"
+     },
+     {
+      "text": "胀"
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "unk": 0
+   },
+   "tsf": {
+    "n": 6,
+    "pieces": [
+     {
+      "text": "社"
+     },
+     {
+      "text": "会"
+     },
+     {
+      "text": "融"
+     },
+     {
+      "text": "资"
+     },
+     {
+      "text": "规"
+     },
+     {
+      "text": "模"
+     }
+    ],
+    "unk": 0
+   },
+   "gdp": {
+    "n": 5,
+    "pieces": [
+     {
+      "text": "GDP"
+     },
+     {
+      "text": "rose"
+     },
+     {
+      "text": "by"
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "%"
+     }
+    ],
+    "unk": 0
+   },
+   "cpi": {
+    "n": 10,
+    "pieces": [
+     {
+      "text": "CP"
+     },
+     {
+      "text": "##I"
+     },
+     {
+      "text": "同"
+     },
+     {
+      "text": "比"
+     },
+     {
+      "text": "上"
+     },
+     {
+      "text": "涨"
+     },
+     {
+      "text": "2"
+     },
+     {
+      "text": "."
+     },
+     {
+      "text": "3"
+     },
+     {
+      "text": "%"
+     }
+    ],
+    "unk": 0
+   },
+   "oov_en": {
+    "n": 10,
+    "pieces": [
+     {
+      "text": "une"
+     },
+     {
+      "text": "##mployment"
+     },
+     {
+      "text": "job"
+     },
+     {
+      "text": "##less"
+     },
+     {
+      "text": "##ness"
+     },
+     {
+      "text": "dis"
+     },
+     {
+      "text": "##in"
+     },
+     {
+      "text": "##f"
+     },
+     {
+      "text": "##lation"
+     },
+     {
+      "text": "##ary"
+     }
+    ],
+    "unk": 0
+   },
+   "hic_en": {
+    "n": 3,
+    "pieces": [
+     {
+      "text": "health"
+     },
+     {
+      "text": "insurance"
+     },
+     {
+      "text": "coverage"
+     }
+    ],
+    "unk": 0
+   },
+   "hic_zh": {
+    "n": 7,
+    "pieces": [
+     {
+      "text": "医"
+     },
+     {
+      "text": "疗"
+     },
+     {
+      "text": "保"
+     },
+     {
+      "text": "险"
+     },
+     {
+      "text": "覆"
+     },
+     {
+      "text": "盖"
+     },
+     {
+      "text": "率"
+     }
+    ],
+    "unk": 0
+   },
+   "debt_en": {
+    "n": 2,
+    "pieces": [
+     {
+      "text": "national"
+     },
+     {
+      "text": "debt"
+     }
+    ],
+    "unk": 0
+   },
+   "debt_zh": {
+    "n": 4,
+    "pieces": [
+     {
+      "text": "国"
+     },
+     {
+      "text": "债"
+     },
+     {
+      "text": "规"
+     },
+     {
+      "text": "模"
+     }
+    ],
+    "unk": 0
+   }
+  }
+ },
+ "bpe_toy": {
+  "corpus": {
+   "通胀": 5,
+   "通缩": 2,
+   "通胀率": 3,
+   "利率": 4
+  },
+  "merges": [
+   {
+    "pair": [
+     "通",
+     "胀"
+    ],
+    "merged": "通胀",
+    "count": 8,
+    "candidates": [
+     {
+      "pair": [
+       "通",
+       "胀"
+      ],
+      "count": 8
+     },
+     {
+      "pair": [
+       "利",
+       "率"
+      ],
+      "count": 4
+     },
+     {
+      "pair": [
+       "胀",
+       "率"
+      ],
+      "count": 3
+     },
+     {
+      "pair": [
+       "通",
+       "缩"
+      ],
+      "count": 2
+     }
+    ]
+   },
+   {
+    "pair": [
+     "利",
+     "率"
+    ],
+    "merged": "利率",
+    "count": 4,
+    "candidates": [
+     {
+      "pair": [
+       "利",
+       "率"
+      ],
+      "count": 4
+     },
+     {
+      "pair": [
+       "通胀",
+       "率"
+      ],
+      "count": 3
+     },
+     {
+      "pair": [
+       "通",
+       "缩"
+      ],
+      "count": 2
+     }
+    ]
+   },
+   {
+    "pair": [
+     "通胀",
+     "率"
+    ],
+    "merged": "通胀率",
+    "count": 3,
+    "candidates": [
+     {
+      "pair": [
+       "通胀",
+       "率"
+      ],
+      "count": 3
+     },
+     {
+      "pair": [
+       "通",
+       "缩"
+      ],
+      "count": 2
+     }
+    ]
+   },
+   {
+    "pair": [
+     "通",
+     "缩"
+    ],
+    "merged": "通缩",
+    "count": 2,
+    "candidates": [
+     {
+      "pair": [
+       "通",
+       "缩"
+      ],
+      "count": 2
+     }
+    ]
+   }
+  ],
+  "segmentation_after_4": {
+   "通胀": [
+    "通胀"
+   ],
+   "通缩": [
+    "通缩"
+   ],
+   "通胀率": [
+    "通胀率"
+   ],
+   "利率": [
+    "利率"
+   ]
+  },
+  "segmentation_after_2": {
+   "通胀": [
+    "通胀"
+   ],
+   "通缩": [
+    "通",
+    "缩"
+   ],
+   "通胀率": [
+    "通胀",
+    "率"
+   ],
+   "利率": [
+    "利率"
+   ]
+  },
+  "unseen_word": "通缩率",
+  "unseen_after_4": [
+   "通缩",
+   "率"
+  ],
+  "unseen_after_2": [
+   "通",
+   "缩",
+   "率"
+  ],
+  "note": "characters are the starting units; a pair is counted once per occurrence of the word"
+ },
+ "contextual": {
+  "model": "bert-base-multilingual-cased",
+  "layers": 12,
+  "hidden": 768,
+  "heads": 12,
+  "parameters": 177853440,
+  "vector": "the model's last hidden layer at the target's word pieces, averaged over the pieces",
+  "static_baseline": "a static embedding gives every occurrence of a word form the same vector, so each of these cosines would be exactly 1",
+  "probes": [
+   {
+    "key": "rate",
+    "target": "rate",
+    "target_pieces": [
+     "rate"
+    ],
+    "contrast": "policy rate vs unemployment rate",
+    "anchor": {
+     "text": "The Fed raised the policy rate to fight inflation.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "The",
+      "Fed",
+      "raised",
+      "the",
+      "policy",
+      "rate",
+      "to",
+      "fight",
+      "inflation",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "same": {
+     "text": "The central bank raised its policy rate again.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "The",
+      "central",
+      "bank",
+      "raised",
+      "its",
+      "policy",
+      "rate",
+      "again",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "other": {
+     "text": "The unemployment rate fell to its lowest level in decades.",
+     "source": "book",
+     "tokens": [
+      "[CLS]",
+      "The",
+      "une",
+      "##mployment",
+      "rate",
+      "fell",
+      "to",
+      "its",
+      "lowest",
+      "level",
+      "in",
+      "decades",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "cos_same_last": 0.8251,
+    "cos_other_last": 0.5704,
+    "cos_same_fourth_last": 0.929,
+    "cos_other_fourth_last": 0.8153
+   },
+   {
+    "key": "lv",
+    "target": "率",
+    "target_pieces": [
+     "率"
+    ],
+    "contrast": "利率 (interest rate) vs 失业率 (unemployment rate)",
+    "anchor": {
+     "text": "央行上调利率以遏制通胀。",
+     "source": "book",
+     "tokens": [
+      "[CLS]",
+      "央",
+      "行",
+      "上",
+      "调",
+      "利",
+      "率",
+      "以",
+      "遏",
+      "制",
+      "通",
+      "胀",
+      "。",
+      "[SEP]"
+     ]
+    },
+    "same": {
+     "text": "央行再次上调政策利率。",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "央",
+      "行",
+      "再",
+      "次",
+      "上",
+      "调",
+      "政",
+      "策",
+      "利",
+      "率",
+      "。",
+      "[SEP]"
+     ]
+    },
+    "other": {
+     "text": "失业率降至几十年来的最低水平。",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "失",
+      "业",
+      "率",
+      "降",
+      "至",
+      "几",
+      "十",
+      "年",
+      "来",
+      "的",
+      "最",
+      "低",
+      "水",
+      "平",
+      "。",
+      "[SEP]"
+     ]
+    },
+    "cos_same_last": 0.826,
+    "cos_other_last": 0.6467,
+    "cos_same_fourth_last": 0.8933,
+    "cos_other_fourth_last": 0.8344
+   },
+   {
+    "key": "sufficient",
+    "target": "sufficient",
+    "target_pieces": [
+     "sufficient"
+    ],
+    "contrast": "sufficient vs not sufficient",
+    "anchor": {
+     "text": "The recovery is sufficient.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "The",
+      "recovery",
+      "is",
+      "sufficient",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "same": {
+     "text": "The recovery is clearly sufficient.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "The",
+      "recovery",
+      "is",
+      "clearly",
+      "sufficient",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "other": {
+     "text": "The recovery is not sufficient.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "The",
+      "recovery",
+      "is",
+      "not",
+      "sufficient",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "cos_same_last": 0.9097,
+    "cos_other_last": 0.9021,
+    "cos_same_fourth_last": 0.9636,
+    "cos_other_fourth_last": 0.9466
+   },
+   {
+    "key": "slow",
+    "target": "放缓",
+    "target_pieces": [
+     "放",
+     "缓"
+    ],
+    "contrast": "放缓 (slowing) vs 并未放缓 (has not slowed)",
+    "anchor": {
+     "text": "GDP增长正在放缓。",
+     "source": "book",
+     "tokens": [
+      "[CLS]",
+      "GDP",
+      "增",
+      "长",
+      "正",
+      "在",
+      "放",
+      "缓",
+      "。",
+      "[SEP]"
+     ]
+    },
+    "same": {
+     "text": "GDP增长明显放缓。",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "GDP",
+      "增",
+      "长",
+      "明",
+      "显",
+      "放",
+      "缓",
+      "。",
+      "[SEP]"
+     ]
+    },
+    "other": {
+     "text": "GDP增长并未放缓。",
+     "source": "book",
+     "tokens": [
+      "[CLS]",
+      "GDP",
+      "增",
+      "长",
+      "并",
+      "未",
+      "放",
+      "缓",
+      "。",
+      "[SEP]"
+     ]
+    },
+    "cos_same_last": 0.9098,
+    "cos_other_last": 0.8757,
+    "cos_same_fourth_last": 0.9552,
+    "cos_other_fourth_last": 0.9437
+   }
+  ]
+ },
+ "schemes": {
+  "text": "disinflationary pressures eased",
+  "source": "constructed",
+  "bpe": {
+   "tokenizer": "cl100k_base",
+   "pieces": [
+    "dis",
+    "in",
+    "flation",
+    "ary",
+    " pressures",
+    " eased"
+   ],
+   "marker": "a leading space is part of the piece"
+  },
+  "wordpiece": {
+   "tokenizer": "bert-base-multilingual-cased",
+   "pieces": [
+    "dis",
+    "##in",
+    "##f",
+    "##lation",
+    "##ary",
+    "pressure",
+    "##s",
+    "ea",
+    "##sed"
+   ],
+   "marker": "## on every piece after a word's first"
+  },
+  "sentencepiece": {
+   "tokenizer": "BAAI/bge-m3 (XLM-R vocabulary)",
+   "model_type": "Unigram",
+   "pieces": [
+    "▁dis",
+    "inf",
+    "lation",
+    "ary",
+    "▁pressure",
+    "s",
+    "▁ea",
+    "sed"
+   ],
+   "marker": "U+2581 on a word's first piece"
+  }
+ },
+ "contextual_en": {
+  "_recorded": {
+   "run_date": "2026-10-03",
+   "python": "3.9.21",
+   "torch": "2.8.0+cu128",
+   "transformers": "4.57.6",
+   "bert-base-multilingual-cased_snapshot": "3f076fdb1ab68d5b2880cb87a0886f315b8146f8"
+  },
+  "model": "bert-base-multilingual-cased",
+  "vector": "last hidden layer, averaged over the target's word pieces",
+  "probes": [
+   {
+    "key": "discount",
+    "target": "discount",
+    "target_pieces": [
+     "disco",
+     "##unt"
+    ],
+    "contrast": "the discount rate vs a price discount",
+    "anchor": {
+     "text": "The Board approved an increase in the discount rate.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "The",
+      "Board",
+      "approved",
+      "an",
+      "increase",
+      "in",
+      "the",
+      "disco",
+      "##unt",
+      "rate",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "same": {
+     "text": "Banks borrowed at the discount rate during the crisis.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "Banks",
+      "bor",
+      "##row",
+      "##ed",
+      "at",
+      "the",
+      "disco",
+      "##unt",
+      "rate",
+      "during",
+      "the",
+      "crisis",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "other": {
+     "text": "The store offered a large discount on winter coats.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "The",
+      "store",
+      "offered",
+      "a",
+      "large",
+      "disco",
+      "##unt",
+      "on",
+      "winter",
+      "coat",
+      "##s",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "cos_same_last": 0.7557,
+    "cos_other_last": 0.7428
+   },
+   {
+    "key": "slowing",
+    "target": "slowing",
+    "target_pieces": [
+     "slow",
+     "##ing"
+    ],
+    "contrast": "slowing vs not slowing",
+    "anchor": {
+     "text": "Economic growth is slowing.",
+     "source": "constructed, after the book's Chinese pair",
+     "tokens": [
+      "[CLS]",
+      "Economic",
+      "growth",
+      "is",
+      "slow",
+      "##ing",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "same": {
+     "text": "Economic growth is clearly slowing.",
+     "source": "constructed",
+     "tokens": [
+      "[CLS]",
+      "Economic",
+      "growth",
+      "is",
+      "clearly",
+      "slow",
+      "##ing",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "other": {
+     "text": "Economic growth is not slowing.",
+     "source": "constructed, after the book's Chinese pair",
+     "tokens": [
+      "[CLS]",
+      "Economic",
+      "growth",
+      "is",
+      "not",
+      "slow",
+      "##ing",
+      ".",
+      "[SEP]"
+     ]
+    },
+    "cos_same_last": 0.9283,
+    "cos_other_last": 0.947
+   }
+  ]
+ },
+ "fillmask": {
+  "_recorded": {
+   "run_date": "2026-10-03",
+   "python": "3.9.21",
+   "torch": "2.8.0+cu128",
+   "transformers": "4.57.6"
+  },
+  "model": "bert-base-multilingual-cased",
+  "head": "the pretrained masked-language-model head (cls.predictions)",
+  "watch_list": [
+   "raised",
+   "increased",
+   "cut",
+   "raise",
+   "lower",
+   "increase",
+   "reduce",
+   "maintain",
+   "keep"
+  ],
+  "sentences": [
+   {
+    "text": "The central bank [MASK] interest rates amid rising inflation.",
+    "source": "book, final full stop added",
+    "tokens": [
+     "[CLS]",
+     "The",
+     "central",
+     "bank",
+     "[MASK]",
+     "interest",
+     "rates",
+     "ami",
+     "##d",
+     "rising",
+     "inflation",
+     ".",
+     "[SEP]"
+    ],
+    "top": [
+     {
+      "token": "increased",
+      "p": 0.0761
+     },
+     {
+      "token": "had",
+      "p": 0.0535
+     },
+     {
+      "token": "rates",
+      "p": 0.0476
+     },
+     {
+      "token": "cut",
+      "p": 0.0307
+     },
+     {
+      "token": "used",
+      "p": 0.0287
+     },
+     {
+      "token": "introduced",
+      "p": 0.0256
+     },
+     {
+      "token": "controlled",
+      "p": 0.0218
+     },
+     {
+      "token": "raised",
+      "p": 0.0188
+     }
+    ],
+    "watch": {
+     "raised": 0.01884,
+     "increased": 0.07606,
+     "cut": 0.03071,
+     "raise": 0.00148,
+     "lower": 0.00311,
+     "increase": 0.00191,
+     "reduce": 0.00079,
+     "maintain": 0.00048,
+     "keep": 0.00067
+    }
+   },
+   {
+    "text": "Inflation is rising, so the Committee decided to [MASK] the target range.",
+    "source": "constructed",
+    "tokens": [
+     "[CLS]",
+     "Inf",
+     "##lation",
+     "is",
+     "rising",
+     ",",
+     "so",
+     "the",
+     "Committee",
+     "decided",
+     "to",
+     "[MASK]",
+     "the",
+     "target",
+     "range",
+     ".",
+     "[SEP]"
+    ],
+    "top": [
+     {
+      "token": "take",
+      "p": 0.0682
+     },
+     {
+      "token": "measure",
+      "p": 0.0669
+     },
+     {
+      "token": "test",
+      "p": 0.0627
+     },
+     {
+      "token": "determine",
+      "p": 0.0594
+     },
+     {
+      "token": "change",
+      "p": 0.0514
+     },
+     {
+      "token": "consider",
+      "p": 0.0367
+     },
+     {
+      "token": "choose",
+      "p": 0.0288
+     },
+     {
+      "token": "use",
+      "p": 0.0274
+     }
+    ],
+    "watch": {
+     "raised": 1e-05,
+     "increased": 4e-05,
+     "cut": 0.00108,
+     "raise": 0.00142,
+     "lower": 0.00042,
+     "increase": 0.00936,
+     "reduce": 0.00164,
+     "maintain": 0.00121,
+     "keep": 0.00644
+    }
+   },
+   {
+    "text": "Unemployment is rising, so the Committee decided to [MASK] the target range.",
+    "source": "constructed",
+    "tokens": [
+     "[CLS]",
+     "Une",
+     "##mployment",
+     "is",
+     "rising",
+     ",",
+     "so",
+     "the",
+     "Committee",
+     "decided",
+     "to",
+     "[MASK]",
+     "the",
+     "target",
+     "range",
+     ".",
+     "[SEP]"
+    ],
+    "top": [
+     {
+      "token": "take",
+      "p": 0.1041
+     },
+     {
+      "token": "change",
+      "p": 0.0756
+     },
+     {
+      "token": "test",
+      "p": 0.0445
+     },
+     {
+      "token": "use",
+      "p": 0.0381
+     },
+     {
+      "token": "choose",
+      "p": 0.0311
+     },
+     {
+      "token": "follow",
+      "p": 0.0295
+     },
+     {
+      "token": "consider",
+      "p": 0.0287
+     },
+     {
+      "token": "have",
+      "p": 0.0285
+     }
+    ],
+    "watch": {
+     "raised": 1e-05,
+     "increased": 4e-05,
+     "cut": 0.00208,
+     "raise": 0.00289,
+     "lower": 0.00062,
+     "increase": 0.00935,
+     "reduce": 0.00233,
+     "maintain": 0.00105,
+     "keep": 0.00808
+    }
+   }
+  ]
+ },
+ "pooling": {
+  "_recorded": {
+   "run_date": "2026-10-03",
+   "python": "3.9.21",
+   "torch": "2.8.0+cu128",
+   "transformers": "4.57.6"
+  },
+  "model": "bert-base-multilingual-cased",
+  "layer": "last",
+  "paragraphs": {
+   "A": {
+    "text": "To counter rising inflation pressure, the central bank decided to raise the policy rate by 25 basis points. The Committee judges that maintaining a restrictive stance is appropriate until inflation returns to its target.",
+    "source": "book, translated",
+    "n_tokens": 42
+   },
+   "B": {
+    "text": "During the reporting period, the company's financing costs increased as market interest rates rose. Management expects tighter credit conditions to put some pressure on next year's capital expenditure.",
+    "source": "book, translated",
+    "n_tokens": 43
+   },
+   "U": {
+    "text": "The museum extended its opening hours for the summer and added two guided tours of its sculpture garden.",
+    "source": "constructed",
+    "n_tokens": 21
+   }
+  },
+  "cosines": {
+   "AB": {
+    "mean": 0.7218,
+    "cls": 0.9145
+   },
+   "AU": {
+    "mean": 0.4618,
+    "cls": 0.8347
+   },
+   "BU": {
+    "mean": 0.4611,
+    "cls": 0.8501
+   }
+  }
+ },
+ "finbert": {
+  "_recorded": {
+   "run_date": "2026-10-03",
+   "python": "3.9.21",
+   "torch": "2.8.0+cu128",
+   "transformers": "4.57.6",
+   "ProsusAI/finbert_snapshot": "4556d13015211d73dccd3fdd39d39232506f3e43"
+  },
+  "model": "ProsusAI/finbert",
+  "labels": [
+   "positive",
+   "negative",
+   "neutral"
+  ],
+  "sentences": [
+   {
+    "key": "hike",
+    "text": "The Committee decided to raise the target range for the federal funds rate.",
+    "source": "constructed",
+    "probs": {
+     "positive": 0.1178,
+     "negative": 0.0265,
+     "neutral": 0.8557
+    },
+    "label": "neutral"
+   },
+   {
+    "key": "cut",
+    "text": "The Committee decided to lower the target range for the federal funds rate.",
+    "source": "constructed",
+    "probs": {
+     "positive": 0.0498,
+     "negative": 0.4959,
+     "neutral": 0.4543
+    },
+    "label": "negative"
+   },
+   {
+    "key": "hold",
+    "text": "The Committee decided to maintain the target range for the federal funds rate.",
+    "source": "constructed",
+    "probs": {
+     "positive": 0.055,
+     "negative": 0.0312,
+     "neutral": 0.9138
+    },
+    "label": "neutral"
+   },
+   {
+    "key": "strong",
+    "text": "The labor market has remained strong, and job gains have been solid.",
+    "source": "constructed",
+    "probs": {
+     "positive": 0.9471,
+     "negative": 0.0336,
+     "neutral": 0.0193
+    },
+    "label": "positive"
+   },
+   {
+    "key": "weak",
+    "text": "Economic growth has slowed, and business investment has weakened.",
+    "source": "constructed",
+    "probs": {
+     "positive": 0.0086,
+     "negative": 0.969,
+     "neutral": 0.0223
+    },
+    "label": "negative"
+   }
+  ]
+ },
+ "nextchar": {
+  "_recorded": {
+   "run_date": "2026-10-03",
+   "python": "3.9.21",
+   "torch": "2.8.0+cu128",
+   "transformers": "4.57.6",
+   "machine_b_checkpoint_sha256": "0abf6609ae6dabf4926443bf0ce51aa4e9e9500a7fd634e9d995cb14574bbecc"
+  },
+  "model": "Machine B, Session 1's character-level decoder (minigpt_fomc.pt)",
+  "prefix": "The Committee decided to ",
+  "vocabulary": [
+   "\n",
+   " ",
+   "\"",
+   "$",
+   "'",
+   "(",
+   ")",
+   ",",
+   "-",
+   ".",
+   "/",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   ":",
+   ";",
+   "A",
+   "B",
+   "C",
+   "D",
+   "E",
+   "F",
+   "G",
+   "H",
+   "I",
+   "J",
+   "K",
+   "L",
+   "M",
+   "N",
+   "O",
+   "P",
+   "Q",
+   "R",
+   "S",
+   "T",
+   "U",
+   "V",
+   "W",
+   "Y",
+   "a",
+   "b",
+   "c",
+   "d",
+   "e",
+   "f",
+   "g",
+   "h",
+   "i",
+   "j",
+   "k",
+   "l",
+   "m",
+   "n",
+   "o",
+   "p",
+   "q",
+   "r",
+   "s",
+   "t",
+   "u",
+   "v",
+   "w",
+   "x",
+   "y",
+   "z",
+   "‑",
+   "–",
+   "—",
+   "’",
+   "�"
+  ],
+  "logits": [
+   -6.43847,
+   -3.14955,
+   -3.76857,
+   0.695,
+   -4.66428,
+   -2.24745,
+   -5.94545,
+   -7.2629,
+   -4.73001,
+   -6.91943,
+   -5.91686,
+   -1.17756,
+   -0.06549,
+   1.90115,
+   -0.58472,
+   -0.03197,
+   0.26654,
+   -1.05747,
+   -4.88183,
+   -4.07856,
+   -4.61576,
+   -5.74651,
+   -8.31067,
+   -2.70234,
+   -2.17702,
+   -2.82966,
+   -0.80618,
+   -2.9059,
+   -1.14538,
+   -2.6073,
+   -3.69359,
+   -3.54005,
+   -1.97755,
+   -2.52179,
+   -2.4772,
+   -3.22879,
+   -2.46777,
+   -4.72441,
+   -2.91244,
+   -5.25011,
+   -2.60572,
+   -3.39551,
+   -2.0275,
+   -0.39931,
+   -6.08697,
+   -4.24708,
+   -3.19177,
+   3.69151,
+   2.86978,
+   3.41532,
+   2.17086,
+   3.02492,
+   0.943,
+   0.78939,
+   2.50689,
+   3.95378,
+   0.34914,
+   4.34656,
+   1.30465,
+   6.34028,
+   1.50067,
+   -1.05232,
+   2.76979,
+   0.80233,
+   4.49416,
+   2.89505,
+   4.18321,
+   -0.25125,
+   -1.59329,
+   2.75947,
+   -1.97063,
+   -0.90728,
+   -4.37868,
+   -6.12521,
+   -4.15249,
+   -4.29995,
+   -3.17169,
+   -5.14853
+  ],
+  "top": [
+   {
+    "char": "m",
+    "p": 0.5321,
+    "logit": 6.3403
+   },
+   {
+    "char": "r",
+    "p": 0.084,
+    "logit": 4.4942
+   },
+   {
+    "char": "k",
+    "p": 0.0725,
+    "logit": 4.3466
+   },
+   {
+    "char": "t",
+    "p": 0.0615,
+    "logit": 4.1832
+   },
+   {
+    "char": "i",
+    "p": 0.0489,
+    "logit": 3.9538
+   },
+   {
+    "char": "a",
+    "p": 0.0376,
+    "logit": 3.6915
+   },
+   {
+    "char": "c",
+    "p": 0.0286,
+    "logit": 3.4153
+   },
+   {
+    "char": "e",
+    "p": 0.0193,
+    "logit": 3.0249
+   },
+   {
+    "char": "s",
+    "p": 0.017,
+    "logit": 2.895
+   },
+   {
+    "char": "b",
+    "p": 0.0165,
+    "logit": 2.8698
+   }
+  ],
+  "greedy": "The Committee decided to maintain the target range for the federal funds rate at 0 to",
+  "sampled": {
+   "0.5": "The Committee decided to maintain the target range for the federal funds rate at 1/4 ",
+   "1": "The Committee decided to measures in the be are light acco2 of monetary policy accomm",
+   "2": "The Committee decided to neiqvelopments, both polifle advi2$105.\n Biral 2 1.S5 fillp4"
+  },
+  "sample_seed": 42
+ },
+ "lengths": {
+  "_recorded": {
+   "run_date": "2026-10-03",
+   "python": "3.9.21",
+   "torch": "2.8.0+cu128",
+   "transformers": "4.57.6"
+  },
+  "tokenizer": "cl100k_base",
+  "statements": 245,
+  "median": 410,
+  "mean": 425.3,
+  "min": 41,
+  "max": 1053,
+  "first_date": "1994-02-04",
+  "last_date": "2026-06-17"
+ }
+}
