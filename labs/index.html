@@ -123,9 +123,16 @@ jupyter lab</code></pre>
 		regression; and whether the Committee's words <strong>improve Session 7's bond-yield forecast</strong>,
 		under a protocol hashed before the test window is scored once. Runs offline on a CPU in a few minutes.</p>
 
-		<h2>Lab 10 <span class="badge badge-soon">In preparation</span></h2>
-		<p>An agentic research workflow.
-		Posted when the session is built.</p>
+		<div class="res-row">
+			<span class="res-name">Lab 10 &mdash; Agents and Retrieval <span class="badge badge-ready">Available</span></span>
+			<a class="btn" href="L10_Agents_And_Retrieval.ipynb" download>Download .ipynb</a>
+		</div>
+		<p style="margin-top:-6px; color:#555;">Session 10 (Dec 3). Five blocks: <strong>A</strong> an agent's loop,
+		run offline from a fixed seven-turn script over real tools; <strong>B</strong> a small index over the 245 FOMC statements, built with
+		a sentence encoder or read from the deck's own matrix; <strong>C</strong> retrieve, then answer or
+		<strong>refuse</strong>; <strong>D</strong> faithfulness checked by hand; <strong>E</strong> governing it in code:
+		a budget, permissions, a verifier that recomputes every number, a gate, and whether a rerun agrees. Runs on a CPU in under a minute, offline;
+		<code>pip install sentence-transformers</code> (optional) lets block B build the index itself.</p>
 
 		<div class="notice info">
 			<strong>If a cell fails</strong>, check the package versions first

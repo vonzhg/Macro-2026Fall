@@ -83,8 +83,13 @@ slides/S06/
 slides/S07/
 slides/S08/
 slides/S09/
-slides/pdf/S10_*.pdf
 slides/S10/
+# Lab 10's assets: the agent's own outputs and the data it fetched in the recorded run (census/,
+# recorded_run/, recorded_cluster_run/) stay private, as in AI-ECON-2026's public release; the lab
+# reads none of them (checked 2026-11-20 by a run of this tree).
+labs/l10_assets/census/
+labs/l10_assets/recorded_run/
+labs/l10_assets/recorded_cluster_run/
 # The combined public deck spans every built session, so it waits too.
 slides/pdf/ECON282E_*_public.pdf
 

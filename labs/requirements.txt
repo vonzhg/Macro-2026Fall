@@ -10,3 +10,4 @@ tqdm
 statsmodels
 scikit-learn>=1.3   # TF-IDF, truncated SVD, ridge (Lab 9)
 pandas-datareader   # FRED access (3.B4); needs an internet connection
+# sentence-transformers  # optional: Lab 10 block B builds its own index (~90 MB model download)
